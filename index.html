@@ -104,7 +104,7 @@
         yes: 'კი',
         no: 'არა',
         partial: 'ნაწილობრივ',
-        partialPh: 'გთხოვთ აღწერეთ დეტალურად...',
+        partialPh: 'სურვილისამებრ შეგიძლიათ აღწეროთ დეტალურად (არასავალდებულო)',
         back: 'უკან',
         next: 'შემდეგი სექცია',
         saveExit: 'შენახვა და გასვლა',
@@ -152,7 +152,7 @@
         yes: 'Yes',
         no: 'No',
         partial: 'Partial',
-        partialPh: 'Please describe in detail...',
+        partialPh: 'Optional - you can describe in detail (not required)',
         back: 'Back',
         next: 'Next Section',
         saveExit: 'Save & Exit',
@@ -192,70 +192,70 @@
         questions: [
           { id: 'q_2_1', isParent: true,
             text: { ka: 'აქვს კომპანიას ხარისხის მართვის სერტიფიკატი?', en: 'Are there any certifications for the quality management system?' },
-            tooltip: { ka: 'მაგალითად ISO 9001 ან მსგავსი საერთაშორისო სტანდარტი.', en: 'For example, ISO 9001 or similar international standards.' } },
+            tooltip: { ka: 'სერტიფიკატი არის ოფიციალური დოკუმენტი, რომელსაც სანდო ორგანიზაცია გასცემს და ადასტურებს, რომ კომპანია იცავს გარკვეულ საერთაშორისო სტანდარტებს. მაგ. ISO 9001 - ხარისხის მართვის ყველაზე ცნობილი საერთაშორისო სერტიფიკატი. თუ თქვენ გაქვთ რომელიმე ხარისხის სერტიფიკატი (ISO 9001, IATF 16949, ან სხვა), აირჩიეთ კი.', en: 'A certificate is an official document issued by a trusted organization confirming the company follows certain international standards. E.g. ISO 9001 - the most recognized quality management certificate. If you hold any quality certification (ISO 9001, IATF 16949, or other), select Yes.' } },
           { id: 'q_2_2', isParent: true,
             text: { ka: 'აქვს კომპანიას ხარისხის სახელმძღვანელო?', en: 'Is there a quality manual defining production procedures?' },
-            tooltip: { ka: 'წერილობითი დოკუმენტი, რომელიც განსაზღვრავს წარმოების პროცედურებს.', en: 'A written document defining manufacturing procedures.' } },
+            tooltip: { ka: 'ხარისხის სახელმძღვანელო (Quality Manual) არის წერილობითი დოკუმენტი, რომელიც დეტალურად აღწერს თუ როგორ აწარმოებთ პროდუქციას ან მომსახურებას - რა ნაბიჯებია, ვინ რას აკეთებს, რა მოთხოვნებია. თუ ასეთი დოკუმენტი გაქვთ, თუნდაც მხოლოდ შიდა გამოყენებისთვის, აირჩიეთ კი.', en: 'A quality manual is a written document detailing how you produce your product or service - what steps are followed, who does what, what requirements apply. If you have such a document, even for internal use only, select Yes.' } },
           { id: 'q_2_2_1', parent: 'q_2_2',
             text: { ka: 'სახელმძღვანელო შეიცავს ხარისხის ინდიკატორებს და სამიზნე მიზნებს?', en: 'Does the manual contain quality indicators and target goals?' },
-            tooltip: { ka: 'KPI-ები, მეტრიკები და მიღწევადი მიზნები.', en: 'KPIs, metrics, and achievable targets.' } },
+            tooltip: { ka: 'ხარისხის ინდიკატორი არის გაზომვადი მაჩვენებელი, რომლითაც ხარისხს აკონტროლებთ - მაგ. დეფექტური ერთეულების პროცენტი, საჩივრების რაოდენობა, მიწოდების სიზუსტე. სამიზნე მიზანი ნიშნავს, რომ კონკრეტული მაჩვენებელი გვინდა მივიყვანოთ რაღაც დონემდე (მაგ. დეფექტი 1%-ზე ნაკლები). სახელმძღვანელოში ეს განსაზღვრულია?', en: 'A quality indicator is a measurable metric used to monitor quality - e.g. percentage of defective units, number of complaints, delivery accuracy. A target goal means aiming to reach a specific level (e.g. defects below 1%). Are these defined in your manual?' } },
           { id: 'q_2_3', isParent: true,
             text: { ka: 'აქვს კომპანიას მენეჯმენტის გადახედვის პროცესი?', en: 'Does the supplier have a management review process?' },
-            tooltip: { ka: 'რეგულარული შეხვედრები, სადაც განიხილება ხარისხის მაჩვენებლები.', en: 'Regular meetings where quality performance is reviewed.' } },
+            tooltip: { ka: 'მენეჯმენტის გადახედვის პროცესი ნიშნავს, რომ ხელმძღვანელობა რეგულარულად (მაგ. წელიწადში ერთხელ ან კვარტალურად) იკრიბება და განიხილავს, თუ როგორ მიდის საქმე ხარისხის მხრივ - რა გამოვიდა კარგად, რას სჭირდება გაუმჯობესება, რა ცვლილებებია საჭირო. გაქვთ ასეთი რეგულარული შეხვედრები?', en: 'A management review process means top management regularly meets (e.g. yearly or quarterly) to discuss how things are going quality-wise - what worked well, what needs improvement, what changes are needed. Do you hold such regular meetings?' } },
           { id: 'q_2_4', isParent: true,
             text: { ka: 'ტარდება შიდა აუდიტი?', en: 'Are there internal audits?' },
-            tooltip: { ka: 'შიდა შემოწმებები ხარისხის სისტემის შესაფასებლად.', en: 'Internal checks to evaluate the quality system.' } },
+            tooltip: { ka: 'შიდა აუდიტი არის შემოწმება, რომელსაც კომპანიის შიგნით ატარებენ - საკუთარი თანამშრომლები ან მოწვეული კონსულტანტი ამოწმებს, ნამდვილად მიჰყვებიან თუ არა დაწერილ პროცედურებს. ეს ეხმარება პრობლემების ადრეულ გამოვლენას. ტარდება ასეთი შემოწმებები რეგულარულად?', en: 'An internal audit is an inspection conducted within the company - own employees or invited consultants check whether established procedures are actually followed. This helps detect problems early. Are such inspections regularly conducted?' } },
           { id: 'q_2_5',
             text: { ka: 'აქვს მომწოდებელს ხარისხის გაუმჯობესების სამოქმედო გეგმა?', en: 'Does the supplier have an action plan for quality improvement?' },
-            tooltip: { ka: 'წერილობითი გეგმა გაუმჯობესების ნაბიჯებით.', en: 'Written plan with improvement steps.' } },
+            tooltip: { ka: 'სამოქმედო გეგმა არის წერილობითი დოკუმენტი, რომელიც აღწერს კონკრეტულ ნაბიჯებს ხარისხის გასაუმჯობესებლად - რა უნდა გაკეთდეს, ვინ პასუხისმგებელი, როდის უნდა დასრულდეს. თუ ასეთი გეგმა გაქვთ, აირჩიეთ კი.', en: 'An action plan is a written document describing concrete steps to improve quality - what needs to be done, who is responsible, when it should be completed. If you have such a plan, select Yes.' } },
           { id: 'q_2_6',
             text: { ka: 'აქვს კომპანიას ორგანიზაციული სტრუქტურა გამოფენილი?', en: 'Does the supplier have an organizational chart displayed?' },
-            tooltip: { ka: 'ორგ. სტრუქტურის სქემა, რომელიც აჩვენებს როლებს და იერარქიას.', en: 'Org chart showing roles and hierarchy.' } },
+            tooltip: { ka: 'ორგანიზაციული სტრუქტურა (org chart) არის სქემა, რომელიც აჩვენებს კომპანიის შიდა იერარქიას - ვინ არის დირექტორი, ვინ ხელმძღვანელობს რომელ დეპარტამენტს, ვის ვინ ექვემდებარება. გამოფენილი ნიშნავს, რომ ხელმისაწვდომია თანამშრომლებისთვის (კედელზე, ინტრანეტში, ან სხვა).', en: 'An organizational chart shows the company internal hierarchy - who is the director, who heads which department, who reports to whom. Displayed means it is accessible to employees (on a wall, intranet, or elsewhere).' } },
           { id: 'q_2_7',
             text: { ka: 'არსებობს უწყვეტი გაუმჯობესების სტრატეგია?', en: 'Does a continuous improvement strategy exist?' },
-            tooltip: { ka: 'მაგ. Kaizen, Lean ან მსგავსი მუდმივი გაუმჯობესების მეთოდოლოგია.', en: 'E.g. Kaizen, Lean, or similar continuous improvement methodology.' } },
+            tooltip: { ka: 'უწყვეტი გაუმჯობესება ნიშნავს, რომ კომპანია მუდმივად ცდილობს გახდეს უკეთესი - ეძებს ხარვეზებს, ცვლის პროცესებს, ეცნობა ახალ მეთოდებს. ცნობილი მიდგომებია Kaizen, Lean, Six Sigma. თუ ასეთი მიდგომა გაქვთ (ფორმალური ან არაფორმალური), აირჩიეთ კი.', en: 'Continuous improvement means the company constantly strives to get better - looks for flaws, changes processes, adopts new methods. Known approaches include Kaizen, Lean, Six Sigma. If you have such an approach (formal or informal), select Yes.' } },
           { id: 'q_2_8',
             text: { ka: 'გამოაქვეყნებს კომპანია წლიურ ESG რეპორტს?', en: 'Does the company publish an annual ESG/Sustainability Report?' },
-            tooltip: { ka: 'საჯარო ანგარიში მდგრადობისა და ESG საქმიანობის შესახებ.', en: 'Public report on sustainability and ESG activities.' } },
+            tooltip: { ka: 'ESG ან Sustainability რეპორტი არის წლიური საჯარო ანგარიში, რომელშიც კომპანია წერს თავის გარემოსდაცვით, სოციალურ და მართვის საქმიანობაზე - მაგ. ემისიები, თანამშრომლების კმაყოფილება, ეთიკის სტანდარტები. ეს არ არის ჩვეულებრივი ფინანსური ანგარიში. თუ თქვენი კომპანია აქვეყნებს ცალკე ასეთ რეპორტს, აირჩიეთ კი.', en: 'An ESG/Sustainability report is an annual public document describing the company environmental, social, and governance activities - e.g. emissions, employee satisfaction, ethics standards. This is separate from a regular financial report. If your company publishes such a separate report, select Yes.' } },
           { id: 'q_2_9', isParent: true,
             text: { ka: 'არის კლიენტთა კმაყოფილების შეფასების პროცედურა?', en: 'Are there customer satisfaction procedures?' },
-            tooltip: { ka: 'გამოკითხვები, კმაყოფილების შეფასების მექანიზმები.', en: 'Surveys, satisfaction measurement mechanisms.' } },
+            tooltip: { ka: 'კლიენტთა კმაყოფილების შეფასება ნიშნავს, რომ კომპანია იკვლევს, რამდენად კმაყოფილები არიან კლიენტები - გამოკითხვებით, ანკეტებით, ან რეგულარული უკუკავშირით. შემდეგ ამ ინფორმაციით ცდილობთ გაუმჯობესდეთ. გაქვთ ასეთი პროცედურა?', en: 'Customer satisfaction evaluation means the company measures how satisfied customers are - through surveys, questionnaires, or regular feedback. The information is used to improve. Do you have such a procedure?' } },
           { id: 'q_2_10',
             text: { ka: 'არსებობს საჩივრებისა და კრიზის მართვის პროცედურა?', en: 'Does a claim and crisis management procedure exist?' },
-            tooltip: { ka: 'წერილობითი პროცედურა, თუ როგორ უნდა მოგვარდეს საჩივრები და კრიზისები.', en: 'Written procedure for handling claims and crises.' } },
+            tooltip: { ka: 'საჩივრების მართვის პროცედურა არის წერილობითი წესები, თუ რა უნდა გააკეთოს კომპანიამ, როცა კლიენტი უკმაყოფილოა - ვინ მიიღებს საჩივარს, რა ვადებში უნდა მოგვარდეს, როგორ მოწმდება რომ პრობლემა მართლაც გადაიჭრა. კრიზის მართვა - სერიოზულ პრობლემებზე (მაგ. ხარვეზიანი პროდუქცია, რომელიც უკვე გაიგზავნა).', en: 'A claim management procedure is a written set of rules for what the company does when a customer is dissatisfied - who receives the complaint, deadlines for resolution, how to verify the problem was actually solved. Crisis management deals with serious problems (e.g. defective products already shipped).' } },
           { id: 'q_2_11',
             text: { ka: 'არის შეკვეთის თვალყურის-დევნების პროცედურა?', en: 'Are there order follow-up procedures?' },
-            tooltip: { ka: 'სისტემა შეკვეთების სტატუსის მოსაკვლევად.', en: 'System for tracking order status.' } },
+            tooltip: { ka: 'შეკვეთის თვალყურის-დევნება ნიშნავს, რომ კომპანიას შეუძლია ნებისმიერ მომენტში გაარკვიოს, რა სტადიაშია მომხმარებლის შეკვეთა - მიღებულია, წარმოებაშია, შეფუთულია, გაიგზავნა და ა.შ. ეს შეიძლება იყოს ციფრული სისტემა (ERP) ან ხელით წარმოებული ჩანაწერები.', en: 'Order tracking means the company can check at any moment what stage a customer order is in - received, in production, packed, shipped, etc. This can be a digital system (ERP) or hand-kept records.' } },
           { id: 'q_2_12',
             text: { ka: 'აქვს მომწოდებელს დოკუმენტების მართვის სისტემა?', en: 'Does the supplier have a document management system?' },
-            tooltip: { ka: 'ციფრული ან ფიზიკური დოკუმენტების ორგანიზებული სისტემა.', en: 'Organized digital or physical document system.' } },
+            tooltip: { ka: 'დოკუმენტების მართვის სისტემა არის ორგანიზებული გზა მნიშვნელოვანი ფაილების შესანახად, საძიებლად და გასაახლებლად - შეიძლება იყოს ელექტრონული (Google Drive, SharePoint, ან სპეციალიზებული პროგრამა) ან ფიზიკური (კლასიფიცირებული საქაღალდეები).', en: 'A document management system is an organized way to store, search, and update important files - can be electronic (Google Drive, SharePoint, or specialized software) or physical (classified folders).' } },
           { id: 'q_2_13', isParent: true,
             text: { ka: 'არის ტრენინგ-პროგრამები მენეჯმენტისთვის და თანამშრომლებისთვის?', en: 'Are there training programs for management and employees?' },
-            tooltip: { ka: 'რეგულარული სასწავლო პროგრამები კვალიფიკაციის ასამაღლებლად.', en: 'Regular training programs to enhance skills.' } },
+            tooltip: { ka: 'ტრენინგ-პროგრამა არის დაგეგმილი სასწავლო პროცესი თანამშრომლებისთვის, რომ მათ უკეთ შეასრულონ თავიანთი სამუშაო ან მიიღონ ახალი უნარები. შეიძლება იყოს შიდა ტრენინგი, გარე კურსები, ვებინარები. ტარდება ასეთი ტრენინგები კომპანიაში?', en: 'A training program is a planned learning process for employees to perform their work better or acquire new skills. Can be internal training, external courses, webinars. Are such trainings conducted in your company?' } },
           { id: 'q_2_13_1', parent: 'q_2_13',
             text: { ka: 'თანამშრომლები საკმარისად კვალიფიციურები არიან?', en: 'Are the employees properly skilled for their role?' },
-            tooltip: { ka: 'შეესაბამება თუ არა თანამშრომელთა უნარები მათ პოზიციას.', en: 'Do employees skills match their roles.' } },
+            tooltip: { ka: 'ეს კითხვა ეკითხება - შეესაბამება თუ არა თქვენი თანამშრომლების უნარები იმ პოზიციას, რომელზეც ისინი მუშაობენ. მაგ. ხარისხის ინჟინერს აქვს შესაბამისი გამოცდილება და ცოდნა? ოპერატორებს იციან მანქანების უსაფრთხო გამოყენება?', en: 'This question asks whether your employees skills match the positions they work in. E.g. does the quality engineer have relevant experience and knowledge? Do operators know how to safely use machines?' } },
           { id: 'q_2_13_2', parent: 'q_2_13',
             text: { ka: 'არის მუშათა ტრენინგისა და ცოდნის ამაღლების პროგრამა?', en: 'Are there worker training or knowledge programs?' },
-            tooltip: { ka: 'სპეციალურად მუშებისთვის შემუშავებული პროგრამები.', en: 'Programs specifically designed for workers.' } },
+            tooltip: { ka: 'მუშაკთა ტრენინგი ნიშნავს სპეციალურად იმ ხალხისთვის, ვინც ფიზიკურად ასრულებს სამუშაოს (არა მენეჯმენტი) - ოპერატორები, ხელოსნები, შემფუთველები. ცოდნის ამაღლება მოიცავს ახალ მეთოდებს, უსაფრთხოების ნორმებს, ხარისხის სტანდარტებს.', en: 'Worker training is specifically for those who physically perform the work (not management) - operators, craftsmen, packers. Knowledge enhancement covers new methods, safety standards, quality standards.' } },
           { id: 'q_2_14', isParent: true,
             text: { ka: 'მოწოდებული მასალები მოწმდება შემოსვლისას?', en: 'Are incoming materials inspected upon arrival?' },
-            tooltip: { ka: 'შემომავალი მასალების ინსპექცია მოთხოვნებთან შესაბამისობისთვის.', en: 'Inspection of incoming materials for compliance.' } },
+            tooltip: { ka: 'როცა მიიღებთ მასალას მომწოდებლისგან (მაგ. ნედლეული, ნაწილები), ამოწმებთ თუ არა, რომ ის შეესაბამება შეკვეთილ მოთხოვნებს - სწორი რაოდენობა, ხარისხი, სპეციფიკაცია? ეს არის ხარვეზიანი მასალის ადრეული გამოვლენის გზა.', en: 'When you receive materials from a supplier (e.g. raw materials, parts), do you check that they match the ordered specifications - correct quantity, quality, specifications? This is a way to detect defective material early.' } },
           { id: 'q_2_14_1', parent: 'q_2_14',
             text: { ka: 'არის შემოსული მასალების ინსპექციის წერილობითი პროცედურა?', en: 'Are there written inspection procedures for incoming materials?' },
-            tooltip: { ka: 'ფორმალური წერილობითი ინსპექციის ინსტრუქცია.', en: 'Formal written inspection instructions.' } },
+            tooltip: { ka: 'წერილობითი ინსპექციის პროცედურა ნიშნავს, რომ გაქვთ დაწერილი დოკუმენტი - რას ამოწმებთ, როგორ ამოწმებთ, რა მოთხოვნებია, ვინ აწერს ხელს. ეს უზრუნველყოფს, რომ ყოველთვის ერთნაირად ხდება შემოწმება, ვინც არ უნდა გააკეთოს.', en: 'A written inspection procedure means a documented file - what to check, how to check, what requirements apply, who signs off. This ensures inspection is always done the same way, no matter who performs it.' } },
           { id: 'q_2_14_2', parent: 'q_2_14',
             text: { ka: 'მიღებული და უარყოფილი მასალები ცალ-ცალკე ინახება?', en: 'Are accepted vs rejected materials kept segregated?' },
-            tooltip: { ka: 'ფიზიკური სეგრეგაცია უხარისხო მასალების შემთხვევითი გამოყენების ასაცილებლად.', en: 'Physical segregation to prevent accidental use of substandard materials.' } },
+            tooltip: { ka: 'სეგრეგაცია ნიშნავს, რომ ფიზიკურად განცალკავებულია მისაღები მასალა და უარყოფილი (ხარვეზიანი) მასალა - სხვადასხვა ადგილას, ცხადად მონიშნული. ეს იცავს იმისგან, რომ შემთხვევით უხარისხო მასალა არ მოხვდეს წარმოებაში.', en: 'Segregation means physically separating accepted and rejected (defective) materials - in different locations, clearly marked. This prevents accidentally using defective material in production.' } },
           { id: 'q_2_15', isParent: true,
             text: { ka: 'არის წერილობითი პროცედურები ყველა საწარმოო პროცესისთვის?', en: 'Are there written procedures for all manufacturing processes?' },
-            tooltip: { ka: 'სტანდარტული საოპერაციო პროცედურები (SOP) ყველა საწარმოო ეტაპისთვის.', en: 'Standard Operating Procedures (SOPs) for all production stages.' } },
+            tooltip: { ka: 'წერილობითი პროცედურა (Standard Operating Procedure - SOP) არის ნაბიჯ-ნაბიჯი ინსტრუქცია, თუ როგორ უნდა შესრულდეს თითოეული საწარმოო პროცესი. ეს უზრუნველყოფს, რომ ყველა მუშაკი ერთნაირად ასრულებს სამუშაოს, რაც იძლევა სტაბილურ ხარისხს.', en: 'A written procedure (Standard Operating Procedure - SOP) is a step-by-step instruction for how each manufacturing process should be performed. This ensures all workers do the work the same way, providing stable quality.' } },
           { id: 'q_2_15_1', parent: 'q_2_15',
             text: { ka: 'მნიშვნელოვანი მახასიათებლები მონიტორინგდება წარმოების დროს?', en: 'Are important characteristics monitored during production?' },
-            tooltip: { ka: 'კრიტიკული პარამეტრების რეალურ დროში თვალყურის დევნება.', en: 'Real-time tracking of critical parameters.' } },
+            tooltip: { ka: 'წარმოების დროს მონიტორინგი ნიშნავს, რომ რეალურ დროში ამოწმებთ კრიტიკულ პარამეტრებს - ტემპერატურა, წნევა, ზომები, წონა. თუ რამე გადაუხვევს ნორმიდან, მაშინვე ვიგებთ და ვასწორებთ, ხარვეზიანი პროდუქციის წარმოებამდე.', en: 'In-process monitoring means checking critical parameters in real time - temperature, pressure, dimensions, weight. If something deviates from norms, we know immediately and correct before defective products are made.' } },
           { id: 'q_2_15_2', parent: 'q_2_15',
             text: { ka: 'ტარდება საბოლოო ინსპექცია თითოეულ პარტიაზე?', en: 'Is final inspection performed on each lot?' },
-            tooltip: { ka: 'საბოლოო ხარისხის შემოწმება გადაგზავნამდე.', en: 'Final quality check before shipment.' } }
+            tooltip: { ka: 'საბოლოო ინსპექცია ნიშნავს, რომ თითოეული პარტიის (lot) გადაგზავნამდე ვამოწმებთ, შეესაბამება თუ არა ის შეკვეთილ მოთხოვნებს. პარტია შეიძლება იყოს ერთი დღის წარმოება, ან ერთი შეკვეთის რაოდენობა. ეს უკანასკნელი ხაზია ხარვეზის გამოვლენისთვის.', en: 'Final inspection means checking each batch (lot) before shipment to verify compliance with order requirements. A batch can be one day production or one order quantity. This is the last line of defect detection.' } }
         ]
       },
       // SECTION 2: HUMAN RIGHTS
@@ -264,31 +264,31 @@
         questions: [
           { id: 'q_3_1', isParent: true,
             text: { ka: 'აქვს კომპანიას ადამიანის უფლებების დაცვის პოლიტიკა?', en: 'Has the company established human rights policies?' },
-            tooltip: { ka: 'წერილობითი ვალდებულება საერთაშორისოდ აღიარებული უფლებების დაცვაზე.', en: 'Written commitment to internationally recognized rights.' } },
+            tooltip: { ka: 'ადამიანის უფლებების პოლიტიკა არის წერილობითი დოკუმენტი, რომელშიც კომპანია აცხადებს თავის ვალდებულებას დაიცვას თანამშრომლების და სხვა ადამიანების ძირითადი უფლებები - სიცოცხლე, თავისუფლება, ღირსება, თანასწორობა. ეს უნდა იყოს ფორმალური დოკუმენტი, არა მხოლოდ სიტყვიერი ვალდებულება.', en: 'A human rights policy is a written document where the company declares its commitment to protect the basic rights of employees and others - life, freedom, dignity, equality. This should be a formal document, not just a verbal commitment.' } },
           { id: 'q_3_1_1', parent: 'q_3_1',
             text: { ka: 'უზრუნველყოფს უსაფრთხო და ჯანსაღ სამუშაო პირობებს?', en: 'Are safe and healthy working conditions provided?' },
-            tooltip: { ka: 'სამუშაო ადგილის უსაფრთხოების სტანდარტები.', en: 'Workplace safety standards.' } },
+            tooltip: { ka: 'უსაფრთხო და ჯანსაღი სამუშაო პირობები მოიცავს - სუფთა ჰაერს, შესაბამის განათებას, უსაფრთხო მანქანებს, დაცვის საშუალებებს (ხელთათმანები, ჩაფხუტი), ხანძარსაწინააღმდეგო სისტემებს, პირველად დახმარებას. თქვენ თანამშრომლებს რეალურად სთავაზობთ ამ პირობებს?', en: 'Safe and healthy working conditions include clean air, appropriate lighting, safe machines, protective equipment (gloves, helmets), fire safety systems, first aid. Do you actually provide these conditions to employees?' } },
           { id: 'q_3_1_2', parent: 'q_3_1',
             text: { ka: 'უზრუნველყოფს გაერთიანების თავისუფლებას?', en: 'Is freedom of association guaranteed?' },
-            tooltip: { ka: 'თანამშრომლების უფლება გაერთიანდნენ პროფკავშირებში.', en: 'Employees right to join trade unions.' } },
+            tooltip: { ka: 'გაერთიანების თავისუფლება ნიშნავს, რომ თანამშრომლებს უფლება აქვთ გაერთიანდნენ ჯგუფებში (პროფკავშირები, კომიტეტები) საერთო ინტერესების დასაცავად, კომპანიის შურისძიების შიშის გარეშე. ეს არის საერთაშორისო შრომითი ნორმა.', en: 'Freedom of association means employees have the right to form groups (unions, committees) to protect common interests, without fear of retaliation from the company. This is an international labor norm.' } },
           { id: 'q_3_1_3', parent: 'q_3_1',
             text: { ka: 'უზრუნველყოფს არადისკრიმინაციულ კადრების პოლიტიკას?', en: 'Is non-discrimination ensured in personnel practices?' },
-            tooltip: { ka: 'არ არის დისკრიმინაცია სქესის, რასის, ასაკის და ა.შ. ნიშნით.', en: 'No discrimination based on gender, race, age, etc.' } },
+            tooltip: { ka: 'არადისკრიმინაცია ნიშნავს, რომ დაქირავება, ხელფასი, დაწინაურება, გათავისუფლება ეფუძნება პროფესიულ უნარებს - არა სქესს, ასაკს, რასას, რელიგიას, ეროვნებას, შშმ სტატუსს, ან სექსუალურ ორიენტაციას. გაქვთ ამის უზრუნველმყოფი წესები?', en: 'Non-discrimination means hiring, salary, promotion, and dismissal are based on professional skills - not gender, age, race, religion, nationality, disability status, or sexual orientation. Do you have rules ensuring this?' } },
           { id: 'q_3_1_4', parent: 'q_3_1',
             text: { ka: 'არ იყენებს იძულებით ან ბავშვთა შრომას?', en: 'Is forced or child labour avoided directly and indirectly?' },
-            tooltip: { ka: 'აკრძალულია იძულებითი შრომა და 18 წლამდე პირების დაქირავება.', en: 'Forced labor and hiring under 18 are prohibited.' } },
+            tooltip: { ka: 'იძულებითი შრომა - ადამიანი მუშაობს იძულებით (ვალის ბრუნდად, საბუთების ჩამორთმევით, ფიზიკური მუქარით). ბავშვთა შრომა - 18 წლამდე პირების დაქირავება საფრთხის შემცველ ან განათლების შემაფერხებელ სამუშაოზე. ეს ეხება არა მხოლოდ თქვენ პირდაპირ, არამედ თქვენს მომწოდებლებს.', en: 'Forced labor - a person works under coercion (debt bondage, document confiscation, physical threats). Child labor - hiring people under 18 for hazardous work or work that interferes with education. This applies not only to you directly, but also to your suppliers.' } },
           { id: 'q_3_2', isParent: true,
             text: { ka: 'ჩაატარა კომპანიამ ადამიანის უფლებების შეფასება იმ ქვეყნებში, სადაც საქმიანობს?', en: 'Has the company performed a human rights assessment in operating countries?' },
-            tooltip: { ka: 'რისკების შეფასება ოპერაციული ქვეყნების მიხედვით.', en: 'Risk assessment by countries of operation.' } },
+            tooltip: { ka: 'ეს კითხვა ისმის - შეისწავლეთ თუ არა ადამიანის უფლებების მდგომარეობა იმ ქვეყნებში, სადაც საქმიანობთ ან გეგმავთ საქმიანობას? ზოგიერთ ქვეყანაში მაღალია რისკი (იძულებითი შრომა, ბავშვთა შრომა, კორუფცია), რის გათვალისწინებაც აუცილებელია.', en: 'This asks whether you have studied the human rights situation in countries where you operate or plan to operate. In some countries the risk is high (forced labor, child labor, corruption), which must be considered.' } },
           { id: 'q_3_2_1', parent: 'q_3_2',
             text: { ka: 'აქვს კომპანიას მკაფიო პოლიტიკა, რომელიც იცავს როგორც საკუთარი თანამშრომლების, ასევე მიწოდების ჯაჭვის მუშაკთა უფლებებს?', en: 'Does the company have explicit policies protecting workers human rights in employment and supply chain?' },
-            tooltip: { ka: 'პოლიტიკა მოიცავს მთელ მიწოდების ჯაჭვს, არა მხოლოდ პირდაპირ თანამშრომლებს.', en: 'Policy covers entire supply chain, not just direct employees.' } },
+            tooltip: { ka: 'პოლიტიკა უნდა იცავდეს არა მხოლოდ თქვენს პირდაპირ თანამშრომლებს, არამედ ყველას, ვინც თქვენი მიწოდების ჯაჭვშია - მომწოდებლების მუშაკები, სუბკონტრაქტორები, ლოჯისტიკის გუნდი. გაქვთ პოლიტიკა, რომელიც მთელ ჯაჭვს ფარავს?', en: 'The policy should protect not only your direct employees but everyone in your supply chain - supplier workers, subcontractors, logistics teams. Do you have a policy covering the entire chain?' } },
           { id: 'q_3_2_2', parent: 'q_3_2',
             text: { ka: 'აქვს მონიტორინგის სისტემა?', en: 'Has the company established monitoring/tracking system?' },
-            tooltip: { ka: 'სისტემა, რომელიც ამოწმებს პოლიტიკის რეალურ აღსრულებას.', en: 'System that verifies real implementation of policy.' } },
+            tooltip: { ka: 'მონიტორინგის სისტემა ამოწმებს, რომ პოლიტიკა რეალურად მუშაობს - მაგ. რეგულარული აუდიტი, ანონიმური საჩივრების სისტემა, მომწოდებლების შემოწმება. ქაღალდზე დაწერილი პოლიტიკა საკმარისი არ არის - საჭიროა მისი აღსრულების ვერიფიკაცია.', en: 'A monitoring system verifies the policy actually works - e.g. regular audits, anonymous complaint systems, supplier checks. A policy on paper is not enough - its enforcement must be verified.' } },
           { id: 'q_3_2_3', parent: 'q_3_2',
             text: { ka: 'აქვს პოლიტიკა, რომ უსაფრთხოების ღონისძიებები არ იწვევდეს უფლებების დარღვევას?', en: 'Does security policy avoid contributing to human rights violations?' },
-            tooltip: { ka: 'უსაფრთხოების სამსახური ვერ არღვევს თანამშრომელთა უფლებებს.', en: 'Security service cannot violate employee rights.' } }
+            tooltip: { ka: 'უსაფრთხოების სამსახური (კერძო დაცვა, კონტრაქტორები) ხანდახან არღვევს თანამშრომლების უფლებებს - ფიზიკური ძალის გადაჭარბებული გამოყენება, თვალთვალი, შეუსაბამო ჩხრეკა. გაქვთ წესები, რომლებიც ამას ხელს უშლის?', en: 'Security services (private guards, contractors) sometimes violate employee rights - excessive force, surveillance, inappropriate searches. Do you have rules preventing this?' } }
         ]
       },
       // SECTION 3: LABOUR
@@ -297,76 +297,76 @@
         questions: [
           { id: 'q_4_1', isParent: true,
             text: { ka: 'კომპანია პატივს სცემს მუშაკთა უფლებას შექმნან პროფკავშირები?', en: 'Does the company respect workers right to form trade unions?' },
-            tooltip: { ka: 'უფლება გაერთიანდნენ პროფკავშირებში დაშინების გარეშე.', en: 'Right to join unions without intimidation.' } },
+            tooltip: { ka: 'პროფკავშირი არის თანამშრომლების ნებაყოფლობითი გაერთიანება საერთო ინტერესების დასაცავად - ხელფასი, სამუშაო პირობები, უსაფრთხოება. პატივისცემა ნიშნავს, რომ კომპანია არ უშლის ხელს მათ შექმნას, არ ერევა მათ საქმიანობაში, არ ისჯება პროფკავშირის წევრობას.', en: 'A trade union is a voluntary association of employees to protect common interests - salary, working conditions, safety. Respect means the company does not hinder their formation, does not interfere with their activities, does not punish union membership.' } },
           { id: 'q_4_1_1', parent: 'q_4_1',
             text: { ka: 'აქვს არადისკრიმინაციული პოლიტიკა და პროცედურები?', en: 'Are non-discriminatory policies and procedures in place?' },
-            tooltip: { ka: 'პოლიტიკები, რომლებიც კრძალავს დისკრიმინაციას.', en: 'Policies prohibiting discrimination.' } },
+            tooltip: { ka: 'ეს არის პოლიტიკები, რომლებიც კრძალავენ ნებისმიერ ფორმის დისკრიმინაციას სამუშაო ადგილზე - დაქირავებისას, ხელფასის განსაზღვრისას, დაწინაურებისას, ტრენინგის ხელმისაწვდომობისას. ეს უნდა იყოს წერილობითი წესები.', en: 'These are policies prohibiting any form of workplace discrimination - in hiring, salary, promotion, training access. These should be written rules.' } },
           { id: 'q_4_1_2', parent: 'q_4_1',
             text: { ka: 'მუშაკთა წარმომადგენლებს ეძლევათ შესაბამისი საშუალებები?', en: 'Are workers representatives provided appropriate facilities?' },
-            tooltip: { ka: 'სათათბირო ოთახები, კომუნიკაციის რესურსები და ა.შ.', en: 'Meeting rooms, communication resources, etc.' } },
+            tooltip: { ka: 'მუშაკთა წარმომადგენელი არის ის, ვინც ლაპარაკობს კოლეგების სახელით კომპანიის ხელმძღვანელობასთან. შესაბამისი საშუალებები ნიშნავს - ოთახს შეხვედრებისთვის, წვდომას ინფორმაციაზე, დროს ამ საქმიანობისთვის, რომ ის თავისუფლად შეასრულოს თავისი ფუნქცია.', en: 'A worker representative is someone who speaks on colleagues behalf to company management. Appropriate facilities means a meeting room, access to information, time for this work - so they can freely perform their role.' } },
           { id: 'q_4_1_3', parent: 'q_4_1',
             text: { ka: 'არ ერევა მუშაკთა წარმომადგენლების საქმიანობაში?', en: 'Does the company avoid interfering with worker representatives?' },
-            tooltip: { ka: 'წარმომადგენლები საქმიანობენ თავისუფლად.', en: 'Representatives operate freely.' } },
+            tooltip: { ka: 'არ ერევა ნიშნავს, რომ კომპანია არ ცდილობს გავლენა იქონიოს მუშაკთა წარმომადგენლების გადაწყვეტილებებზე, არ აშინებს მათ, არ აგროვებს მათზე ინფორმაციას, არ კრძალავს მათ შეხვედრებს (გონივრული საათების ფარგლებში).', en: 'Non-interference means the company does not try to influence worker representatives decisions, does not intimidate them, does not gather information about them, does not prohibit their meetings (within reasonable hours).' } },
           { id: 'q_4_2', isParent: true,
             text: { ka: 'კომპანიას აქვს მკაფიო პოლიტიკა იძულებითი შრომის წინააღმდეგ?', en: 'Does the company have clear policy against forced labour?' },
-            tooltip: { ka: 'წერილობითი ვალდებულება არ გამოიყენოს იძულებითი შრომა.', en: 'Written commitment to not use forced labor.' } },
+            tooltip: { ka: 'იძულებითი შრომის წინააღმდეგ პოლიტიკა - წერილობითი ვალდებულება, რომ კომპანია არასოდეს არ გამოიყენებს იძულებას მუშაობაში. იძულებითი შრომის ნიშნებია: საბუთების ჩამორთმევა, ვალის ბრუნდი, ფიზიკური მუქარა, თავისუფლების შეზღუდვა, ხელფასის დაკავება.', en: 'Anti-forced-labor policy is a written commitment that the company will never use coercion in work. Signs of forced labor: document confiscation, debt bondage, physical threats, restriction of freedom, salary withholding.' } },
           { id: 'q_4_2_1', parent: 'q_4_2',
             text: { ka: 'ყველა თანამშრომელს ესმის, რა არის იძულებითი შრომა?', en: 'Do all officials understand what forced labour means?' },
-            tooltip: { ka: 'საკითხის ცოდნა ყველა მენეჯერული პოზიციისთვის.', en: 'Knowledge of the issue at all managerial positions.' } },
+            tooltip: { ka: 'საკითხი არის - იციან თუ არა თქვენს კომპანიაში მენეჯერებმა და HR-მა, რას ნიშნავს იძულებითი შრომა და როგორ უნდა იცნონ მისი ნიშნები. ჩატარდა თუ არა ამაზე ტრენინგი ან გაცნობა?', en: 'The question is - do your managers and HR understand what forced labor means and how to recognize its signs? Has training or awareness on this been provided?' } },
           { id: 'q_4_2_2', parent: 'q_4_2',
             text: { ka: 'შრომითი ხელშეკრულებები იწერება მუშაკისთვის გასაგებ ენაზე?', en: 'Are employment contracts written in workers language?' },
-            tooltip: { ka: 'ხელშეკრულება მუშაკის მშობლიურ ან გასაგებ ენაზე.', en: 'Contract in worker native or understandable language.' } },
+            tooltip: { ka: 'შრომითი ხელშეკრულება უნდა იყოს მუშაკისთვის გასაგებ ენაზე - ეროვნული ან მისი მშობლიური ენით. თუ მუშაკი ვერ კითხულობს ხელშეკრულებას, ის ვერ ხვდება თავის უფლებებს და ვალდებულებებს, რაც ცუდი მოპყრობის რისკია.', en: 'Employment contracts should be in a language workers understand - national or native language. If a worker cannot read the contract, they cannot understand their rights and duties, which is a risk for mistreatment.' } },
           { id: 'q_4_2_3', parent: 'q_4_2',
             text: { ka: 'კომპანია იცის რომელ ქვეყნებში/სექტორებში იძულებითი შრომის რისკი მაღალია?', en: 'Is the company aware of high-risk regions/sectors?' },
-            tooltip: { ka: 'რისკ-ქვეყნების და სექტორების იდენტიფიცირება.', en: 'Identification of risk countries and sectors.' } },
+            tooltip: { ka: 'ზოგიერთ ქვეყანაში და სექტორში იძულებითი შრომის რისკი მაღალია - მაგ. მიგრანტი მუშაკების დასაქმება, სოფლის მეურნეობა, ტექსტილის ფაბრიკები ზოგიერთ რეგიონში. იცით თუ არა ვინ არიან თქვენი მაღალი რისკის მომწოდებლები?', en: 'Some countries and sectors have high forced-labor risk - e.g. migrant worker employment, agriculture, textile factories in certain regions. Do you know who your high-risk suppliers are?' } },
           { id: 'q_4_2_4', parent: 'q_4_2',
             text: { ka: 'კომპანია არ ჩამოართმევს მუშაკებს პირადობის დოკუმენტებს?', en: 'Does the company avoid confiscating workers identity documents?' },
-            tooltip: { ka: 'პასპორტის ან პირადობის ჩამორთმევა იძულებითი შრომის ნიშანია.', en: 'Confiscating ID is a sign of forced labor.' } },
+            tooltip: { ka: 'პასპორტის ან პირადობის მოწმობის ჩამორთმევა არის იძულებითი შრომის ერთ-ერთი ყველაზე გავრცელებული ნიშანი - ეს ხელს უშლის მუშაკს ადგილის დატოვებას ან სხვა სამუშაოს ძიებას. თქვენი კომპანია არ ჩამოართმევს მუშაკებს დოკუმენტებს?', en: 'Confiscating passports or ID documents is one of the most common signs of forced labor - it prevents workers from leaving or seeking other employment. Does your company avoid taking workers documents?' } },
           { id: 'q_4_2_5', parent: 'q_4_2',
             text: { ka: 'მონიტორინგდება მიწოდების ჯაჭვი და სუბკონტრაქტორები?', en: 'Are supply chains and subcontractors monitored?' },
-            tooltip: { ka: 'რეგულარული შემოწმებები სუბკონტრაქტორებისთვის.', en: 'Regular checks for subcontractors.' } },
+            tooltip: { ka: 'მონიტორინგი ნიშნავს, რომ რეგულარულად ამოწმებთ თქვენს მომწოდებლებს და სუბკონტრაქტორებს, არიან თუ არა ისინი იძულებით შრომაში მონაწილენი. ეს შეიძლება იყოს კითხვარი, აუდიტი, ან მესამე მხარის ვერიფიკაცია.', en: 'Monitoring means regularly checking your suppliers and subcontractors for involvement in forced labor. This can be questionnaires, audits, or third-party verification.' } },
           { id: 'q_4_3', isParent: true,
             text: { ka: 'კომპანია ანვითარებს ცნობიერებას ბავშვთა შრომის მიზეზებსა და შედეგებზე?', en: 'Is awareness of child labour developed within the company?' },
-            tooltip: { ka: 'შიდა ცნობიერების ამაღლების კამპანიები.', en: 'Internal awareness campaigns.' } },
+            tooltip: { ka: 'ცნობიერების განვითარება ნიშნავს, რომ თქვენ კომპანიაში ლაპარაკობთ ბავშვთა შრომაზე - მუშაობენ თუ არა ბავშვები, ცუდია თუ არა მათთვის ფიზიკური სამუშაო, რა სოციალური მიზეზები იწვევს ამას. ხდება თუ არა ეს დისკუსია, ტრენინგი ან კომუნიკაცია თანამშრომლებთან?', en: 'Awareness development means your company talks about child labor - whether children are working, whether physical work is bad for them, what social causes lead to this. Are such discussions, trainings, or communications happening?' } },
           { id: 'q_4_3_1', parent: 'q_4_3',
             text: { ka: 'იცავს ეროვნული კანონით დადგენილ მინიმალურ ასაკობრივ ნორმებს?', en: 'Does the company adhere to minimum age provisions?' },
-            tooltip: { ka: 'საქართველოში მინიმალური სამუშაო ასაკი 16 წელია.', en: 'In Georgia minimum working age is 16.' } },
+            tooltip: { ka: 'საქართველოში სამუშაო ასაკის მინიმუმი 16 წელია (გამონაკლისებით - 14 წლიდან მსუბუქი სამუშაოები). საერთაშორისოდ - 15 წელი. სახიფათო სამუშაოებზე - 18 წელი. იცავთ თქვენი ქვეყნის კანონმდებლობას?', en: 'In Georgia the minimum working age is 16 (with exceptions - light work from age 14). Internationally - 15 years. For hazardous work - 18 years. Do you comply with your country laws?' } },
           { id: 'q_4_3_2', parent: 'q_4_3',
             text: { ka: 'ცნობს ბავშვთა შრომის რისკ-ქვეყნებსა და სექტორებს?', en: 'Is the company aware of high-risk regions for child labour?' },
-            tooltip: { ka: 'სპეციფიკური ცოდნა რისკის ზონებზე.', en: 'Specific knowledge of risk zones.' } },
+            tooltip: { ka: 'ბავშვთა შრომის რისკი მაღალია გარკვეულ ქვეყნებში (განვითარებადი, ღარიბი რეგიონები) და სექტორებში (სოფლის მეურნეობა, ტექსტილის წარმოება, სამთო-მოპოვებითი). იცით თუ არა, სად შეიძლება ეს პრობლემა გაჩნდეს თქვენს ჯაჭვში?', en: 'Child labor risk is high in certain countries (developing, poor regions) and sectors (agriculture, textile production, mining). Do you know where this problem might arise in your chain?' } },
           { id: 'q_4_3_3', parent: 'q_4_3',
             text: { ka: 'იყენებს ასაკის შემოწმების მექანიზმებს დაქირავებისას?', en: 'Are age verification mechanisms used in recruitment?' },
-            tooltip: { ka: 'დოკუმენტური ან სხვა ვერიფიკაცია.', en: 'Document or other verification.' } },
+            tooltip: { ka: 'ასაკის შემოწმების მექანიზმი - დაქირავებისას ამოწმებთ ოფიციალურ დოკუმენტებს (პასპორტი, პირადობა) იმის დასადასტურებლად, რომ კანდიდატი არ არის არასრულწლოვანი. იყენებთ თუ არა ამ შემოწმებას რუტინულად?', en: 'Age verification mechanism - during hiring you check official documents (passport, ID) to confirm the candidate is not a minor. Do you routinely use this check?' } },
           { id: 'q_4_3_4', parent: 'q_4_3',
             text: { ka: 'აქვს პოლიტიკა 18 წლამდე პირების დაქირავების წინააღმდეგ?', en: 'Does the company have policy against hiring under 18?' },
-            tooltip: { ka: 'პოლიტიკა, რომელიც აღემატება მინიმალურ კანონისმიერ მოთხოვნას.', en: 'Policy exceeding minimum legal requirement.' } },
+            tooltip: { ka: 'პოლიტიკა, რომელიც კრძალავს 18 წლამდე პირების დაქირავებას, აღემატება მინიმალურ კანონისმიერ მოთხოვნას (16 წ. საქართველოში) და უფრო უსაფრთხოა - გამორიცხავს ნებისმიერ რისკს ბავშვთა შრომასთან დაკავშირებით.', en: 'A policy prohibiting hiring under 18 exceeds the minimum legal requirement (16 in Georgia) and is safer - it eliminates any risk related to child labor.' } },
           { id: 'q_4_3_5', parent: 'q_4_3',
             text: { ka: 'ახდენს გავლენას ქვე-კონტრაქტორებზე ბავშვთა შრომის წინააღმდეგ?', en: 'Does the company influence subcontractors against child labour?' },
-            tooltip: { ka: 'სუბკონტრაქტორებთან მოლაპარაკება და მონიტორინგი.', en: 'Negotiation and monitoring with subcontractors.' } },
+            tooltip: { ka: 'თქვენი მომწოდებლები ან სუბკონტრაქტორები შეიძლება იყენებდნენ ბავშვთა შრომას. გავლენა ნიშნავს, რომ თქვენ ცდილობთ მათი დარწმუნებას ან მოთხოვნას, რომ ისინიც დაიცვან ბავშვთა უფლებები - კონტრაქტული ვალდებულებებით, აუდიტებით, განათლებით.', en: 'Your suppliers or subcontractors might use child labor. Influence means you try to convince them or require them to also protect children rights - through contractual obligations, audits, education.' } },
           { id: 'q_4_3_6', parent: 'q_4_3',
             text: { ka: 'შემუშავებული აქვს ბავშვთა შრომის გამოვლენის მექანიზმი?', en: 'Has the company developed mechanisms to detect child labour?' },
-            tooltip: { ka: 'სისტემა გამოვლენის და რეაგირებისთვის.', en: 'System for detection and response.' } },
+            tooltip: { ka: 'გამოვლენის მექანიზმი - სისტემა, რომელიც ამჩნევს, თუ ბავშვი უკვე მუშაობს თქვენს ან თქვენი მომწოდებლის ობიექტზე. შეიძლება იყოს ანონიმური ცხელი ხაზი, რეგულარული აუდიტი, ან თანამშრომლების ტრენინგი ნიშნების ამოცნობაზე.', en: 'Detection mechanism - a system that notices if a child is already working at your or your supplier site. Can be an anonymous hotline, regular audits, or training employees to recognize signs.' } },
           { id: 'q_4_4', isParent: true,
             text: { ka: 'კვალიფიკაცია, უნარები და გამოცდილება არის დაქირავების და დაწინაურების საფუძველი?', en: 'Are qualifications, skill, experience the basis for recruitment/promotion?' },
-            tooltip: { ka: 'არჩევანი ეფუძნება ობიექტურ კრიტერიუმებს, არა პირად კავშირებს.', en: 'Selection based on objective criteria, not personal connections.' } },
+            tooltip: { ka: 'ეს კითხვა - ხალხს ქირავდებთ, ხელფასს უწევთ ან აწინაურებთ მათი უნარების და გამოცდილების მიხედვით (ობიექტური კრიტერიუმებით), თუ პირადი კავშირების, ნათესაობის, ან სხვა არარელევანტური მიზეზების გამო?', en: 'This asks - do you hire, pay, or promote people based on their skills and experience (objective criteria), or due to personal connections, family ties, or other irrelevant reasons?' } },
           { id: 'q_4_4_1', parent: 'q_4_4',
             text: { ka: 'მაღალი დონის პასუხისმგებელი პირი დანიშნულია თანასწორი დასაქმების საკითხებზე?', en: 'Is high-level responsibility assigned for equal employment?' },
-            tooltip: { ka: 'მენეჯერული დონის პოზიცია თანასწორი შესაძლებლობებისთვის.', en: 'Managerial-level position for equal opportunities.' } },
+            tooltip: { ka: 'მაღალი დონის პასუხისმგებელი პირი - დირექტორის ან მისი მოადგილის რანგის თანამშრომელი, რომელიც პასუხს აგებს, რომ კომპანიაში თანასწორი დასაქმების პრინციპი დაცულია. ეს ცხადყოფს, რომ საკითხი მნიშვნელოვანია კომპანიისთვის.', en: 'High-level responsible person - an employee at director or deputy director rank who is accountable for ensuring equal employment principles are upheld. This shows the issue matters to the company.' } },
           { id: 'q_4_4_2', parent: 'q_4_4',
             text: { ka: 'ინახება განახლებული ჩანაწერები დაქირავების, ტრენინგის და დაწინაურების შესახებ?', en: 'Are records kept on recruitment, training, promotion?' },
-            tooltip: { ka: 'გამჭვირვალე ჩანაწერები HR პროცესებისთვის.', en: 'Transparent records of HR processes.' } },
+            tooltip: { ka: 'განახლებული ჩანაწერები ნიშნავს, რომ ყველა HR გადაწყვეტილება (დაქირავება, ტრენინგი, დაწინაურება) დოკუმენტირებულია - ვინ მიიღო, რა საფუძველზე, რა შედეგი. ეს გამჭვირვალობა იცავს დისკრიმინაციისგან.', en: 'Up-to-date records means all HR decisions (hiring, training, promotion) are documented - who decided, on what basis, what was the outcome. This transparency protects against discrimination.' } },
           { id: 'q_4_4_3', parent: 'q_4_4',
             text: { ka: 'ტარდება არაცნობიერი მიკერძოების ტრენინგი?', en: 'Is unconscious bias training conducted?' },
-            tooltip: { ka: 'ტრენინგი ფარული მიკერძოების შესამცირებლად.', en: 'Training to reduce hidden biases.' } },
+            tooltip: { ka: 'არაცნობიერი მიკერძოება (unconscious bias) არის ფარული წინასწარი დამოკიდებულება, რომელსაც ხალხი თვითონ ვერ ხედავს - მაგ. ვფიქრობთ რომ მამაკაცი უფრო ლიდერია, ვიდრე ქალი. ტრენინგი დაგვეხმარება ამ ფარული მიკერძოებების გაცნობიერებაში.', en: 'Unconscious bias is a hidden preconception people do not see in themselves - e.g. we think men are more leader-like than women. Training helps recognize these hidden biases.' } },
           { id: 'q_4_4_4', parent: 'q_4_4',
             text: { ka: 'აქვს საჩივრების წარდგენის პროცედურა დისკრიმინაციის შემთხვევაში?', en: 'Are grievance procedures developed for discrimination?' },
-            tooltip: { ka: 'ფორმალური მექანიზმი საჩივრების მართვისთვის.', en: 'Formal mechanism for handling complaints.' } },
+            tooltip: { ka: 'საჩივრების პროცედურა - ფორმალური გზა იმისთვის, რომ თანამშრომელმა, რომელიც დისკრიმინაციას გრძნობს, შემოიტანოს საჩივარი, ის გამოიკვლიოს მიუკერძოებელი პირის მიერ, და მიიღოს შედეგი. ანონიმურობის უზრუნველყოფა მნიშვნელოვანია.', en: 'Grievance procedure - a formal way for an employee experiencing discrimination to file a complaint, have it investigated by an impartial party, and receive a resolution. Anonymity is important.' } },
           { id: 'q_4_4_5', parent: 'q_4_4',
             text: { ka: 'ტარდება არადისკრიმინაციული პოლიტიკის ტრენინგი?', en: 'Is non-discrimination training provided?' },
-            tooltip: { ka: 'პერიოდული ტრენინგი ყველა თანამშრომლისთვის.', en: 'Periodic training for all employees.' } },
+            tooltip: { ka: 'პოლიტიკის ცოდნა მხოლოდ HR-ში არ არის საკმარისი - ყველა მენეჯერმა და თანამშრომელმა უნდა იცოდეს, რა არის დისკრიმინაცია, რა არ არის დასაშვები. რეგულარული ტრენინგი ამის უზრუნველყოფაა.', en: 'Policy knowledge in HR alone is not enough - every manager and employee should know what discrimination is, what is unacceptable. Regular training ensures this.' } },
           { id: 'q_4_4_6', parent: 'q_4_4',
             text: { ka: 'აქვს უნარების განვითარების ხელმისაწვდომობის პროგრამა?', en: 'Are programs in place to promote access to skills training?' },
-            tooltip: { ka: 'თანასწორი წვდომა განვითარების შესაძლებლობებზე.', en: 'Equal access to development opportunities.' } }
+            tooltip: { ka: 'უნარების განვითარების ხელმისაწვდომობა - ყველა თანამშრომელს, განურჩევლად სქესის, ასაკის, ეროვნების და ა.შ., აქვს თანაბარი წვდომა ტრენინგებზე, კურსებზე, დაწინაურების შესაძლებლობებზე.', en: 'Skills development access - all employees, regardless of gender, age, nationality, etc., have equal access to trainings, courses, promotion opportunities.' } }
         ]
       },
       // SECTION 4: ENVIRONMENT
@@ -375,46 +375,46 @@
         questions: [
           { id: 'q_5_1', isParent: true,
             text: { ka: 'აქვს კომპანიას ქცევის კოდექსი ჯანმრთელობასა და გარემოზე ზრუნვისთვის?', en: 'Does the company have code of conduct for health/environment care?' },
-            tooltip: { ka: 'წერილობითი ვალდებულება გარემოს დაცვაზე.', en: 'Written commitment to environmental protection.' } },
+            tooltip: { ka: 'ქცევის კოდექსი (Code of Conduct) არის წერილობითი დოკუმენტი, რომელიც აცხადებს, რომ კომპანია ერთგულია ჯანდაცვისა და გარემოს დაცვის - როგორ წარმოებს, როგორ ანიავებს ნარჩენებს, როგორ ცდილობს შეამციროს ემისიები. გაქვთ ასეთი დოკუმენტი?', en: 'A code of conduct is a written document declaring the company commitment to health and environmental protection - how it produces, how it manages waste, how it tries to reduce emissions. Do you have such a document?' } },
           { id: 'q_5_1_1', parent: 'q_5_1',
             text: { ka: 'აქვს მენეჯერული კომიტეტი წინდახედული მიდგომის ზედამხედველობისთვის?', en: 'Is there a managerial committee overseeing precautionary application?' },
-            tooltip: { ka: 'მენეჯმენტის დონის სამეთვალყურეო ჯგუფი.', en: 'Management-level oversight group.' } },
+            tooltip: { ka: 'მენეჯერული კომიტეტი - ხელმძღვანელობის რანგის ჯგუფი, რომელიც სპეციალურად აკონტროლებს გარემოსდაცვით საკითხებს, რეგულარულად იხილავს მონაცემებს, იღებს გადაწყვეტილებებს. ეს ცხადყოფს, რომ საკითხი სერიოზულად აღიქმება.', en: 'Managerial committee - a group at executive level that specifically oversees environmental matters, regularly reviews data, makes decisions. This shows the issue is taken seriously.' } },
           { id: 'q_5_1_2', parent: 'q_5_1',
             text: { ka: 'დამყარებულია ორმხრივი კომუნიკაცია დაინტერესებულ მხარეებთან?', en: 'Is two-way communication established with stakeholders?' },
-            tooltip: { ka: 'რეგულარული დიალოგი თემთან, ინვესტორებთან, რეგულატორებთან.', en: 'Regular dialog with community, investors, regulators.' } },
+            tooltip: { ka: 'ორმხრივი კომუნიკაცია ნიშნავს, რომ კომპანია არა მხოლოდ აცნობებს დაინტერესებულ მხარეებს (თემს, რეგულატორებს, ინვესტორებს), არამედ მათ ეძლევათ შესაძლებლობა, რომ თავიანთი გარემოსდაცვითი შეშფოთება და აზრი მოგვაწოდონ.', en: 'Two-way communication means the company not only informs stakeholders (community, regulators, investors) but also gives them a chance to express environmental concerns and feedback.' } },
           { id: 'q_5_1_3', parent: 'q_5_1',
             text: { ka: 'იყენებს მრავალმხრივ შეხვედრებს და ფოკუს-ჯგუფებს?', en: 'Does the company use multi-stakeholder meetings and focus groups?' },
-            tooltip: { ka: 'სხვადასხვა დაინტერესებული მხარის ჩართულობა.', en: 'Engagement of various stakeholders.' } },
+            tooltip: { ka: 'მრავალმხრივი შეხვედრები - საუბრები, რომლებზეც ერთად იკრიბება სხვადასხვა ჯგუფი (კომპანია, თემი, NGO, რეგულატორი). ფოკუს-ჯგუფი - მცირე ჯგუფის ღრმა გამოკითხვა. ეს გვეხმარება სხვადასხვა მხარის პერსპექტივის გაგებაში.', en: 'Multi-stakeholder meetings - discussions bringing together various groups (company, community, NGO, regulator). Focus group - in-depth interview with a small group. This helps understand various perspectives.' } },
           { id: 'q_5_2', isParent: true,
             text: { ka: 'აქვს განსაზღვრული მდგრადი განვითარების ხედვა?', en: 'Are sustainable development vision and policies defined?' },
-            tooltip: { ka: 'სტრატეგიული ხედვა, რომელიც აერთიანებს ეკონომიკას, გარემოს და სოციალურს.', en: 'Strategic vision integrating economic, environmental, social aspects.' } },
+            tooltip: { ka: 'მდგრადი განვითარება - ბიზნესის მართვა ისე, რომ ის იყოს მოგებიანი, არ აზიანებდეს გარემოს და ხელს უწყობდეს საზოგადოებას. ხედვა - გრძელვადიანი მისწრაფება. პოლიტიკა - წერილობითი წესები. სტრატეგია - გეგმა, როგორ მივიღოთ შედეგი.', en: 'Sustainable development - managing business to be profitable, not harm the environment, and benefit society. Vision - long-term aspiration. Policy - written rules. Strategy - plan to achieve results.' } },
           { id: 'q_5_2_1', parent: 'q_5_2',
             text: { ka: 'შემუშავებულია მდგრადობის სამიზნე მაჩვენებლები?', en: 'Are sustainability targets and indicators developed?' },
-            tooltip: { ka: 'რიცხობრივი მიზნები ეკონომიკურ, გარემოს და სოციალურ სფეროებში.', en: 'Numerical targets in economic, environmental, social spheres.' } },
+            tooltip: { ka: 'სამიზნე მაჩვენებლები - რიცხვითი მიზნები, მაგ. ენერგიის მოხმარების შემცირება 20%-ით 5 წელიწადში, ქალების ხელფასური განსხვავება მამაკაცებთან 0%-მდე. ინდიკატორები - ცოცხალი მონაცემები, რომლითაც პროგრესს ვადგენთ.', en: 'Target indicators - numerical goals, e.g. reduce energy consumption by 20% in 5 years, close gender pay gap to 0%. Indicators - live data tracking progress.' } },
           { id: 'q_5_2_2', parent: 'q_5_2',
             text: { ka: 'აქვს მდგრადი წარმოების და მოხმარების პროგრამა?', en: 'Is there sustainable production/consumption programme?' },
-            tooltip: { ka: 'პროგრამა, რომელიც აღემატება შესაბამისობას.', en: 'Programme exceeding mere compliance.' } },
+            tooltip: { ka: 'მდგრადი წარმოება - ნედლეულის და ენერგიის ეფექტური გამოყენება, ნარჩენების შემცირება, წყლის დაცვა. მდგრადი მოხმარება - პროდუქცია, რომელიც გრძელვადიანია, გადამუშავებადია. ეს უნდა აღემატებოდეს კანონისმიერ მინიმუმს.', en: 'Sustainable production - efficient use of raw materials and energy, reducing waste, water conservation. Sustainable consumption - products that are durable, recyclable. This should exceed legal minimums.' } },
           { id: 'q_5_2_3', parent: 'q_5_2',
             text: { ka: 'მუშაობს დიზაინერებთან და მომწოდებლებთან გარემოსდაცვითი მაჩვენებლების გასაუმჯობესებლად?', en: 'Does the company work with designers/suppliers to improve environmental performance?' },
-            tooltip: { ka: 'თანამშრომლობა მთელ ღირებულების ჯაჭვში.', en: 'Collaboration across the value chain.' } },
+            tooltip: { ka: 'პროდუქტის დიზაინი მნიშვნელოვნად განსაზღვრავს მის გარემოსდაცვით ეფექტს. თქვენი კომპანია მუშაობს დიზაინერებთან და მომწოდებლებთან, რომ პროდუქცია იყოს უფრო ეფექტური, ნაკლებად მავნე, უკეთესად გადასამუშავებელი?', en: 'Product design significantly determines environmental impact. Does your company work with designers and suppliers so products are more efficient, less harmful, more recyclable?' } },
           { id: 'q_5_2_4', parent: 'q_5_2',
             text: { ka: 'ზომავს და აცნობს პროგრესს მდგრადობის პრინციპებზე?', en: 'Does the company measure/communicate sustainability progress?' },
-            tooltip: { ka: 'რეგულარული პროგრესის ანგარიშგება.', en: 'Regular progress reporting.' } },
+            tooltip: { ka: 'ზომვა, თვალყურის დევნება, რეპორტინგი - სამი ნაბიჯი მდგრადობის მონიტორინგისთვის. ჯერ უნდა გავზომოთ (მაგ. CO2 ემისიები), მერე თვალი ვადევნოთ ცვლილებებს, ბოლოს კი - საჯაროდ გავუგზავნოთ შედეგები.', en: 'Measure, track, communicate - three steps for sustainability monitoring. First measure (e.g. CO2 emissions), then track changes, finally communicate results publicly.' } },
           { id: 'q_5_3', isParent: true,
             text: { ka: 'აქვს კომპანიას პოლიტიკა გარემოსდაცვითი ტექნოლოგიების გამოყენებაზე?', en: 'Is there policy on use of environmentally sound technologies?' },
-            tooltip: { ka: 'კორპორაციული პოლიტიკა მწვანე ტექნოლოგიებზე.', en: 'Corporate policy on green technologies.' } },
+            tooltip: { ka: 'გარემოსდაცვითი ტექნოლოგიები - მანქანები და სისტემები, რომლებიც ნაკლებად აზიანებენ გარემოს - მაგ. განახლებადი ენერგია, ენერგოეფექტური მანქანები, ბიოდეგრადირებადი მასალები. გაქვთ წერილობითი მითითება, რომ ასეთი ტექნოლოგიები გამოიყენოთ?', en: 'Environmental technologies - machines and systems that harm the environment less - e.g. renewable energy, energy-efficient machines, biodegradable materials. Do you have written guidance to use such technologies?' } },
           { id: 'q_5_3_1', parent: 'q_5_3',
             text: { ka: 'აწვდის ინფორმაციას ტექნოლოგიების გარემოსდაცვითი მაჩვენებლების შესახებ?', en: 'Is information made available about environmental performance?' },
-            tooltip: { ka: 'გამჭვირვალობა ტექნოლოგიების ეფექტებზე.', en: 'Transparency on technology impacts.' } },
+            tooltip: { ka: 'გამჭვირვალობა - დაინტერესებულ მხარეებს (კლიენტებს, ინვესტორებს, რეგულატორებს) ეუბნებით, რა არის თქვენი ტექნოლოგიების გარემოსდაცვითი მახასიათებლები - მაგ. რამდენ ენერგიას ხარჯავს, რა ემისიებს გამოყოფს, რამდენი წყალი იხარჯება.', en: 'Transparency - telling stakeholders (customers, investors, regulators) what your technologies environmental characteristics are - e.g. how much energy used, what emissions, how much water consumed.' } },
           { id: 'q_5_3_2', parent: 'q_5_3',
             text: { ka: 'იყენებს ცხოვრების ციკლის შეფასებას (LCA) ახალი ტექნოლოგიებისთვის?', en: 'Is life cycle assessment used in new technology development?' },
-            tooltip: { ka: 'მთლიანი ცხოვრების ციკლის ეფექტების ანალიზი.', en: 'Analysis of full life cycle impacts.' } },
+            tooltip: { ka: 'ცხოვრების ციკლის შეფასება (Life Cycle Assessment - LCA) - სრული ანალიზი ნედლეულის მოპოვებიდან, წარმოებიდან, ტრანსპორტირებიდან, გამოყენებიდან, ბოლოს უტილიზაციამდე. ამით ვხედავთ, სად არის ყველაზე დიდი გარემოსდაცვითი ეფექტი.', en: 'Life Cycle Assessment (LCA) - full analysis from raw material extraction, production, transport, use, to final disposal. This shows where the biggest environmental impact lies.' } },
           { id: 'q_5_3_3', parent: 'q_5_3',
             text: { ka: 'ამოწმებს კრიტერიუმებს მომწოდებელთა შესარჩევად?', en: 'Are criteria examined for supplier selection?' },
-            tooltip: { ka: 'მომწოდებლების შერჩევა გარემოსდაცვითი კრიტერიუმებით.', en: 'Supplier selection by environmental criteria.' } },
+            tooltip: { ka: 'მომწოდებელთა შერჩევისას, ფასისა და ხარისხის გარდა, გასათვალისწინებელია გარემოსდაცვითი მაჩვენებლები - გადასცემთ თუ არა მომწოდებლებს მინიმალური ეკოლოგიური მოთხოვნებს?', en: 'When selecting suppliers, beyond price and quality, environmental performance should be considered - do you communicate minimum environmental requirements to suppliers?' } },
           { id: 'q_5_3_4', parent: 'q_5_3',
             text: { ka: 'თანამშრომლობს ინდუსტრიის პარტნიორებთან საუკეთესო ტექნოლოგიების უზრუნველსაყოფად?', en: 'Does the company cooperate with industry partners on best technology?' },
-            tooltip: { ka: 'ინდუსტრიული თანამშრომლობა.', en: 'Industry collaboration.' } }
+            tooltip: { ka: 'ინდუსტრიული თანამშრომლობა - ერთად მუშაობა კონკურენტებთან, საუნივერსიტეტო ცენტრებთან, რათა საუკეთესო ხელმისაწვდომი ტექნოლოგიების (Best Available Technology - BAT) ცოდნა გავრცელდეს. ეს აჩქარებს მთლიანი ინდუსტრიის გამწვანებას.', en: 'Industry collaboration - working together with competitors, university centers, so Best Available Technology (BAT) knowledge spreads. This accelerates greening of the entire industry.' } }
         ]
       },
       // SECTION 5: ANTI-CORRUPTION
@@ -423,16 +423,16 @@
         questions: [
           { id: 'q_6_1', isParent: true,
             text: { ka: 'აქვს კომპანიას ანტიკორუფციული პოლიტიკა და პროგრამები?', en: 'Does the company have anti-corruption policies and programmes?' },
-            tooltip: { ka: 'წერილობითი პოლიტიკა ქრთამის და კორუფციის წინააღმდეგ.', en: 'Written policy against bribery and corruption.' } },
+            tooltip: { ka: 'ანტიკორუფციული პოლიტიკა - წერილობითი დოკუმენტი, რომელშიც კომპანია აცხადებს, რომ კრძალავს ქრთამის მიცემას/მიღებას, ფავორიტიზმს, ხელისუფლების ბოროტ გამოყენებას. პროგრამა - კონკრეტული ნაბიჯები ამის უზრუნველსაყოფად (ტრენინგი, გადამოწმება, საჩივრების სისტემა).', en: 'Anti-corruption policy - written document where the company declares prohibition of bribery, favoritism, abuse of power. Programme - concrete steps to ensure this (training, verification, complaint system).' } },
           { id: 'q_6_1_1', parent: 'q_6_1',
             text: { ka: 'წლიურ ანგარიშებში მოცემულია ანტიკორუფციული მუშაობის შედეგები?', en: 'Is anti-corruption work reported in annual reports?' },
-            tooltip: { ka: 'საჯარო რეპორტინგი ანტიკორუფციულ მცდელობებზე.', en: 'Public reporting on anti-corruption efforts.' } },
+            tooltip: { ka: 'საჯარო რეპორტინგი - წლიურ ანგარიშებში (ან ცალკე ESG რეპორტში) იწერებით, რა მუშაობა გაქვთ ჩატარებული ანტიკორუფციული მიმართულებით - რამდენი ტრენინგი ჩატარდა, რამდენი საჩივარი გამოიკვლიეს, რა შედეგები მიიღეს.', en: 'Public reporting - in annual reports (or separate ESG report) you describe what anti-corruption work has been done - how many trainings, how many complaints investigated, what results.' } },
           { id: 'q_6_1_2', parent: 'q_6_1',
             text: { ka: 'კომპანია იზიარებს გამოცდილებას და საუკეთესო პრაქტიკას?', en: 'Does the company share experiences and best practices?' },
-            tooltip: { ka: 'შემთხვევითი მაგალითების და გამოცდილების გაზიარება.', en: 'Sharing case stories and experiences.' } },
+            tooltip: { ka: 'საუკეთესო პრაქტიკის გაზიარება - სხვა კომპანიებთან, კონფერენციებზე, ინდუსტრიულ ფორუმებზე იზიარებთ თქვენ გამოცდილებას - რა მუშაობდა, რა არ მუშაობდა, რას ისწავლეთ. ამ ცოდნის გაცვლა მთლიან ინდუსტრიას უმჯობესდება.', en: 'Sharing best practices - with other companies, at conferences, industry forums, you share your experience - what worked, what did not, what you learned. This knowledge exchange improves the entire industry.' } },
           { id: 'q_6_1_3', parent: 'q_6_1',
             text: { ka: 'თანამშრომლობს ინდუსტრიის თანატოლებთან ანტიკორუფციული ძალისხმევის გასაძლიერებლად?', en: 'Does the company join forces with industry peers in anti-corruption?' },
-            tooltip: { ka: 'კოლექტიური მოქმედება ინდუსტრიასთან ერთად.', en: 'Collective action with industry.' } }
+            tooltip: { ka: 'კოლექტიური მოქმედება - ერთად მუშაობა კონკურენტებთან, ბიზნეს ასოციაციებთან, NGO-ებთან, რათა კორუფციას მთლიან ინდუსტრიულ დონეზე მოწინააღმდეგდეთ. ერთ კომპანიას უჭირს მარტო ცვლილების მიღწევა.', en: 'Collective action - working together with competitors, business associations, NGOs to fight corruption at the entire industry level. One company alone struggles to achieve change.' } }
         ]
       },
       // SECTION 6: HEALTH & SAFETY
@@ -441,16 +441,16 @@
         questions: [
           { id: 'q_7_1', isParent: true,
             text: { ka: 'აქვს კომპანიას ჯანდაცვისა და უსაფრთხოების პოლიტიკა?', en: 'Does the company have H&S policy and procedures?' },
-            tooltip: { ka: 'წერილობითი პოლიტიკა მუშაკთა და კონტრაქტორთა უსაფრთხოებაზე.', en: 'Written policy on worker and contractor safety.' } },
+            tooltip: { ka: 'ჯანდაცვისა და უსაფრთხოების (H&S) პოლიტიკა - წერილობითი დოკუმენტი, რომელიც აცხადებს, თუ როგორ იცავს კომპანია მუშაკებს და კონტრაქტორებს ფიზიკური ზიანისგან. პროცედურები - კონკრეტული წესები ყოველდღიური მუშაობისთვის (PPE, უსაფრთხოების პროტოკოლი, ავარიული დახმარება).', en: 'Health & Safety (H&S) policy - written document declaring how the company protects workers and contractors from physical harm. Procedures - specific rules for daily work (PPE, safety protocols, emergency response).' } },
           { id: 'q_7_1_1', parent: 'q_7_1',
             text: { ka: 'ხელმისაწვდომია H&S სტატისტიკა (ინციდენტები, ფატალური შემთხვევები)?', en: 'Are H&S statistics available (incidents, fatalities)?' },
-            tooltip: { ka: 'რიცხობრივი მონაცემები ინციდენტებზე და ფატალურ შემთხვევებზე.', en: 'Numerical data on incidents and fatalities.' } },
+            tooltip: { ka: 'H&S სტატისტიკა - რიცხვითი მონაცემები ინციდენტებზე - რამდენი დაშავება მოხდა გასულ წელს, რამდენი ფატალური შემთხვევა (გარდაცვალება სამუშაოზე), რა იყო მიზეზი, როგორ გადაიჭრა. გრძნობთ თუ არა, რომ ეს ციფრები ხელმისაწვდომია?', en: 'H&S statistics - numerical data on incidents - how many injuries last year, how many fatalities (work-related deaths), what were causes, how were they resolved. Are these numbers available to you?' } },
           { id: 'q_7_1_2', parent: 'q_7_1',
             text: { ka: 'კომპანია გადასცემს მუშაკებს H&S შედეგებსა და სტატისტიკას?', en: 'Does the company communicate H&S performance to workers?' },
-            tooltip: { ka: 'გამჭვირვალე კომუნიკაცია უსაფრთხოების მაჩვენებლებზე.', en: 'Transparent communication on safety metrics.' } },
+            tooltip: { ka: 'მუშაკებს უფლება აქვთ იცოდნენ, რამდენად უსაფრთხოა მათი სამუშაო ადგილი. გადასცემთ თუ არა მათ რეგულარულად ინფორმაციას - ინციდენტების სტატისტიკას, უსაფრთხოების მაჩვენებლებს, რა გასაუმჯობესებელია?', en: 'Workers have the right to know how safe their workplace is. Do you regularly communicate to them - incident statistics, safety metrics, what needs improvement?' } },
           { id: 'q_7_1_3', parent: 'q_7_1',
             text: { ka: 'არის გეგმები რომლებიც უზრუნველყოფს PPE-ს (პირადი დაცვის საშუალებები)?', en: 'Are there plans/standards committing to PPE for workers?' },
-            tooltip: { ka: 'სათანადო ინდივიდუალური დაცვის საშუალებები.', en: 'Adequate personal protective equipment.' } }
+            tooltip: { ka: 'PPE (Personal Protective Equipment) - პირადი დაცვის საშუალებები: ჩაფხუტი, სათვალე, ხელთათმანები, საფეხურები, რესპირატორი, საყურე-ჩამქრობი. სათანადო ნიშნავს, რომ ეს კონკრეტული სამუშაოს რისკებს ითვალისწინებს და ხარისხიანი დაცვაა.', en: 'PPE (Personal Protective Equipment) - personal protective gear: helmets, goggles, gloves, boots, respirators, ear protection. Adequate means it considers the specific job risks and provides quality protection.' } }
         ]
       },
       // SECTION 7: CLIMATE CHANGE
@@ -459,16 +459,16 @@
         questions: [
           { id: 'q_8_1', isParent: true,
             text: { ka: 'აქვს კომპანიას დეკარბონიზაციის გეგმა?', en: 'Does the company have a decarbonization plan?' },
-            tooltip: { ka: 'წერილობითი გეგმა ნახშირბადის ემისიების შესამცირებლად.', en: 'Written plan to reduce carbon emissions.' } },
+            tooltip: { ka: 'დეკარბონიზაცია - ნახშირბადის (CO2 და სხვა სათბურის) ემისიების შემცირება. დეკარბონიზაციის გეგმა - წერილობითი დოკუმენტი იმაზე, თუ როგორ შეამცირებს თქვენი კომპანია ემისიებს - რა ნაბიჯებით, რა ტექნოლოგიებით, რა ვადებში.', en: 'Decarbonization - reducing carbon (CO2 and other greenhouse gas) emissions. Decarbonization plan - written document on how your company will reduce emissions - through what steps, technologies, timelines.' } },
           { id: 'q_8_1_1', parent: 'q_8_1',
             text: { ka: 'აქვს კომპანიას ნახშირბადის შემცირების სამიზნე მაჩვენებლები?', en: 'Does the company have carbon reduction targets?' },
-            tooltip: { ka: 'რიცხობრივი მიზნები CO2 შემცირებისთვის.', en: 'Numerical targets for CO2 reduction.' } },
+            tooltip: { ka: 'სამიზნე მაჩვენებლები - კონკრეტული რიცხვობრივი მიზნები, მაგ. 30% შემცირება 2030 წლისთვის, ნულოვანი ემისია 2050 წლისთვის. უნდა იყოს გაზომვადი და ვადიანი, არა მხოლოდ ზოგადი ვალდებულება.', en: 'Target indicators - specific numerical goals, e.g. 30% reduction by 2030, net zero by 2050. Must be measurable and time-bound, not just general commitment.' } },
           { id: 'q_8_1_2', parent: 'q_8_1',
             text: { ka: 'იდენტიფიცირებული აქვს დეკარბონიზაციის სტრატეგიის ძირითადი დაბრკოლებები?', en: 'Has the company identified main obstacles of decarbonization?' },
-            tooltip: { ka: 'რისკების და გამოწვევების გაცნობიერება.', en: 'Awareness of risks and challenges.' } },
+            tooltip: { ka: 'დეკარბონიზაცია არ არის მარტივი - ხშირად ბევრი დაბრკოლებაა: ფინანსური (ახალი ტექნოლოგიები ძვირია), ტექნიკური (ალტერნატივები არ არის), ორგანიზაციული (პროცესების ცვლილება). ცნობილი გაქვთ რა აფერხებს თქვენ?', en: 'Decarbonization is not simple - there are often many obstacles: financial (new technologies are expensive), technical (no alternatives), organizational (process change). Do you know what obstacles you face?' } },
           { id: 'q_8_2',
             text: { ka: 'იდენტიფიცირებული აქვს კლიმატთან ადაპტაციის რისკები და ღონისძიებები?', en: 'Has the company identified climate adaptation risks and measures?' },
-            tooltip: { ka: 'კლიმატის ცვლილებასთან ადაპტაციის სტრატეგია.', en: 'Climate change adaptation strategy.' } }
+            tooltip: { ka: 'კლიმატის ცვლილება უკვე ხდება - ცხელი ზაფხული, ღვარცოფი, ხანძრები. ადაპტაცია ნიშნავს ამ რისკების გათვალისწინებას - სად არის ფაბრიკა (წყალდიდობის ზონაში?), როგორ მოვიქცეთ, თუ ენერგიის მიწოდება შეფერხდა, როგორ დავიცვათ თანამშრომლები ცხელ დღეებში.', en: 'Climate change is already happening - hot summers, floods, fires. Adaptation means considering these risks - where is the factory (in flood zone?), how to act if energy supply is disrupted, how to protect workers on hot days.' } }
         ]
       }
     ];
@@ -676,58 +676,61 @@
       const [showTooltip, setShowTooltip] = useState(false);
       const isChild = !!q.parent;
 
-      const buttonBase = 'flex-1 h-10 text-sm font-medium rounded-lg transition border flex items-center justify-center gap-1.5';
+      const buttonBase = 'flex-1 h-12 text-[15px] font-medium rounded-lg transition border flex items-center justify-center gap-2';
       const yesActive = answer === 'yes';
       const noActive = answer === 'no';
       const partialActive = answer === 'partial';
 
       const yesBtn = yesActive
         ? 'bg-emerald-50 border-emerald-600 text-emerald-800'
-        : 'bg-white border-stone-200 text-stone-600 hover:border-stone-300 hover:bg-stone-50';
+        : 'bg-white border-stone-200 text-stone-700 hover:border-stone-300 hover:bg-stone-50';
       const partialBtn = partialActive
         ? 'bg-amber-50 border-amber-500 text-amber-800'
-        : 'bg-white border-stone-200 text-stone-600 hover:border-stone-300 hover:bg-stone-50';
+        : 'bg-white border-stone-200 text-stone-700 hover:border-stone-300 hover:bg-stone-50';
       const noBtn = noActive
         ? 'bg-rose-50 border-rose-500 text-rose-800'
-        : 'bg-white border-stone-200 text-stone-600 hover:border-stone-300 hover:bg-stone-50';
+        : 'bg-white border-stone-200 text-stone-700 hover:border-stone-300 hover:bg-stone-50';
 
       const cardBorder = hasError ? 'border-rose-400 ring-2 ring-rose-100' : 'border-stone-200';
-      const containerStyle = isChild ? { marginLeft: '32px', borderLeft: '3px solid #0F6E56' } : {};
+      const containerStyle = isChild ? { marginLeft: '36px', borderLeft: '3px solid #0F6E56' } : {};
 
       return React.createElement('div', {
-        className: `bg-white border ${cardBorder} rounded-xl p-5 mb-3 transition fade-in`,
+        className: `bg-white border ${cardBorder} rounded-xl p-6 mb-4 transition fade-in`,
         style: containerStyle
       },
-        React.createElement('div', { className: 'flex gap-3 items-start mb-4' },
+        React.createElement('div', { className: 'flex gap-4 items-start mb-5' },
           React.createElement('div', {
-            className: `w-7 h-7 rounded-full flex items-center justify-center text-xs font-medium flex-shrink-0 ${q.isParent ? 'bg-emerald-100 text-emerald-800' : 'bg-stone-100 text-stone-600'}`
+            className: `w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium flex-shrink-0 mt-0.5 ${q.isParent ? 'bg-emerald-100 text-emerald-800' : 'bg-stone-100 text-stone-600'}`
           }, index),
           React.createElement('div', { className: 'flex-1 min-w-0' },
             q.isParent ? React.createElement('div', {
-              className: 'text-[10px] font-semibold text-emerald-700 uppercase tracking-wider mb-1'
+              className: 'text-[11px] font-semibold text-emerald-700 uppercase tracking-wider mb-1.5'
             }, T[lang].mainQ) : null,
-            React.createElement('div', { className: 'flex items-start gap-2' },
-              React.createElement('p', { className: 'text-sm leading-relaxed text-stone-900 flex-1' }, q.text[lang]),
+            React.createElement('div', { className: 'flex items-start gap-3' },
+              React.createElement('p', {
+                className: 'text-[16px] leading-[1.65] text-stone-900 flex-1',
+                style: { fontWeight: 450 }
+              }, q.text[lang]),
               React.createElement('button', {
                 onMouseEnter: () => setShowTooltip(true),
                 onMouseLeave: () => setShowTooltip(false),
                 onClick: () => setShowTooltip(s => !s),
-                className: 'flex-shrink-0 w-5 h-5 rounded-full bg-stone-100 hover:bg-stone-200 text-stone-500 text-xs flex items-center justify-center transition relative',
+                className: 'flex-shrink-0 w-6 h-6 rounded-full bg-stone-100 hover:bg-stone-200 text-stone-500 hover:text-stone-700 text-xs flex items-center justify-center transition relative mt-0.5',
                 'aria-label': 'info'
               },
-                'i',
+                React.createElement('span', { style: { fontSize: '13px', fontStyle: 'italic', fontWeight: 600 } }, 'i'),
                 showTooltip ? React.createElement('span', {
-                  className: 'absolute right-0 top-7 z-50 bg-stone-900 text-white text-xs leading-relaxed font-normal px-3 py-2 rounded-lg shadow-xl normal-case',
-                  style: { width: '280px', textAlign: 'left' }
+                  className: 'absolute right-0 top-8 z-50 bg-stone-900 text-white px-4 py-3 rounded-lg shadow-xl normal-case text-left',
+                  style: { width: '340px', fontSize: '13px', lineHeight: '1.65', fontStyle: 'normal', fontWeight: 400 }
                 }, q.tooltip[lang]) : null
               )
             ),
             autoSuggested && answer ? React.createElement('p', {
-              className: 'text-[11px] text-stone-400 mt-2 italic'
+              className: 'text-[12px] text-stone-400 mt-2.5 italic'
             }, '↳ ' + T[lang].autoFilled) : null
           )
         ),
-        React.createElement('div', { className: 'flex gap-2' },
+        React.createElement('div', { className: 'flex gap-2.5' },
           React.createElement('button', { onClick: () => onAnswer('yes'), className: `${buttonBase} ${yesBtn}` }, '✓ ', T[lang].yes),
           React.createElement('button', { onClick: () => onAnswer('partial'), className: `${buttonBase} ${partialBtn}` }, '◐ ', T[lang].partial),
           React.createElement('button', { onClick: () => onAnswer('no'), className: `${buttonBase} ${noBtn}` }, '✗ ', T[lang].no)
@@ -736,8 +739,9 @@
           placeholder: T[lang].partialPh,
           value: partialText || '',
           onChange: e => onPartialText(e.target.value),
-          className: 'w-full mt-3 p-3 text-sm bg-stone-50 border border-stone-200 rounded-lg focus:outline-none focus:bg-white focus:border-amber-500 transition resize-y',
-          rows: 3
+          className: 'w-full mt-3 p-3.5 text-[14px] bg-stone-50 border border-stone-200 rounded-lg focus:outline-none focus:bg-white focus:border-amber-500 transition resize-y leading-relaxed',
+          rows: 3,
+          style: { fontFamily: 'inherit' }
         }) : null
       );
     }
@@ -794,11 +798,48 @@
         newAuto[qid] = false;
 
         const q = getQuestion(qid);
-        // If this is a parent
-        if (q && q.isParent) {
+        // Find which section this question belongs to and check if it's the FIRST question of that section
+        let isFirstOfSection = false;
+        let sectionQuestions = [];
+        for (const s of SECTIONS) {
+          if (s.questions.length > 0 && s.questions[0].id === qid) {
+            isFirstOfSection = true;
+            sectionQuestions = s.questions;
+            break;
+          }
+        }
+
+        // If this is the first question of a section
+        if (isFirstOfSection) {
+          if (val === 'no') {
+            // Auto-fill ALL other questions in this section with 'no' (if not manually set, or previously auto-suggested)
+            sectionQuestions.forEach(sq => {
+              if (sq.id === qid) return; // skip the first one itself
+              const existing = newAnswers[sq.id];
+              if (!existing || newAuto[sq.id]) {
+                newAnswers[sq.id] = { answer: 'no', partial_text: null, was_auto_suggested: true };
+                newAuto[sq.id] = true;
+                scheduleSave(sq.id, { answer: 'no', partial_text: null, was_auto_suggested: true });
+              }
+            });
+          } else {
+            // First question changed to yes/partial → clear ALL auto-suggested in this section
+            sectionQuestions.forEach(sq => {
+              if (sq.id === qid) return;
+              if (newAuto[sq.id]) {
+                delete newAnswers[sq.id];
+                newAuto[sq.id] = false;
+                if (supabase) {
+                  supabase.from('esg_answers').delete().eq('company_id', companyId).eq('question_id', sq.id);
+                }
+              }
+            });
+          }
+        }
+        // Also keep the original parent/child logic for nested questions (q_2_2 → q_2_2_1, etc.)
+        else if (q && q.isParent) {
           const children = getChildren(qid);
           if (val === 'no') {
-            // Auto-fill children with 'no' if not yet manually set, OR if previously auto-suggested
             children.forEach(c => {
               const existing = newAnswers[c.id];
               if (!existing || newAuto[c.id]) {
@@ -808,7 +849,6 @@
               }
             });
           } else {
-            // Parent changed to yes/partial → clear auto-suggested children
             children.forEach(c => {
               if (newAuto[c.id]) {
                 delete newAnswers[c.id];
@@ -837,12 +877,11 @@
         }
       };
 
-      // Validation: all questions in current section answered + partials have text
+      // Validation: all questions in current section answered (partial text is optional)
       const validateSection = () => {
         for (const q of section.questions) {
           const a = answers[q.id];
           if (!a || !a.answer) return false;
-          if (a.answer === 'partial' && (!partialTexts[q.id] || !partialTexts[q.id].trim())) return false;
         }
         return true;
       };
@@ -851,7 +890,6 @@
         for (const q of ALL_QUESTIONS) {
           const a = answers[q.id];
           if (!a || !a.answer) return false;
-          if (a.answer === 'partial' && (!partialTexts[q.id] || !partialTexts[q.id].trim())) return false;
         }
         return true;
       };
@@ -878,7 +916,7 @@
           for (let i = 0; i < SECTIONS.length; i++) {
             const incomplete = SECTIONS[i].questions.some(q => {
               const a = answers[q.id];
-              return !a || !a.answer || (a.answer === 'partial' && (!partialTexts[q.id] || !partialTexts[q.id].trim()));
+              return !a || !a.answer;
             });
             if (incomplete) { setCurrentSection(i); break; }
           }
@@ -970,10 +1008,7 @@
                 className: 'bg-rose-50 border border-rose-200 rounded-xl p-4 mb-4 flex items-start gap-3 fade-in'
               },
                 React.createElement('div', { className: 'w-5 h-5 rounded-full bg-rose-100 text-rose-700 text-xs font-bold flex items-center justify-center flex-shrink-0' }, '!'),
-                React.createElement('div', { className: 'text-sm text-rose-800' },
-                  React.createElement('div', { className: 'font-medium mb-0.5' }, T[lang].mustAnswer),
-                  React.createElement('div', { className: 'text-xs text-rose-600' }, T[lang].partialRequired)
-                )
+                React.createElement('div', { className: 'text-sm text-rose-800 font-medium' }, T[lang].mustAnswer)
               ) : null,
               // Questions
               React.createElement('div', null,
@@ -981,9 +1016,8 @@
                   const a = answers[q.id];
                   const ansVal = a ? a.answer : null;
                   const partial = partialTexts[q.id];
-                  const isPartialMissing = ansVal === 'partial' && (!partial || !partial.trim());
                   const isUnanswered = !ansVal;
-                  const hasError = showError && (isUnanswered || isPartialMissing);
+                  const hasError = showError && isUnanswered;
                   return React.createElement(QuestionCard, {
                     key: q.id,
                     q, lang, index: num,
