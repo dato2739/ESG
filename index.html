@@ -869,7 +869,7 @@
     function QuestionCard({ q, lang, answer, partialText, autoSuggested, onAnswer, onPartialText, hasError, index }) {
       const [showTooltip, setShowTooltip] = useState(false);
 
-      const buttonBase = 'flex-1 h-9 text-[13px] font-medium rounded-md transition border flex items-center justify-center gap-1.5';
+      const buttonBase = 'flex-1 h-7 text-[12px] font-medium rounded transition border flex items-center justify-center gap-1';
       const yesActive = answer === 'yes';
       const noActive = answer === 'no';
       const partialActive = answer === 'partial';
@@ -887,38 +887,38 @@
       const cardBorder = hasError ? 'border-rose-400 ring-2 ring-rose-100' : 'border-stone-200';
 
       return React.createElement('div', {
-        className: `bg-white border ${cardBorder} rounded-lg px-4 py-3 mb-2 transition fade-in`
+        className: `bg-white border ${cardBorder} rounded-lg px-3.5 py-2.5 mb-1.5 transition fade-in`
       },
-        React.createElement('div', { className: 'flex gap-3 items-start mb-2.5' },
+        React.createElement('div', { className: 'flex gap-2.5 items-start mb-2' },
           React.createElement('div', {
-            className: 'w-6 h-6 rounded-full flex items-center justify-center text-[12px] font-medium flex-shrink-0 mt-0.5 bg-stone-100 text-stone-600'
+            className: 'w-5 h-5 rounded-full flex items-center justify-center text-[11px] font-medium flex-shrink-0 mt-0.5 bg-stone-100 text-stone-600'
           }, index),
           React.createElement('div', { className: 'flex-1 min-w-0' },
             React.createElement('div', { className: 'flex items-start gap-2' },
               React.createElement('p', {
-                className: 'text-[15px] leading-[1.5] text-stone-900 flex-1',
+                className: 'text-[14px] leading-[1.45] text-stone-900 flex-1',
                 style: { fontWeight: 450 }
               }, q.text[lang]),
               React.createElement('button', {
                 onMouseEnter: () => setShowTooltip(true),
                 onMouseLeave: () => setShowTooltip(false),
                 onClick: () => setShowTooltip(s => !s),
-                className: 'flex-shrink-0 w-5 h-5 rounded-full bg-stone-100 hover:bg-stone-200 text-stone-500 hover:text-stone-700 flex items-center justify-center transition relative mt-0.5',
+                className: 'flex-shrink-0 w-4 h-4 rounded-full bg-stone-100 hover:bg-stone-200 text-stone-500 hover:text-stone-700 flex items-center justify-center transition relative mt-0.5',
                 'aria-label': 'info'
               },
-                React.createElement('span', { style: { fontSize: '12px', fontStyle: 'italic', fontWeight: 600 } }, 'i'),
+                React.createElement('span', { style: { fontSize: '10px', fontStyle: 'italic', fontWeight: 600 } }, 'i'),
                 showTooltip ? React.createElement('span', {
-                  className: 'absolute right-0 top-7 z-50 bg-stone-900 text-white px-3.5 py-2.5 rounded-lg shadow-xl normal-case text-left',
+                  className: 'absolute right-0 top-6 z-50 bg-stone-900 text-white px-3.5 py-2.5 rounded-lg shadow-xl normal-case text-left',
                   style: { width: '340px', fontSize: '12.5px', lineHeight: '1.6', fontStyle: 'normal', fontWeight: 400 }
                 }, q.tooltip[lang]) : null
               )
             ),
             autoSuggested && answer ? React.createElement('p', {
-              className: 'text-[11px] text-stone-400 mt-1.5 italic'
+              className: 'text-[10px] text-stone-400 mt-1 italic'
             }, '↳ ' + T[lang].autoFilled) : null
           )
         ),
-        React.createElement('div', { className: 'flex gap-1.5' },
+        React.createElement('div', { className: 'flex gap-1' },
           React.createElement('button', { onClick: () => onAnswer('yes'), className: `${buttonBase} ${yesBtn}` }, '✓ ', T[lang].yes),
           React.createElement('button', { onClick: () => onAnswer('partial'), className: `${buttonBase} ${partialBtn}` }, '◐ ', T[lang].partial),
           React.createElement('button', { onClick: () => onAnswer('no'), className: `${buttonBase} ${noBtn}` }, '✗ ', T[lang].no)
@@ -927,7 +927,7 @@
           placeholder: T[lang].partialPh,
           value: partialText || '',
           onChange: e => onPartialText(e.target.value),
-          className: 'w-full mt-2 p-3 text-[13px] bg-stone-50 border border-stone-200 rounded-md focus:outline-none focus:bg-white focus:border-amber-500 transition resize-y leading-relaxed',
+          className: 'w-full mt-1.5 p-2.5 text-[12.5px] bg-stone-50 border border-stone-200 rounded focus:outline-none focus:bg-white focus:border-amber-500 transition resize-y leading-relaxed',
           rows: 2,
           style: { fontFamily: 'inherit' }
         }) : null
