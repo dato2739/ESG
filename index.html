@@ -1385,13 +1385,16 @@
 
       try {
         // Wait for fonts and image to load
-        await new Promise(r => setTimeout(r, 500));
+        await new Promise(r => setTimeout(r, 800));
 
         const canvas = await html2canvas(container, {
           scale: 2,
           useCORS: true,
+          allowTaint: true,
           backgroundColor: '#ffffff',
-          logging: false
+          logging: false,
+          windowWidth: 794,
+          imageTimeout: 5000
         });
 
         // Add to PDF, splitting into pages
@@ -1568,8 +1571,13 @@
       const handleSave = () => setScreen('saved');
 
       const handleSubmitFinal = async (currentAnswers) => {
-        const { error } = await lockCompany(companyId);
-        if (error) { alert(T[lang].connectError); return; }
+        const result = await lockCompany(companyId);
+        if (result.error) {
+          console.error('Submit error:', result.error);
+          const errMsg = (result.error.message || result.error.code || JSON.stringify(result.error)).slice(0, 200);
+          alert(T[lang].connectError + '\n\n' + errMsg);
+          return;
+        }
         setSubmittedAt(new Date().toISOString());
         if (currentAnswers) setLatestAnswers(currentAnswers);
         setScreen('locked');
