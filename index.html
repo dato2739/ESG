@@ -653,7 +653,7 @@
     }
 
     // ----------- INSTRUCTIONS MODAL -----------
-    function InstructionsModal({ lang, onClose }) {
+    function InstructionsModal({ lang, setLang, onClose }) {
       const sections = T[lang].modalSections;
       const features = [
         { icon: '①', title: T[lang].modalHow1Title, text: T[lang].modalHow1 },
@@ -670,9 +670,9 @@
           className: 'bg-white rounded-2xl max-w-3xl w-full my-auto shadow-2xl overflow-hidden',
           onClick: e => e.stopPropagation()
         },
-          // Modal header with logo
+          // Modal header with logo + language switch
           React.createElement('div', {
-            className: 'flex items-center justify-between px-7 py-5 border-b border-stone-100',
+            className: 'flex items-center justify-between px-7 py-5 border-b border-stone-100 gap-3',
             style: { background: 'linear-gradient(135deg, #0E5BA8, #1976D2)' }
           },
             React.createElement('img', {
@@ -680,11 +680,26 @@
               alt: 'ENERGO-PRO Georgia',
               className: 'h-12 w-auto rounded'
             }),
-            React.createElement('button', {
-              onClick: onClose,
-              className: 'w-9 h-9 rounded-full bg-white/20 hover:bg-white/30 text-white flex items-center justify-center transition text-lg',
-              'aria-label': 'Close'
-            }, '✕')
+            React.createElement('div', { className: 'flex items-center gap-3' },
+              // Language switch inside modal (white-on-blue style)
+              React.createElement('div', {
+                className: 'inline-flex bg-white/15 rounded-lg p-0.5 border border-white/20 backdrop-blur-sm'
+              },
+                React.createElement('button', {
+                  onClick: () => setLang('ka'),
+                  className: `px-3 py-1.5 text-xs font-semibold rounded-md transition ${lang === 'ka' ? 'bg-white text-blue-700 shadow-sm' : 'text-white/90 hover:text-white'}`
+                }, 'ქარ'),
+                React.createElement('button', {
+                  onClick: () => setLang('en'),
+                  className: `px-3 py-1.5 text-xs font-semibold rounded-md transition ${lang === 'en' ? 'bg-white text-blue-700 shadow-sm' : 'text-white/90 hover:text-white'}`
+                }, 'EN')
+              ),
+              React.createElement('button', {
+                onClick: onClose,
+                className: 'w-9 h-9 rounded-full bg-white/20 hover:bg-white/30 text-white flex items-center justify-center transition text-lg',
+                'aria-label': 'Close'
+              }, '✕')
+            )
           ),
           // Body
           React.createElement('div', { className: 'p-7 max-h-[calc(100vh-200px)] overflow-y-auto scrollbar-thin' },
@@ -854,7 +869,7 @@
     function QuestionCard({ q, lang, answer, partialText, autoSuggested, onAnswer, onPartialText, hasError, index }) {
       const [showTooltip, setShowTooltip] = useState(false);
 
-      const buttonBase = 'flex-1 h-10 text-[13px] font-medium rounded-lg transition border flex items-center justify-center gap-1.5';
+      const buttonBase = 'flex-1 h-9 text-[13px] font-medium rounded-md transition border flex items-center justify-center gap-1.5';
       const yesActive = answer === 'yes';
       const noActive = answer === 'no';
       const partialActive = answer === 'partial';
@@ -872,34 +887,34 @@
       const cardBorder = hasError ? 'border-rose-400 ring-2 ring-rose-100' : 'border-stone-200';
 
       return React.createElement('div', {
-        className: `bg-white border ${cardBorder} rounded-xl p-6 mb-3 transition fade-in`
+        className: `bg-white border ${cardBorder} rounded-lg px-4 py-3 mb-2 transition fade-in`
       },
-        React.createElement('div', { className: 'flex gap-4 items-start mb-5' },
+        React.createElement('div', { className: 'flex gap-3 items-start mb-2.5' },
           React.createElement('div', {
-            className: 'w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium flex-shrink-0 mt-0.5 bg-stone-100 text-stone-600'
+            className: 'w-6 h-6 rounded-full flex items-center justify-center text-[12px] font-medium flex-shrink-0 mt-0.5 bg-stone-100 text-stone-600'
           }, index),
           React.createElement('div', { className: 'flex-1 min-w-0' },
-            React.createElement('div', { className: 'flex items-start gap-3' },
+            React.createElement('div', { className: 'flex items-start gap-2' },
               React.createElement('p', {
-                className: 'text-[18px] leading-[1.65] text-stone-900 flex-1',
+                className: 'text-[15px] leading-[1.5] text-stone-900 flex-1',
                 style: { fontWeight: 450 }
               }, q.text[lang]),
               React.createElement('button', {
                 onMouseEnter: () => setShowTooltip(true),
                 onMouseLeave: () => setShowTooltip(false),
                 onClick: () => setShowTooltip(s => !s),
-                className: 'flex-shrink-0 w-6 h-6 rounded-full bg-stone-100 hover:bg-stone-200 text-stone-500 hover:text-stone-700 text-xs flex items-center justify-center transition relative mt-1',
+                className: 'flex-shrink-0 w-5 h-5 rounded-full bg-stone-100 hover:bg-stone-200 text-stone-500 hover:text-stone-700 flex items-center justify-center transition relative mt-0.5',
                 'aria-label': 'info'
               },
-                React.createElement('span', { style: { fontSize: '13px', fontStyle: 'italic', fontWeight: 600 } }, 'i'),
+                React.createElement('span', { style: { fontSize: '12px', fontStyle: 'italic', fontWeight: 600 } }, 'i'),
                 showTooltip ? React.createElement('span', {
-                  className: 'absolute right-0 top-8 z-50 bg-stone-900 text-white px-4 py-3 rounded-lg shadow-xl normal-case text-left',
-                  style: { width: '360px', fontSize: '13px', lineHeight: '1.7', fontStyle: 'normal', fontWeight: 400 }
+                  className: 'absolute right-0 top-7 z-50 bg-stone-900 text-white px-3.5 py-2.5 rounded-lg shadow-xl normal-case text-left',
+                  style: { width: '340px', fontSize: '12.5px', lineHeight: '1.6', fontStyle: 'normal', fontWeight: 400 }
                 }, q.tooltip[lang]) : null
               )
             ),
             autoSuggested && answer ? React.createElement('p', {
-              className: 'text-[12px] text-stone-400 mt-2.5 italic'
+              className: 'text-[11px] text-stone-400 mt-1.5 italic'
             }, '↳ ' + T[lang].autoFilled) : null
           )
         ),
@@ -912,8 +927,8 @@
           placeholder: T[lang].partialPh,
           value: partialText || '',
           onChange: e => onPartialText(e.target.value),
-          className: 'w-full mt-3 p-3.5 text-[14px] bg-stone-50 border border-stone-200 rounded-lg focus:outline-none focus:bg-white focus:border-amber-500 transition resize-y leading-relaxed',
-          rows: 3,
+          className: 'w-full mt-2 p-3 text-[13px] bg-stone-50 border border-stone-200 rounded-md focus:outline-none focus:bg-white focus:border-amber-500 transition resize-y leading-relaxed',
+          rows: 2,
           style: { fontFamily: 'inherit' }
         }) : null
       );
@@ -1602,7 +1617,7 @@
       return React.createElement(React.Fragment, null,
         mainContent,
         showInstructions ? React.createElement(InstructionsModal, {
-          lang, onClose: () => setShowInstructions(false)
+          lang, setLang: setLangState, onClose: () => setShowInstructions(false)
         }) : null
       );
     }
