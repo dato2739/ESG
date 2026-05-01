@@ -17,9 +17,11 @@
     }
   }
   </script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <style>
     * { font-family: 'Noto Sans Georgian', 'Inter', sans-serif; }
-    body { background: #FAFAF7; margin: 0; }
+    body { background: #F5F8FC; margin: 0; }
     .tooltip-wrapper { position: relative; display: inline-flex; }
     .tooltip {
       position: absolute;
@@ -79,17 +81,20 @@
       ? createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
       : null;
 
+    // Logo embedded as data URI
+    const LOGO_URL = 'data:image/jpeg;base64,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';
+
     // ============================================
     // TRANSLATIONS
     // ============================================
     const T = {
       ka: {
-        appTitle: 'მომწოდებლის ESG შეფასება',
-        welcome: 'მომწოდებლის ESG შეფასება',
-        welcomeSub: 'შეიყვანეთ კომპანიის საიდენტიფიკაციო ნომერი ფორმის შესავსებად',
+        appTitle: 'ESG შეფასების ფორმა',
+        welcome: 'ESG შეფასების ფორმა',
+        welcomeSub: 'შეიყვანეთ თქვენი კომპანიის ინფორმაცია ფორმის დასაწყებად',
         idLabel: 'საიდენტიფიკაციო ნომერი',
         idPlaceholder: 'მაგ. 405123456',
-        enter: 'შესვლა',
+        enter: 'ფორმის დაწყება',
         idRequired: 'გთხოვთ შეიყვანოთ საიდენტიფიკაციო ნომერი',
         loading: 'იტვირთება...',
         companyInfo: 'კომპანიის ინფორმაცია',
@@ -98,8 +103,36 @@
         companyNamePh: 'შპს ექსამპლი',
         contact: 'საკონტაქტო ნომერი',
         contactPh: '+995 555 12 34 56',
-        continue: 'გაგრძელება',
+        continue: 'ფორმის დაწყება',
         fillRequired: 'გთხოვთ შეავსოთ ყველა ველი',
+        // Modal instruction
+        modalTitle: 'რატომ გთხოვთ ამ ფორმის შევსებას',
+        modalIntro: 'ENERGO-PRO Georgia ცდილობს უზრუნველყოს, რომ მისი წარმოების/მომსახურებების წყაროების ჯაჭვი (კონტრაქტორები და მომწოდებლები) შეესაბამებოდეს ESG (Environmental, Social, Governance — გარემოსდაცვით, სოციალურ და მმართველობით) საერთაშორისო ნორმებს.',
+        modalIntro2: 'რადგან ჩვენი კონტრაქტორების უმეტესობას არ აქვს შესაბამისი ISO სერტიფიკატები, ეს ფორმა გვეხმარება ჩამოვაყალიბოთ თქვენი კომპანიის შესაბამისობა ამ ნორმებთან. ფორმის შევსება არ არის სავალდებულო, თუმცა აუცილებელია იმისთვის, რომ ჩვენი მხრიდან მოხდეს თქვენი კომპანიის შეფასება და გადაწყდეს მომავალი თანამშრომლობის საკითხი.',
+        modalSectionsTitle: 'ფორმა შედგება 7 თემატური ბლოკისგან:',
+        modalSections: ['ხარისხი', 'ადამიანის უფლებები', 'შრომა', 'გარემო', 'ანტი-კორუფცია', 'ჯანმრთელობა და უსაფრთხოება', 'კლიმატის ცვლილება'],
+        modalHowTitle: 'როგორ შეავსოთ ფორმა — გამარტივების ხერხები',
+        modalHow1Title: 'სამი მარტივი არჩევანი',
+        modalHow1: 'თითოეულ კითხვაზე აირჩიეთ ერთ-ერთი: კი / ნაწილობრივ / არა.',
+        modalHow2Title: 'ჭკვიანი ავტო-შევსება',
+        modalHow2: 'თითოეული ბლოკის პირველი (მთავარი) კითხვა განსაზღვრავს დანარჩენებს. თუ მთავარ კითხვაზე უპასუხებთ "არა", დანარჩენი კითხვები ბლოკში ავტომატურად მოინიშნება როგორც "არა" — ეს მნიშვნელოვნად ამცირებს თქვენ დროს. რა თქმა უნდა, ცალკეული კითხვის ხელით შეცვლა ნებისმიერ მომენტში შეგიძლიათ.',
+        modalHow3Title: 'მაგალითები კითხვებთან',
+        modalHow3: 'თითოეული კითხვის გვერდით ნახავთ პატარა ღილაკს "i" — მასზე დაჭერით გამოვა ფანჯარა მოკლე განმარტებითა და კონკრეტული მაგალითით სამშენებლო ან ელექტრო დარგიდან, რაც ბევრად გაგიადვილებთ პასუხის გაცემას.',
+        modalHow4Title: 'ნაწილობრივი პასუხი',
+        modalHow4: 'თუ კითხვაზე არც სრული "კი" და არც "არა" გერგებათ, აირჩიეთ "ნაწილობრივ". გამოჩნდება ტექსტური ველი, სადაც სურვილისამებრ შეგიძლიათ ჩაწეროთ დეტალები (არასავალდებულოა).',
+        modalHow5Title: 'ავტო-შენახვა',
+        modalHow5: 'ყველა პასუხი ავტომატურად ინახება. შეგიძლიათ დახუროთ გვერდი და დაბრუნდეთ მოგვიანებით — გააგრძელებთ იქიდან, სადაც გაჩერდით.',
+        modalHow6Title: 'PDF ფაილი',
+        modalHow6: 'ყველა კითხვაზე პასუხის გაცემის შემდეგ შეგიძლიათ ჩამოტვირთოთ თქვენი პასუხების PDF ვერსია თქვენი არქივისთვის.',
+        modalImportantTitle: 'მნიშვნელოვანი',
+        modalImportant: 'ფორმის გადაგზავნის შემდეგ პასუხების შეცვლა შეუძლებელია. გთხოვთ, ჩაატაროთ ფინალური გადახედვა გადაგზავნამდე.',
+        modalSupportTitle: 'დახმარება',
+        modalSupport: 'შეკითხვების შემთხვევაში დაგვიკავშირდით:',
+        modalSupportName: 'თეონა ქველიძე',
+        modalSupportEmail: 'teona.qvelidze@energo-pro.ge',
+        modalSupportPhone: '577 35 00 90',
+        modalStart: 'გავიგე, ვიწყებ შევსებას',
+        modalShowAgain: 'ინსტრუქციის ხელახლა ნახვა',
         progress: 'შევსებულია',
         yes: 'კი',
         no: 'არა',
@@ -129,15 +162,27 @@
         saved: 'შენახულია',
         connectError: 'კავშირის შეცდომა. გთხოვთ სცადოთ თავიდან.',
         company: 'კომპანია',
-        sections: ['ხარისხი', 'ადამიანის უფლებები', 'შრომა', 'გარემო', 'ანტი-კორუფცია', 'ჯანდაცვა და უსაფრთხოება', 'კლიმატის ცვლილება']
+        sections: ['ხარისხი', 'ადამიანის უფლებები', 'შრომა', 'გარემო', 'ანტი-კორუფცია', 'ჯანდაცვა და უსაფრთხოება', 'კლიმატის ცვლილება'],
+        downloadPdf: 'PDF ჩამოტვირთვა',
+        pdfNeedsAll: 'PDF-ის ჩამოტვირთვა შესაძლებელი იქნება ყველა კითხვაზე პასუხის გაცემის შემდეგ',
+        pdfTitle: 'ESG შეფასების ფორმა',
+        pdfCompany: 'კომპანია',
+        pdfId: 'საიდენტიფიკაციო ნომერი',
+        pdfContact: 'საკონტაქტო',
+        pdfDate: 'შევსების თარიღი',
+        pdfSection: 'სექცია',
+        pdfQuestion: 'კითხვა',
+        pdfAnswer: 'პასუხი',
+        pdfNote: 'შენიშვნა',
+        pdfGenerating: 'PDF იქმნება...'
       },
       en: {
-        appTitle: 'Supplier ESG Assessment',
-        welcome: 'Supplier ESG Assessment',
-        welcomeSub: 'Enter your company identification number to fill the form',
+        appTitle: 'ESG Assessment Form',
+        welcome: 'ESG Assessment Form',
+        welcomeSub: 'Enter your company information to start the form',
         idLabel: 'Company ID',
         idPlaceholder: 'e.g. 405123456',
-        enter: 'Continue',
+        enter: 'Start Form',
         idRequired: 'Please enter your identification number',
         loading: 'Loading...',
         companyInfo: 'Company Information',
@@ -146,8 +191,36 @@
         companyNamePh: 'Example LLC',
         contact: 'Contact Number',
         contactPh: '+995 555 12 34 56',
-        continue: 'Continue',
+        continue: 'Start Form',
         fillRequired: 'Please fill in all fields',
+        // Modal instruction
+        modalTitle: 'Why we ask you to fill out this form',
+        modalIntro: 'ENERGO-PRO Georgia strives to ensure that its production/service supply chain (contractors and suppliers) complies with ESG (Environmental, Social, Governance) international standards.',
+        modalIntro2: 'Since most of our contractors do not hold relevant ISO certificates, this form helps us establish your company compliance with these standards. Filling out the form is not mandatory, however it is essential for our evaluation of your company and for decisions on future cooperation.',
+        modalSectionsTitle: 'The form consists of 7 thematic blocks:',
+        modalSections: ['Quality', 'Human Rights', 'Labour', 'Environment', 'Anti-Corruption', 'Health & Safety', 'Climate Change'],
+        modalHowTitle: 'How to fill the form — simplification methods',
+        modalHow1Title: 'Three simple choices',
+        modalHow1: 'For each question choose one: Yes / Partial / No.',
+        modalHow2Title: 'Smart auto-fill',
+        modalHow2: 'The first (main) question of each block determines the others. If you answer "No" to the main question, the rest of the questions in the block will automatically be marked as "No" — this significantly reduces your time. Of course, you can manually change any individual question at any time.',
+        modalHow3Title: 'Examples next to questions',
+        modalHow3: 'Next to each question you will see a small "i" button — clicking it will show a window with a brief explanation and a concrete example from construction or electrical industry, which will significantly help you answer.',
+        modalHow4Title: 'Partial answer',
+        modalHow4: 'If neither full "Yes" nor "No" applies to your question, choose "Partial". A text field will appear where you can optionally write details (not required).',
+        modalHow5Title: 'Auto-save',
+        modalHow5: 'All answers are automatically saved. You can close the page and return later — you will continue from where you left off.',
+        modalHow6Title: 'PDF file',
+        modalHow6: 'After answering all questions, you can download a PDF version of your answers for your archive.',
+        modalImportantTitle: 'Important',
+        modalImportant: 'After submitting the form, answers cannot be changed. Please conduct a final review before submission.',
+        modalSupportTitle: 'Support',
+        modalSupport: 'For questions, contact:',
+        modalSupportName: 'Teona Kvelidze',
+        modalSupportEmail: 'teona.qvelidze@energo-pro.ge',
+        modalSupportPhone: '577 35 00 90',
+        modalStart: 'Got it, starting the form',
+        modalShowAgain: 'Show instructions again',
         progress: 'Completed',
         yes: 'Yes',
         no: 'No',
@@ -177,7 +250,19 @@
         saved: 'Saved',
         connectError: 'Connection error. Please try again.',
         company: 'Company',
-        sections: ['Quality', 'Human Rights', 'Labour', 'Environment', 'Anti-Corruption', 'Health & Safety', 'Climate Change']
+        sections: ['Quality', 'Human Rights', 'Labour', 'Environment', 'Anti-Corruption', 'Health & Safety', 'Climate Change'],
+        downloadPdf: 'Download PDF',
+        pdfNeedsAll: 'PDF download will be available after all questions are answered',
+        pdfTitle: 'ESG Assessment Form',
+        pdfCompany: 'Company',
+        pdfId: 'Company ID',
+        pdfContact: 'Contact',
+        pdfDate: 'Submission date',
+        pdfSection: 'Section',
+        pdfQuestion: 'Question',
+        pdfAnswer: 'Answer',
+        pdfNote: 'Note',
+        pdfGenerating: 'Generating PDF...'
       }
     };
 
@@ -523,47 +608,186 @@
     // UI COMPONENTS
     // ============================================
     function LangSwitch({ lang, setLang }) {
-      return React.createElement('button', {
-        onClick: () => setLang(lang === 'ka' ? 'en' : 'ka'),
-        className: 'flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-stone-600 hover:text-stone-900 hover:bg-stone-100 rounded-md transition'
+      return React.createElement('div', {
+        className: 'inline-flex bg-stone-100 rounded-lg p-0.5 border border-stone-200'
       },
-        React.createElement('span', null, '🌐'),
-        React.createElement('span', null, lang === 'ka' ? 'EN' : 'ქართული')
+        React.createElement('button', {
+          onClick: () => setLang('ka'),
+          className: `px-3 py-1.5 text-xs font-semibold rounded-md transition ${lang === 'ka' ? 'bg-white text-blue-700 shadow-sm' : 'text-stone-500 hover:text-stone-700'}`
+        }, 'ქარ'),
+        React.createElement('button', {
+          onClick: () => setLang('en'),
+          className: `px-3 py-1.5 text-xs font-semibold rounded-md transition ${lang === 'en' ? 'bg-white text-blue-700 shadow-sm' : 'text-stone-500 hover:text-stone-700'}`
+        }, 'EN')
       );
     }
 
-    function Header({ lang, setLang, companyName }) {
+    function Header({ lang, setLang, companyName, onShowInstructions }) {
       return React.createElement('header', {
-        className: 'border-b border-stone-200 bg-white/70 backdrop-blur-md sticky top-0 z-40'
+        className: 'border-b border-stone-200 bg-white sticky top-0 z-40 shadow-sm'
       },
-        React.createElement('div', { className: 'max-w-6xl mx-auto px-6 py-3 flex items-center justify-between' },
+        React.createElement('div', { className: 'max-w-6xl mx-auto px-6 py-3 flex items-center justify-between gap-4' },
           React.createElement('div', { className: 'flex items-center gap-3' },
-            React.createElement('div', {
-              className: 'w-9 h-9 rounded-xl flex items-center justify-center text-white font-semibold text-sm',
-              style: { background: 'linear-gradient(135deg, #1F4D3C, #0F6E56)' }
-            }, 'ESG'),
-            React.createElement('div', null,
-              React.createElement('div', { className: 'text-sm font-semibold text-stone-900' }, T[lang].appTitle),
-              companyName ? React.createElement('div', { className: 'text-xs text-stone-500' }, T[lang].company + ': ' + companyName) : null
-            )
+            React.createElement('img', {
+              src: LOGO_URL,
+              alt: 'ENERGO-PRO Georgia',
+              className: 'h-10 w-auto rounded'
+            }),
+            companyName ? React.createElement('div', { className: 'hidden sm:block pl-3 border-l border-stone-200' },
+              React.createElement('div', { className: 'text-[11px] text-stone-400 uppercase tracking-wider font-medium' }, T[lang].company),
+              React.createElement('div', { className: 'text-sm font-medium text-stone-900' }, companyName)
+            ) : null
           ),
-          React.createElement(LangSwitch, { lang, setLang })
+          React.createElement('div', { className: 'flex items-center gap-2' },
+            onShowInstructions ? React.createElement('button', {
+              onClick: onShowInstructions,
+              className: 'hidden sm:flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-stone-600 hover:text-stone-900 hover:bg-stone-100 rounded-md transition'
+            },
+              React.createElement('span', null, '?'),
+              React.createElement('span', null, T[lang].modalShowAgain)
+            ) : null,
+            React.createElement(LangSwitch, { lang, setLang })
+          )
         )
       );
     }
 
-    // ----------- LOGIN SCREEN -----------
-    function LoginScreen({ lang, setLang, onLogin }) {
-      const [id, setId] = useState('');
+    // ----------- INSTRUCTIONS MODAL -----------
+    function InstructionsModal({ lang, onClose }) {
+      const sections = T[lang].modalSections;
+      const features = [
+        { icon: '①', title: T[lang].modalHow1Title, text: T[lang].modalHow1 },
+        { icon: '⚡', title: T[lang].modalHow2Title, text: T[lang].modalHow2 },
+        { icon: 'ℹ', title: T[lang].modalHow3Title, text: T[lang].modalHow3 },
+        { icon: '◐', title: T[lang].modalHow4Title, text: T[lang].modalHow4 },
+        { icon: '💾', title: T[lang].modalHow5Title, text: T[lang].modalHow5 },
+        { icon: '📄', title: T[lang].modalHow6Title, text: T[lang].modalHow6 }
+      ];
+      return React.createElement('div', {
+        className: 'fixed inset-0 bg-black/50 flex items-center justify-center px-4 py-6 z-50 overflow-y-auto fade-in'
+      },
+        React.createElement('div', {
+          className: 'bg-white rounded-2xl max-w-3xl w-full my-auto shadow-2xl overflow-hidden',
+          onClick: e => e.stopPropagation()
+        },
+          // Modal header with logo
+          React.createElement('div', {
+            className: 'flex items-center justify-between px-7 py-5 border-b border-stone-100',
+            style: { background: 'linear-gradient(135deg, #0E5BA8, #1976D2)' }
+          },
+            React.createElement('img', {
+              src: LOGO_URL,
+              alt: 'ENERGO-PRO Georgia',
+              className: 'h-12 w-auto rounded'
+            }),
+            React.createElement('button', {
+              onClick: onClose,
+              className: 'w-9 h-9 rounded-full bg-white/20 hover:bg-white/30 text-white flex items-center justify-center transition text-lg',
+              'aria-label': 'Close'
+            }, '✕')
+          ),
+          // Body
+          React.createElement('div', { className: 'p-7 max-h-[calc(100vh-200px)] overflow-y-auto scrollbar-thin' },
+            // Title
+            React.createElement('h2', { className: 'text-2xl font-semibold text-stone-900 mb-4 flex items-center gap-2' },
+              React.createElement('span', { style: { fontSize: '24px' } }, '🌱'),
+              T[lang].modalTitle
+            ),
+            // Intro
+            React.createElement('p', { className: 'text-[15px] text-stone-700 leading-relaxed mb-3' }, T[lang].modalIntro),
+            React.createElement('p', { className: 'text-[15px] text-stone-700 leading-relaxed mb-5' }, T[lang].modalIntro2),
+            // Sections list
+            React.createElement('div', { className: 'bg-blue-50 border border-blue-100 rounded-xl p-4 mb-6' },
+              React.createElement('p', { className: 'text-sm font-medium text-blue-900 mb-2' }, T[lang].modalSectionsTitle),
+              React.createElement('div', { className: 'flex flex-wrap gap-2' },
+                sections.map((s, i) => React.createElement('span', {
+                  key: i,
+                  className: 'px-3 py-1 bg-white border border-blue-200 text-blue-800 rounded-full text-[13px] font-medium'
+                }, s))
+              )
+            ),
+            // How to fill
+            React.createElement('h3', { className: 'text-lg font-semibold text-stone-900 mb-4 flex items-center gap-2' },
+              React.createElement('span', { style: { fontSize: '20px' } }, '📝'),
+              T[lang].modalHowTitle
+            ),
+            React.createElement('div', { className: 'space-y-3 mb-6' },
+              features.map((f, i) => React.createElement('div', {
+                key: i,
+                className: 'flex gap-3 items-start p-4 bg-stone-50 rounded-xl border border-stone-100'
+              },
+                React.createElement('div', {
+                  className: 'flex-shrink-0 w-9 h-9 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-base font-semibold'
+                }, f.icon),
+                React.createElement('div', { className: 'flex-1' },
+                  React.createElement('p', { className: 'font-semibold text-stone-900 text-[14px] mb-0.5' }, f.title),
+                  React.createElement('p', { className: 'text-[14px] text-stone-600 leading-relaxed' }, f.text)
+                )
+              ))
+            ),
+            // Important
+            React.createElement('div', { className: 'bg-amber-50 border border-amber-200 rounded-xl p-4 mb-6 flex gap-3 items-start' },
+              React.createElement('div', { className: 'text-amber-700 text-xl' }, '⚠'),
+              React.createElement('div', null,
+                React.createElement('p', { className: 'font-semibold text-amber-900 text-[14px] mb-0.5' }, T[lang].modalImportantTitle),
+                React.createElement('p', { className: 'text-[14px] text-amber-800 leading-relaxed' }, T[lang].modalImportant)
+              )
+            ),
+            // Support
+            React.createElement('div', { className: 'bg-stone-50 border border-stone-200 rounded-xl p-5' },
+              React.createElement('p', { className: 'font-semibold text-stone-900 mb-2 flex items-center gap-2' },
+                React.createElement('span', null, '📞'),
+                T[lang].modalSupportTitle
+              ),
+              React.createElement('p', { className: 'text-[14px] text-stone-600 mb-3' }, T[lang].modalSupport),
+              React.createElement('div', { className: 'space-y-1.5 text-[14px]' },
+                React.createElement('p', { className: 'font-medium text-stone-900' }, T[lang].modalSupportName),
+                React.createElement('p', { className: 'text-stone-600' },
+                  React.createElement('span', { className: 'mr-2' }, '✉'),
+                  React.createElement('a', {
+                    href: 'mailto:' + T[lang].modalSupportEmail,
+                    className: 'text-blue-700 hover:underline'
+                  }, T[lang].modalSupportEmail)
+                ),
+                React.createElement('p', { className: 'text-stone-600' },
+                  React.createElement('span', { className: 'mr-2' }, '☎'),
+                  React.createElement('a', {
+                    href: 'tel:+995' + T[lang].modalSupportPhone.replace(/\s/g, ''),
+                    className: 'text-blue-700 hover:underline'
+                  }, T[lang].modalSupportPhone)
+                )
+              )
+            )
+          ),
+          // Footer
+          React.createElement('div', { className: 'px-7 py-4 border-t border-stone-100 bg-stone-50' },
+            React.createElement('button', {
+              onClick: onClose,
+              className: 'w-full h-12 text-white text-[15px] font-medium rounded-lg transition shadow-sm hover:shadow',
+              style: { background: 'linear-gradient(135deg, #0E5BA8, #1976D2)' }
+            }, T[lang].modalStart + ' →')
+          )
+        )
+      );
+    }
+
+    // ----------- COMBINED LOGIN + INFO SCREEN -----------
+    function StartScreen({ lang, setLang, onLogin, onShowInstructions, prefill }) {
+      const [id, setId] = useState(prefill?.id || '');
+      const [name, setName] = useState(prefill?.name || '');
+      const [contact, setContact] = useState(prefill?.contact || '');
       const [error, setError] = useState('');
       const [loading, setLoading] = useState(false);
 
       const submit = async () => {
-        const trimmed = id.trim();
-        if (!trimmed) { setError(T[lang].idRequired); return; }
+        const trimmedId = id.trim();
+        const trimmedName = name.trim();
+        const trimmedContact = contact.trim();
+        if (!trimmedId) { setError(T[lang].idRequired); return; }
+        if (!trimmedName || !trimmedContact) { setError(T[lang].fillRequired); return; }
         setError(''); setLoading(true);
         try {
-          await onLogin(trimmed);
+          await onLogin(trimmedId, trimmedName, trimmedContact);
         } catch (e) {
           setError(T[lang].connectError);
         } finally {
@@ -572,72 +796,22 @@
       };
 
       return React.createElement('div', { className: 'min-h-screen flex flex-col' },
-        React.createElement(Header, { lang, setLang }),
+        React.createElement(Header, { lang, setLang, onShowInstructions }),
         React.createElement('div', { className: 'flex-1 flex items-center justify-center px-4 py-12' },
           React.createElement('div', { className: 'w-full max-w-md fade-in' },
             React.createElement('div', { className: 'text-center mb-8' },
-              React.createElement('div', {
-                className: 'w-16 h-16 rounded-2xl mx-auto mb-5 flex items-center justify-center text-white text-xl font-semibold shadow-lg',
-                style: { background: 'linear-gradient(135deg, #1F4D3C, #0F6E56)' }
-              }, 'ESG'),
               React.createElement('h1', { className: 'text-2xl font-semibold text-stone-900 mb-2' }, T[lang].welcome),
               React.createElement('p', { className: 'text-sm text-stone-500 leading-relaxed' }, T[lang].welcomeSub)
             ),
-            React.createElement('div', { className: 'bg-white border border-stone-200 rounded-2xl p-7 shadow-sm' },
-              React.createElement('label', { className: 'block text-xs font-medium text-stone-600 mb-2' }, T[lang].idLabel),
-              React.createElement('input', {
-                type: 'text',
-                value: id,
-                onChange: e => setId(e.target.value),
-                onKeyDown: e => e.key === 'Enter' && submit(),
-                placeholder: T[lang].idPlaceholder,
-                className: 'w-full h-11 px-3.5 text-sm bg-stone-50 border border-stone-200 rounded-lg focus:outline-none focus:bg-white focus:border-emerald-700 transition mb-4'
-              }),
-              error ? React.createElement('div', { className: 'text-xs text-rose-600 mb-3' }, error) : null,
-              React.createElement('button', {
-                onClick: submit,
-                disabled: loading,
-                className: 'w-full h-11 bg-stone-900 hover:bg-stone-800 text-white text-sm font-medium rounded-lg transition disabled:opacity-50'
-              }, loading ? T[lang].loading : (T[lang].enter + ' →'))
-            )
-          )
-        )
-      );
-    }
-
-    // ----------- COMPANY INFO SCREEN -----------
-    function CompanyInfoScreen({ lang, setLang, companyId, onSubmit }) {
-      const [name, setName] = useState('');
-      const [contact, setContact] = useState('');
-      const [error, setError] = useState('');
-      const [saving, setSaving] = useState(false);
-
-      const submit = async () => {
-        if (!name.trim() || !contact.trim()) { setError(T[lang].fillRequired); return; }
-        setError(''); setSaving(true);
-        try {
-          await onSubmit(name.trim(), contact.trim());
-        } catch (e) {
-          setError(T[lang].connectError);
-        } finally {
-          setSaving(false);
-        }
-      };
-
-      return React.createElement('div', { className: 'min-h-screen flex flex-col' },
-        React.createElement(Header, { lang, setLang }),
-        React.createElement('div', { className: 'flex-1 flex items-center justify-center px-4 py-12' },
-          React.createElement('div', { className: 'w-full max-w-lg fade-in' },
-            React.createElement('div', { className: 'mb-6' },
-              React.createElement('h1', { className: 'text-2xl font-semibold text-stone-900 mb-1' }, T[lang].companyInfo),
-              React.createElement('p', { className: 'text-sm text-stone-500' }, T[lang].companyInfoSub)
-            ),
             React.createElement('div', { className: 'bg-white border border-stone-200 rounded-2xl p-7 shadow-sm space-y-4' },
               React.createElement('div', null,
-                React.createElement('label', { className: 'block text-xs font-medium text-stone-600 mb-2' }, T[lang].idLabel),
+                React.createElement('label', { className: 'block text-xs font-medium text-stone-600 mb-2' },
+                  T[lang].idLabel, React.createElement('span', { className: 'text-rose-500 ml-1' }, '*')
+                ),
                 React.createElement('input', {
-                  type: 'text', value: companyId, disabled: true,
-                  className: 'w-full h-11 px-3.5 text-sm bg-stone-100 border border-stone-200 rounded-lg text-stone-500'
+                  type: 'text', value: id, onChange: e => setId(e.target.value),
+                  placeholder: T[lang].idPlaceholder,
+                  className: 'w-full h-11 px-3.5 text-sm bg-stone-50 border border-stone-200 rounded-lg focus:outline-none focus:bg-white focus:border-blue-700 transition'
                 })
               ),
               React.createElement('div', null,
@@ -647,7 +821,7 @@
                 React.createElement('input', {
                   type: 'text', value: name, onChange: e => setName(e.target.value),
                   placeholder: T[lang].companyNamePh,
-                  className: 'w-full h-11 px-3.5 text-sm bg-stone-50 border border-stone-200 rounded-lg focus:outline-none focus:bg-white focus:border-emerald-700 transition'
+                  className: 'w-full h-11 px-3.5 text-sm bg-stone-50 border border-stone-200 rounded-lg focus:outline-none focus:bg-white focus:border-blue-700 transition'
                 })
               ),
               React.createElement('div', null,
@@ -657,15 +831,20 @@
                 React.createElement('input', {
                   type: 'text', value: contact, onChange: e => setContact(e.target.value),
                   placeholder: T[lang].contactPh,
-                  className: 'w-full h-11 px-3.5 text-sm bg-stone-50 border border-stone-200 rounded-lg focus:outline-none focus:bg-white focus:border-emerald-700 transition'
+                  className: 'w-full h-11 px-3.5 text-sm bg-stone-50 border border-stone-200 rounded-lg focus:outline-none focus:bg-white focus:border-blue-700 transition'
                 })
               ),
-              error ? React.createElement('div', { className: 'text-xs text-rose-600' }, error) : null,
+              error ? React.createElement('div', { className: 'text-xs text-rose-600 px-1' }, error) : null,
               React.createElement('button', {
-                onClick: submit, disabled: saving,
-                className: 'w-full h-11 bg-stone-900 hover:bg-stone-800 text-white text-sm font-medium rounded-lg transition disabled:opacity-50'
-              }, saving ? T[lang].saving : (T[lang].continue + ' →'))
-            )
+                onClick: submit, disabled: loading,
+                className: 'w-full h-12 text-white text-[14px] font-medium rounded-lg transition shadow-sm hover:shadow disabled:opacity-50',
+                style: { background: 'linear-gradient(135deg, #0E5BA8, #1976D2)' }
+              }, loading ? T[lang].loading : (T[lang].enter + ' →'))
+            ),
+            React.createElement('button', {
+              onClick: onShowInstructions,
+              className: 'mt-4 w-full text-xs text-stone-500 hover:text-stone-700 transition py-2'
+            }, '? ' + T[lang].modalShowAgain)
           )
         )
       );
@@ -741,7 +920,7 @@
     }
 
     // ----------- WIZARD SCREEN -----------
-    function WizardScreen({ lang, setLang, companyId, companyName, initialAnswers, onSave, onSubmit }) {
+    function WizardScreen({ lang, setLang, companyId, companyName, contact, initialAnswers, onSave, onSubmit, onAnswersUpdate, onShowInstructions }) {
       const [currentSection, setCurrentSection] = useState(0);
       const [answers, setAnswers] = useState(initialAnswers || {});
       const [partialTexts, setPartialTexts] = useState(() => {
@@ -871,6 +1050,11 @@
         }
       };
 
+      // Sync answers to parent App for PDF generation
+      useEffect(() => {
+        if (onAnswersUpdate) onAnswersUpdate(answers);
+      }, [answers]);
+
       // Validation: all questions in current section answered (partial text is optional)
       const validateSection = () => {
         for (const q of section.questions) {
@@ -922,7 +1106,7 @@
       const doSubmit = async () => {
         setSubmitting(true);
         try {
-          await onSubmit();
+          await onSubmit(answers);
         } catch (e) {
           setSubmitting(false);
         }
@@ -935,7 +1119,7 @@
       const numberedQs = sectionQuestions.map((q, i) => ({ q, num: i + 1 }));
 
       return React.createElement('div', { className: 'min-h-screen flex flex-col' },
-        React.createElement(Header, { lang, setLang, companyName }),
+        React.createElement(Header, { lang, setLang, companyName, onShowInstructions }),
         React.createElement('div', { className: 'flex-1 max-w-6xl w-full mx-auto px-4 lg:px-6 py-6' },
           React.createElement('div', { className: 'grid grid-cols-1 lg:grid-cols-[260px_1fr] gap-6' },
             // SIDEBAR
@@ -970,7 +1154,7 @@
                         className: `w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-medium flex-shrink-0 ${
                           isActive ? 'text-white' : sectionAnswered ? 'bg-emerald-100 text-emerald-700' : 'bg-stone-100 text-stone-500'
                         }`,
-                        style: isActive ? { background: 'linear-gradient(135deg, #1F4D3C, #0F6E56)' } : {}
+                        style: isActive ? { background: 'linear-gradient(135deg, #0E5BA8, #1976D2)' } : {}
                       }, sectionAnswered && !isActive ? '✓' : (i + 1)),
                       React.createElement('span', {
                         className: `text-[13px] ${isActive ? 'text-stone-900 font-medium' : sectionAnswered ? 'text-stone-700' : 'text-stone-500'}`
@@ -1026,12 +1210,27 @@
               ),
               // Footer
               React.createElement('div', {
-                className: 'flex items-center justify-between gap-3 mt-6 pt-5 border-t border-stone-200'
+                className: 'flex flex-wrap items-center justify-between gap-3 mt-6 pt-5 border-t border-stone-200'
               },
-                React.createElement('button', {
-                  onClick: () => onSave(),
-                  className: 'h-10 px-4 text-sm text-stone-600 hover:text-stone-900 hover:bg-stone-100 rounded-lg transition'
-                }, T[lang].saveExit),
+                React.createElement('div', { className: 'flex gap-2' },
+                  React.createElement('button', {
+                    onClick: () => onSave(),
+                    className: 'h-10 px-4 text-sm text-stone-600 hover:text-stone-900 hover:bg-stone-100 rounded-lg transition'
+                  }, T[lang].saveExit),
+                  React.createElement('button', {
+                    onClick: async () => {
+                      if (!validateAll()) return;
+                      try {
+                        await generatePDF(lang, { id: companyId, name: companyName, contact }, answers);
+                      } catch (e) {
+                        console.error('PDF failed', e);
+                      }
+                    },
+                    disabled: !validateAll(),
+                    title: !validateAll() ? T[lang].pdfNeedsAll : '',
+                    className: 'h-10 px-4 text-sm text-stone-600 hover:text-stone-900 hover:bg-stone-100 rounded-lg transition disabled:opacity-40 disabled:cursor-not-allowed'
+                  }, '📄 ' + T[lang].downloadPdf)
+                ),
                 React.createElement('div', { className: 'flex gap-2' },
                   React.createElement('button', {
                     onClick: goBack,
@@ -1042,7 +1241,7 @@
                     ? React.createElement('button', {
                         onClick: trySubmit,
                         className: 'h-10 px-5 text-sm font-medium text-white rounded-lg transition shadow-sm hover:shadow',
-                        style: { background: 'linear-gradient(135deg, #1F4D3C, #0F6E56)' }
+                        style: { background: 'linear-gradient(135deg, #0E5BA8, #1976D2)' }
                       }, T[lang].submit)
                     : React.createElement('button', {
                         onClick: goNext,
@@ -1075,7 +1274,7 @@
                 onClick: doSubmit,
                 disabled: submitting,
                 className: 'flex-1 h-11 text-sm font-medium text-white rounded-lg transition disabled:opacity-50',
-                style: { background: 'linear-gradient(135deg, #1F4D3C, #0F6E56)' }
+                style: { background: 'linear-gradient(135deg, #0E5BA8, #1976D2)' }
               }, submitting ? T[lang].loading : T[lang].confirmSubmit)
             )
           )
@@ -1083,23 +1282,175 @@
       );
     }
 
+    // ----------- PDF GENERATION -----------
+    async function generatePDF(lang, company, answers) {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({ unit: 'mm', format: 'a4' });
+
+      // Build HTML container off-screen for html2canvas (handles Georgian fonts)
+      const container = document.createElement('div');
+      container.style.position = 'fixed';
+      container.style.left = '-10000px';
+      container.style.top = '0';
+      container.style.width = '794px'; // A4 width at 96 DPI
+      container.style.padding = '40px 50px';
+      container.style.background = 'white';
+      container.style.fontFamily = "'Noto Sans Georgian', 'Inter', sans-serif";
+      container.style.color = '#1c1917';
+
+      const dateStr = new Date().toLocaleDateString(lang === 'ka' ? 'ka-GE' : 'en-US', {
+        year: 'numeric', month: 'long', day: 'numeric'
+      });
+
+      let html = `
+        <div style="border-bottom: 3px solid #0E5BA8; padding-bottom: 20px; margin-bottom: 24px; display: flex; justify-content: space-between; align-items: flex-start;">
+          <div>
+            <img src="${LOGO_URL}" style="height: 50px; width: auto; margin-bottom: 12px;" />
+            <h1 style="font-size: 22px; font-weight: 600; margin: 0; color: #1c1917;">${T[lang].pdfTitle}</h1>
+          </div>
+          <div style="text-align: right; font-size: 11px; color: #78716c;">
+            <div style="font-weight: 500; margin-bottom: 4px;">${T[lang].pdfDate}</div>
+            <div style="font-size: 13px; color: #1c1917; font-weight: 500;">${dateStr}</div>
+          </div>
+        </div>
+
+        <div style="background: #F5F8FC; border: 1px solid #E0E7F0; border-radius: 10px; padding: 16px 20px; margin-bottom: 28px;">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px 24px; font-size: 13px;">
+            <div>
+              <div style="color: #78716c; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 500; margin-bottom: 3px;">${T[lang].pdfCompany}</div>
+              <div style="font-weight: 500;">${escapeHtml(company.name || '')}</div>
+            </div>
+            <div>
+              <div style="color: #78716c; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 500; margin-bottom: 3px;">${T[lang].pdfId}</div>
+              <div style="font-weight: 500;">${escapeHtml(company.id || '')}</div>
+            </div>
+            <div style="grid-column: 1 / -1;">
+              <div style="color: #78716c; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 500; margin-bottom: 3px;">${T[lang].pdfContact}</div>
+              <div style="font-weight: 500;">${escapeHtml(company.contact || '')}</div>
+            </div>
+          </div>
+        </div>
+      `;
+
+      // Sections
+      SECTIONS.forEach((section, sIdx) => {
+        const sectionTitle = T[lang].sections[sIdx];
+        html += `<div style="margin-bottom: 28px; page-break-inside: avoid;">
+          <h2 style="font-size: 16px; font-weight: 600; color: #0E5BA8; margin: 0 0 12px; padding-bottom: 8px; border-bottom: 1px solid #E0E7F0;">
+            ${sIdx + 1}. ${escapeHtml(sectionTitle)}
+          </h2>`;
+
+        section.questions.forEach((q, qIdx) => {
+          const a = answers[q.id];
+          const ansVal = a ? a.answer : '';
+          const partial = a && a.partial_text ? a.partial_text : '';
+          const ansLabel = ansVal === 'yes' ? `✓ ${T[lang].yes}` : ansVal === 'no' ? `✗ ${T[lang].no}` : ansVal === 'partial' ? `◐ ${T[lang].partial}` : '—';
+          const ansColor = ansVal === 'yes' ? '#059669' : ansVal === 'no' ? '#dc2626' : ansVal === 'partial' ? '#d97706' : '#78716c';
+          const ansBg = ansVal === 'yes' ? '#ECFDF5' : ansVal === 'no' ? '#FEF2F2' : ansVal === 'partial' ? '#FFFBEB' : '#F5F5F4';
+
+          html += `<div style="margin-bottom: 10px; padding: 10px 14px; border: 1px solid #E7E5E4; border-radius: 8px; background: white;">
+            <div style="display: flex; gap: 12px; align-items: flex-start;">
+              <div style="font-size: 11px; color: #78716c; font-weight: 500; min-width: 28px;">${qIdx + 1}.</div>
+              <div style="flex: 1; font-size: 12px; line-height: 1.5; color: #1c1917;">${escapeHtml(q.text[lang])}</div>
+              <div style="font-size: 11px; font-weight: 600; color: ${ansColor}; background: ${ansBg}; padding: 4px 10px; border-radius: 6px; white-space: nowrap;">${ansLabel}</div>
+            </div>
+            ${partial ? `<div style="margin-top: 8px; margin-left: 40px; padding: 8px 12px; background: #FFFBEB; border-left: 3px solid #F59E0B; border-radius: 4px; font-size: 11px; color: #78716c; line-height: 1.5;"><span style="font-weight: 600; color: #92400e;">${T[lang].pdfNote}:</span> ${escapeHtml(partial)}</div>` : ''}
+          </div>`;
+        });
+
+        html += `</div>`;
+      });
+
+      html += `<div style="margin-top: 30px; padding-top: 16px; border-top: 1px solid #E0E7F0; text-align: center; font-size: 10px; color: #a8a29e;">
+        ENERGO-PRO Georgia • ESG Assessment • ${dateStr}
+      </div>`;
+
+      container.innerHTML = html;
+      document.body.appendChild(container);
+
+      try {
+        // Wait for fonts and image to load
+        await new Promise(r => setTimeout(r, 500));
+
+        const canvas = await html2canvas(container, {
+          scale: 2,
+          useCORS: true,
+          backgroundColor: '#ffffff',
+          logging: false
+        });
+
+        // Add to PDF, splitting into pages
+        const imgWidth = 210;
+        const pageHeight = 297;
+        const imgHeight = (canvas.height * imgWidth) / canvas.width;
+        let heightLeft = imgHeight;
+        let position = 0;
+        const imgData = canvas.toDataURL('image/jpeg', 0.92);
+
+        doc.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+
+        while (heightLeft > 0) {
+          position = heightLeft - imgHeight;
+          doc.addPage();
+          doc.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
+          heightLeft -= pageHeight;
+        }
+
+        const filename = `ESG_${(company.name || 'form').replace(/[^a-zA-Z0-9-_]/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf`;
+        doc.save(filename);
+      } finally {
+        document.body.removeChild(container);
+      }
+    }
+
+    function escapeHtml(s) {
+      if (!s) return '';
+      return String(s)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
     // ----------- LOCKED SCREEN -----------
-    function LockedScreen({ lang, setLang, submittedAt, companyName }) {
+    function LockedScreen({ lang, setLang, submittedAt, companyName, companyId, contact, answers }) {
+      const [pdfLoading, setPdfLoading] = useState(false);
       const dateStr = submittedAt ? new Date(submittedAt).toLocaleDateString(lang === 'ka' ? 'ka-GE' : 'en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : '';
+
+      const downloadPdf = async () => {
+        setPdfLoading(true);
+        try {
+          await generatePDF(lang, { id: companyId, name: companyName, contact }, answers);
+        } catch (e) {
+          console.error('PDF generation failed:', e);
+          alert(T[lang].connectError);
+        } finally {
+          setPdfLoading(false);
+        }
+      };
+
       return React.createElement('div', { className: 'min-h-screen flex flex-col' },
         React.createElement(Header, { lang, setLang, companyName }),
         React.createElement('div', { className: 'flex-1 flex items-center justify-center px-4 py-12' },
           React.createElement('div', { className: 'w-full max-w-md text-center fade-in' },
             React.createElement('div', {
               className: 'w-20 h-20 rounded-full mx-auto mb-6 flex items-center justify-center text-white text-3xl shadow-lg',
-              style: { background: 'linear-gradient(135deg, #1F4D3C, #0F6E56)' }
+              style: { background: 'linear-gradient(135deg, #0E5BA8, #1976D2)' }
             }, '✓'),
             React.createElement('h1', { className: 'text-2xl font-semibold text-stone-900 mb-3' }, T[lang].lockedTitle),
             React.createElement('p', { className: 'text-sm text-stone-500 leading-relaxed mb-6' }, T[lang].lockedMsg),
-            dateStr ? React.createElement('div', { className: 'bg-white border border-stone-200 rounded-xl p-4' },
+            dateStr ? React.createElement('div', { className: 'bg-white border border-stone-200 rounded-xl p-4 mb-4' },
               React.createElement('div', { className: 'text-[11px] text-stone-400 mb-1 font-medium uppercase tracking-wider' }, T[lang].submittedOn),
               React.createElement('div', { className: 'text-sm font-medium text-stone-900' }, dateStr)
-            ) : null
+            ) : null,
+            React.createElement('button', {
+              onClick: downloadPdf,
+              disabled: pdfLoading,
+              className: 'w-full h-12 text-white text-[14px] font-medium rounded-lg transition shadow-sm hover:shadow disabled:opacity-50',
+              style: { background: 'linear-gradient(135deg, #0E5BA8, #1976D2)' }
+            }, pdfLoading ? T[lang].pdfGenerating : ('📄 ' + T[lang].downloadPdf))
           )
         )
       );
@@ -1128,12 +1479,14 @@
     // ============================================
     function App() {
       const [lang, setLangState] = useState('ka');
-      const [screen, setScreen] = useState('login'); // login, info, wizard, locked, saved
+      const [screen, setScreen] = useState('start'); // start, wizard, locked, saved
       const [companyId, setCompanyId] = useState('');
       const [companyName, setCompanyName] = useState('');
       const [contact, setContact] = useState('');
       const [submittedAt, setSubmittedAt] = useState(null);
       const [initialAnswers, setInitialAnswers] = useState({});
+      const [latestAnswers, setLatestAnswers] = useState({});
+      const [showInstructions, setShowInstructions] = useState(true);
 
       useEffect(() => {
         document.documentElement.lang = lang;
@@ -1144,87 +1497,114 @@
         if (companyId) updateCompany(companyId, { language: l });
       };
 
-      const handleLogin = async (id) => {
+      const handleLogin = async (id, name, contactNum) => {
         if (!supabase) {
-          alert('Supabase not configured. Open the file in editor and add SUPABASE_URL and SUPABASE_ANON_KEY.');
+          alert('Supabase not configured.');
           return;
         }
         setCompanyId(id);
         const { data: company } = await loadCompany(id);
         if (!company) {
-          // New company → create + go to info screen
+          // New company → create with name & contact
           await createCompany(id, lang);
-          setScreen('info');
+          await updateCompany(id, { name, contact: contactNum });
+          setCompanyName(name);
+          setContact(contactNum);
+          setInitialAnswers({});
+          setLatestAnswers({});
+          setScreen('wizard');
           return;
         }
         // Existing
         if (company.language) setLangState(company.language);
-        setCompanyName(company.name || '');
-        setContact(company.contact || '');
         if (company.is_locked) {
+          setCompanyName(company.name || name);
+          setContact(company.contact || contactNum);
           setSubmittedAt(company.submitted_at);
+          // Load answers for PDF
+          const { data: rows } = await loadAnswers(id);
+          const map = {};
+          rows.forEach(r => {
+            map[r.question_id] = {
+              answer: r.answer, partial_text: r.partial_text, was_auto_suggested: r.was_auto_suggested
+            };
+          });
+          setLatestAnswers(map);
           setScreen('locked');
           return;
         }
-        if (!company.name || !company.contact) {
-          setScreen('info');
-          return;
-        }
-        // Load answers
+        // Update name/contact if user changed them
+        await updateCompany(id, { name, contact: contactNum });
+        setCompanyName(name);
+        setContact(contactNum);
+        // Load existing answers
         const { data: rows } = await loadAnswers(id);
         const map = {};
         rows.forEach(r => {
           map[r.question_id] = {
-            answer: r.answer,
-            partial_text: r.partial_text,
-            was_auto_suggested: r.was_auto_suggested
+            answer: r.answer, partial_text: r.partial_text, was_auto_suggested: r.was_auto_suggested
           };
         });
         setInitialAnswers(map);
-        setScreen('wizard');
-      };
-
-      const handleInfoSubmit = async (name, contactNum) => {
-        await updateCompany(companyId, { name, contact: contactNum });
-        setCompanyName(name);
-        setContact(contactNum);
-        setInitialAnswers({});
+        setLatestAnswers(map);
         setScreen('wizard');
       };
 
       const handleSave = () => setScreen('saved');
 
-      const handleSubmitFinal = async () => {
+      const handleSubmitFinal = async (currentAnswers) => {
         const { error } = await lockCompany(companyId);
         if (error) { alert(T[lang].connectError); return; }
         setSubmittedAt(new Date().toISOString());
+        if (currentAnswers) setLatestAnswers(currentAnswers);
         setScreen('locked');
       };
 
+      const handleAnswersUpdate = (newAnswers) => setLatestAnswers(newAnswers);
+
       const handleBackToLogin = () => {
-        setCompanyId(''); setCompanyName(''); setContact(''); setInitialAnswers({});
-        setScreen('login');
+        setCompanyId(''); setCompanyName(''); setContact(''); setInitialAnswers({}); setLatestAnswers({});
+        setScreen('start');
       };
 
+      let mainContent;
       switch (screen) {
-        case 'login':
-          return React.createElement(LoginScreen, { lang, setLang: setLangState, onLogin: handleLogin });
-        case 'info':
-          return React.createElement(CompanyInfoScreen, { lang, setLang: setLangState, companyId, onSubmit: handleInfoSubmit });
+        case 'start':
+          mainContent = React.createElement(StartScreen, {
+            lang, setLang: setLangState,
+            onLogin: handleLogin,
+            onShowInstructions: () => setShowInstructions(true)
+          });
+          break;
         case 'wizard':
-          return React.createElement(WizardScreen, {
-            lang, setLang, companyId, companyName,
+          mainContent = React.createElement(WizardScreen, {
+            lang, setLang, companyId, companyName, contact,
             initialAnswers,
             onSave: handleSave,
-            onSubmit: handleSubmitFinal
+            onSubmit: handleSubmitFinal,
+            onAnswersUpdate: handleAnswersUpdate,
+            onShowInstructions: () => setShowInstructions(true)
           });
+          break;
         case 'locked':
-          return React.createElement(LockedScreen, { lang, setLang, submittedAt, companyName });
+          mainContent = React.createElement(LockedScreen, {
+            lang, setLang, submittedAt, companyName, companyId, contact,
+            answers: latestAnswers
+          });
+          break;
         case 'saved':
-          return React.createElement(SavedScreen, { lang, setLang, onBack: handleBackToLogin });
+          mainContent = React.createElement(SavedScreen, { lang, setLang, onBack: handleBackToLogin });
+          break;
         default:
-          return null;
+          mainContent = null;
       }
+
+      return React.createElement(React.Fragment, null,
+        mainContent,
+        showInstructions ? React.createElement(InstructionsModal, {
+          lang, onClose: () => setShowInstructions(false)
+        }) : null
+      );
     }
 
     const root = createRoot(document.getElementById('root'));
