@@ -53,6 +53,172 @@
       en: ['Quality', 'Human Rights', 'Labour', 'Environment', 'Anti-Corruption', 'Health & Safety', 'Climate Change']
     };
 
+    // ============================================
+    // TRANSLATIONS
+    // ============================================
+    const T = {
+      ka: {
+        // Login
+        adminPanel: 'ESG Admin Panel',
+        loginPrompt: 'შესასვლელად შეიყვანეთ პაროლი',
+        password: 'პაროლი',
+        login: 'შესვლა',
+        wrongPassword: 'არასწორი პაროლი',
+        // Header
+        adminLabel: 'ADMIN PANEL',
+        esgAssessments: 'ESG შეფასებები',
+        logout: 'გასვლა',
+        // Stats
+        statTotalCompanies: 'სულ კომპანიები',
+        statSubmitted: 'შევსებული',
+        statInProgress: 'მიმდინარე',
+        statAvgScore: 'საშ. ESG ქულა',
+        // Filters
+        searchPlaceholder: 'ძებნა კომპანიის სახელით ან ID-ით...',
+        filterAll: 'ყველა',
+        filterSubmitted: 'შევსებული',
+        filterInProgress: 'მიმდინარე',
+        refresh: '↻ განახლება',
+        // Table
+        thCompany: 'კომპანია',
+        thId: 'ID',
+        thContact: 'კონტაქტი',
+        thStatus: 'სტატუსი',
+        thDate: 'შევსების თარიღი',
+        thScore: 'ESG ქულა',
+        thActions: 'მოქმედებები',
+        statusSubmitted: '✓ შევსებული',
+        statusInProgress: '◷ მიმდინარე',
+        actionView: 'ნახვა',
+        actionDelete: 'წაშლა',
+        noCompanies: 'კომპანიები ვერ მოიძებნა',
+        // Detail
+        backToList: 'კომპანიების სია',
+        downloadPdf: '📄 PDF ჩამოტვირთვა',
+        generating: '⌛ იქმნება...',
+        idLabel: 'ID',
+        contactLabel: 'კონტაქტი',
+        dateLabel: 'შევსების თარიღი',
+        statusLabel: 'სტატუსი',
+        totalScore: 'საერთო ESG ქულა',
+        yesShort: 'კი',
+        partialShort: 'ნაწილ.',
+        noShort: 'არა',
+        sectionScores: 'სექციების მიხედვით',
+        answerDistribution: 'პასუხების განაწილება',
+        fullAnswers: 'სრული პასუხები',
+        yesLabel: 'კი',
+        partialLabel: 'ნაწილობრივ',
+        noLabel: 'არა',
+        autoFilled: 'ავტო',
+        noteLabel: 'შენიშვნა',
+        // Delete confirmation
+        deleteTitle: 'კომპანიის წაშლა',
+        deleteConfirm1: 'დარწმუნებული ხართ, რომ გსურთ კომპანიის "',
+        deleteConfirm2: '" წაშლა? ყველა პასუხი სამუდამოდ წაიშლება. ეს მოქმედება არ გადადის უკან.',
+        cancel: 'გაუქმება',
+        confirmDelete: 'წაშლა',
+        deleting: 'იშლება...',
+        deleteFailed: 'წაშლა ვერ მოხერხდა: ',
+        // Loading
+        loadingData: 'იტვირთება მონაცემები...',
+        loadingItem: 'იტვირთება...',
+        companyNotFound: 'კომპანია ვერ მოიძებნა',
+        pdfFailed: 'PDF შექმნა ვერ მოხერხდა: ',
+        // PDF
+        pdfTitle: 'ESG შეფასების ანგარიში',
+        pdfSubtitle: 'Admin Report',
+        pdfTotalScore: 'საერთო ESG ქულა',
+        pdfGenerated: 'გენერ.',
+        pdfCompany: 'კომპანია',
+        pdfId: 'საიდენტიფიკაციო ნომერი',
+        pdfContact: 'კონტაქტი',
+        pdfDate: 'შევსების თარიღი',
+        pdfSectionScoresTitle: 'სექციების მიხედვით ქულები',
+        pdfFooter: 'ENERGO-PRO Georgia • ESG Admin Report'
+      },
+      en: {
+        // Login
+        adminPanel: 'ESG Admin Panel',
+        loginPrompt: 'Enter password to log in',
+        password: 'Password',
+        login: 'Log in',
+        wrongPassword: 'Incorrect password',
+        // Header
+        adminLabel: 'ADMIN PANEL',
+        esgAssessments: 'ESG Assessments',
+        logout: 'Log out',
+        // Stats
+        statTotalCompanies: 'Total companies',
+        statSubmitted: 'Submitted',
+        statInProgress: 'In progress',
+        statAvgScore: 'Avg. ESG score',
+        // Filters
+        searchPlaceholder: 'Search by company name or ID...',
+        filterAll: 'All',
+        filterSubmitted: 'Submitted',
+        filterInProgress: 'In progress',
+        refresh: '↻ Refresh',
+        // Table
+        thCompany: 'Company',
+        thId: 'ID',
+        thContact: 'Contact',
+        thStatus: 'Status',
+        thDate: 'Submission date',
+        thScore: 'ESG score',
+        thActions: 'Actions',
+        statusSubmitted: '✓ Submitted',
+        statusInProgress: '◷ In progress',
+        actionView: 'View',
+        actionDelete: 'Delete',
+        noCompanies: 'No companies found',
+        // Detail
+        backToList: 'Companies list',
+        downloadPdf: '📄 Download PDF',
+        generating: '⌛ Generating...',
+        idLabel: 'ID',
+        contactLabel: 'Contact',
+        dateLabel: 'Submission date',
+        statusLabel: 'Status',
+        totalScore: 'Overall ESG score',
+        yesShort: 'Yes',
+        partialShort: 'Partial',
+        noShort: 'No',
+        sectionScores: 'By sections',
+        answerDistribution: 'Answer distribution',
+        fullAnswers: 'Full answers',
+        yesLabel: 'Yes',
+        partialLabel: 'Partial',
+        noLabel: 'No',
+        autoFilled: 'auto',
+        noteLabel: 'Note',
+        // Delete confirmation
+        deleteTitle: 'Delete company',
+        deleteConfirm1: 'Are you sure you want to delete "',
+        deleteConfirm2: '"? All answers will be permanently deleted. This action cannot be undone.',
+        cancel: 'Cancel',
+        confirmDelete: 'Delete',
+        deleting: 'Deleting...',
+        deleteFailed: 'Delete failed: ',
+        // Loading
+        loadingData: 'Loading data...',
+        loadingItem: 'Loading...',
+        companyNotFound: 'Company not found',
+        pdfFailed: 'PDF generation failed: ',
+        // PDF
+        pdfTitle: 'ESG Assessment Report',
+        pdfSubtitle: 'Admin Report',
+        pdfTotalScore: 'Overall ESG score',
+        pdfGenerated: 'Generated',
+        pdfCompany: 'Company',
+        pdfId: 'Identification number',
+        pdfContact: 'Contact',
+        pdfDate: 'Submission date',
+        pdfSectionScoresTitle: 'Section scores',
+        pdfFooter: 'ENERGO-PRO Georgia • ESG Admin Report'
+      }
+    };
+
     const SECTION_PREFIXES = ['q_2_', 'q_3_', 'q_4_', 'q_5_', 'q_6_', 'q_7_', 'q_8_'];
 
     const QUESTIONS = {
@@ -229,7 +395,7 @@
     // ============================================
 
     // ----------- LOGIN -----------
-    function LoginScreen({ onLogin }) {
+    function LoginScreen({ onLogin, lang, setLang }) {
       const [pw, setPw] = useState('');
       const [error, setError] = useState('');
 
@@ -238,26 +404,30 @@
           sessionStorage.setItem('esg_admin_auth', '1');
           onLogin();
         } else {
-          setError('არასწორი პაროლი');
+          setError(T[lang].wrongPassword);
           setPw('');
         }
       };
 
-      return React.createElement('div', { className: 'min-h-screen flex items-center justify-center px-4' },
+      return React.createElement('div', { className: 'min-h-screen flex items-center justify-center px-4 relative' },
+        // Language switch top right
+        React.createElement('div', { className: 'absolute top-4 right-4' },
+          React.createElement(LangSwitch, { lang, setLang })
+        ),
         React.createElement('div', { className: 'w-full max-w-sm fade-in' },
           React.createElement('div', { className: 'text-center mb-8' },
             React.createElement('img', {
               src: LOGO_URL, alt: 'ENERGO-PRO',
               className: 'h-12 w-auto mx-auto mb-5 rounded'
             }),
-            React.createElement('h1', { className: 'text-xl font-semibold text-stone-900 mb-1' }, 'ESG Admin Panel'),
-            React.createElement('p', { className: 'text-xs text-stone-500' }, 'შესასვლელად შეიყვანეთ პაროლი')
+            React.createElement('h1', { className: 'text-xl font-semibold text-stone-900 mb-1' }, T[lang].adminPanel),
+            React.createElement('p', { className: 'text-xs text-stone-500' }, T[lang].loginPrompt)
           ),
           React.createElement('div', { className: 'bg-white border border-stone-200 rounded-2xl p-7 shadow-sm' },
             React.createElement('input', {
               type: 'password', value: pw, onChange: e => setPw(e.target.value),
               onKeyDown: e => e.key === 'Enter' && submit(),
-              placeholder: 'პაროლი',
+              placeholder: T[lang].password,
               autoFocus: true,
               className: 'w-full h-11 px-3.5 text-sm bg-stone-50 border border-stone-200 rounded-lg focus:outline-none focus:bg-white focus:border-blue-700 transition mb-3'
             }),
@@ -266,14 +436,30 @@
               onClick: submit,
               className: 'w-full h-11 text-white text-sm font-medium rounded-lg transition shadow-sm hover:shadow',
               style: { background: 'linear-gradient(135deg, #0E5BA8, #1976D2)' }
-            }, 'შესვლა')
+            }, T[lang].login)
           )
         )
       );
     }
 
+    // ----------- LANGUAGE SWITCH -----------
+    function LangSwitch({ lang, setLang }) {
+      return React.createElement('div', {
+        className: 'inline-flex bg-stone-100 rounded-lg p-0.5 border border-stone-200'
+      },
+        React.createElement('button', {
+          onClick: () => setLang('ka'),
+          className: `px-3 py-1.5 text-xs font-semibold rounded-md transition ${lang === 'ka' ? 'bg-white text-blue-700 shadow-sm' : 'text-stone-500 hover:text-stone-700'}`
+        }, 'ქარ'),
+        React.createElement('button', {
+          onClick: () => setLang('en'),
+          className: `px-3 py-1.5 text-xs font-semibold rounded-md transition ${lang === 'en' ? 'bg-white text-blue-700 shadow-sm' : 'text-stone-500 hover:text-stone-700'}`
+        }, 'EN')
+      );
+    }
+
     // ----------- HEADER -----------
-    function AdminHeader({ onLogout, currentView, onNavigate }) {
+    function AdminHeader({ onLogout, currentView, onNavigate, lang, setLang }) {
       return React.createElement('header', {
         className: 'bg-white border-b border-stone-200 sticky top-0 z-40 shadow-sm'
       },
@@ -285,25 +471,27 @@
               onClick: () => onNavigate('list')
             }),
             React.createElement('div', { className: 'pl-3 border-l border-stone-200' },
-              React.createElement('div', { className: 'text-[11px] text-stone-400 uppercase tracking-wider font-medium' }, 'ADMIN PANEL'),
-              React.createElement('div', { className: 'text-sm font-medium text-stone-900' }, 'ESG შეფასებები')
+              React.createElement('div', { className: 'text-[11px] text-stone-400 uppercase tracking-wider font-medium' }, T[lang].adminLabel),
+              React.createElement('div', { className: 'text-sm font-medium text-stone-900' }, T[lang].esgAssessments)
             )
           ),
-          React.createElement('button', {
-            onClick: onLogout,
-            className: 'text-xs text-stone-500 hover:text-stone-900 hover:bg-stone-100 px-3 py-1.5 rounded-md transition'
-          }, 'გასვლა')
+          React.createElement('div', { className: 'flex items-center gap-3' },
+            React.createElement(LangSwitch, { lang, setLang }),
+            React.createElement('button', {
+              onClick: onLogout,
+              className: 'text-xs text-stone-500 hover:text-stone-900 hover:bg-stone-100 px-3 py-1.5 rounded-md transition'
+            }, T[lang].logout)
+          )
         )
       );
     }
 
     // ----------- DASHBOARD STATS -----------
-    function DashboardStats({ companies, allAnswersByCompany }) {
+    function DashboardStats({ companies, allAnswersByCompany, lang }) {
       const total = companies.length;
       const submitted = companies.filter(c => c.is_locked).length;
       const inProgress = total - submitted;
 
-      // Average score across submitted companies
       let avgScore = 0;
       const submittedCompanies = companies.filter(c => c.is_locked);
       if (submittedCompanies.length > 0) {
@@ -315,10 +503,10 @@
       }
 
       const cards = [
-        { label: 'სულ კომპანიები', value: total, color: 'blue' },
-        { label: 'შევსებული', value: submitted, color: 'emerald' },
-        { label: 'მიმდინარე', value: inProgress, color: 'amber' },
-        { label: 'საშ. ESG ქულა', value: avgScore + '%', color: 'indigo' }
+        { label: T[lang].statTotalCompanies, value: total, color: 'blue' },
+        { label: T[lang].statSubmitted, value: submitted, color: 'emerald' },
+        { label: T[lang].statInProgress, value: inProgress, color: 'amber' },
+        { label: T[lang].statAvgScore, value: avgScore + '%', color: 'indigo' }
       ];
 
       const colorMap = {
@@ -339,7 +527,7 @@
       );
     }
     // ----------- COMPANY LIST -----------
-    function CompanyListScreen({ companies, allAnswersByCompany, onSelectCompany, onRefresh }) {
+    function CompanyListScreen({ companies, allAnswersByCompany, onSelectCompany, onRefresh, lang }) {
       const [search, setSearch] = useState('');
       const [filter, setFilter] = useState('all'); // all, submitted, in_progress
       const [confirmDelete, setConfirmDelete] = useState(null); // { id, name }
@@ -361,7 +549,7 @@
 
       const formatDate = (d) => {
         if (!d) return '—';
-        return new Date(d).toLocaleDateString('ka-GE', { year: 'numeric', month: 'short', day: 'numeric' });
+        return new Date(d).toLocaleDateString(lang === 'ka' ? 'ka-GE' : 'en-US', { year: 'numeric', month: 'short', day: 'numeric' });
       };
 
       const handleDelete = async () => {
@@ -370,7 +558,7 @@
         const result = await deleteCompany(confirmDelete.id);
         setDeleting(false);
         if (result.error) {
-          alert('წაშლა ვერ მოხერხდა: ' + (result.error.message || result.error.code || 'უცნობი შეცდომა'));
+          alert(T[lang].deleteFailed + (result.error.message || result.error.code || 'unknown error'));
         } else {
           setConfirmDelete(null);
           onRefresh();
@@ -378,13 +566,13 @@
       };
 
       return React.createElement('div', { className: 'fade-in' },
-        React.createElement(DashboardStats, { companies, allAnswersByCompany }),
+        React.createElement(DashboardStats, { companies, allAnswersByCompany, lang }),
 
         // Filters
         React.createElement('div', { className: 'flex flex-wrap items-center gap-3 mb-4' },
           React.createElement('input', {
             type: 'text', value: search, onChange: e => setSearch(e.target.value),
-            placeholder: 'ძებნა კომპანიის სახელით ან ID-ით...',
+            placeholder: T[lang].searchPlaceholder,
             className: 'flex-1 min-w-[200px] h-10 px-3.5 text-sm bg-white border border-stone-200 rounded-lg focus:outline-none focus:border-blue-700 transition'
           }),
           React.createElement('div', { className: 'inline-flex bg-white rounded-lg p-0.5 border border-stone-200' },
@@ -392,12 +580,12 @@
               key: f,
               onClick: () => setFilter(f),
               className: `px-3 py-1.5 text-xs font-medium rounded-md transition ${filter === f ? 'bg-blue-700 text-white' : 'text-stone-600 hover:text-stone-900'}`
-            }, f === 'all' ? 'ყველა' : f === 'submitted' ? 'შევსებული' : 'მიმდინარე'))
+            }, f === 'all' ? T[lang].filterAll : f === 'submitted' ? T[lang].filterSubmitted : T[lang].filterInProgress))
           ),
           React.createElement('button', {
             onClick: onRefresh,
             className: 'h-10 px-3 text-xs font-medium text-stone-600 hover:text-stone-900 hover:bg-stone-100 rounded-lg transition'
-          }, '↻ განახლება')
+          }, T[lang].refresh)
         ),
 
         // Table
@@ -406,18 +594,18 @@
             React.createElement('table', { className: 'w-full text-sm' },
               React.createElement('thead', { className: 'bg-stone-50 border-b border-stone-200' },
                 React.createElement('tr', null,
-                  React.createElement('th', { className: 'text-left px-4 py-3 font-medium text-stone-600 text-xs uppercase tracking-wider' }, 'კომპანია'),
-                  React.createElement('th', { className: 'text-left px-4 py-3 font-medium text-stone-600 text-xs uppercase tracking-wider' }, 'ID'),
-                  React.createElement('th', { className: 'text-left px-4 py-3 font-medium text-stone-600 text-xs uppercase tracking-wider' }, 'კონტაქტი'),
-                  React.createElement('th', { className: 'text-left px-4 py-3 font-medium text-stone-600 text-xs uppercase tracking-wider' }, 'სტატუსი'),
-                  React.createElement('th', { className: 'text-left px-4 py-3 font-medium text-stone-600 text-xs uppercase tracking-wider' }, 'შევსების თარიღი'),
-                  React.createElement('th', { className: 'text-left px-4 py-3 font-medium text-stone-600 text-xs uppercase tracking-wider' }, 'ESG ქულა'),
-                  React.createElement('th', { className: 'text-right px-4 py-3 font-medium text-stone-600 text-xs uppercase tracking-wider' }, 'მოქმედებები')
+                  React.createElement('th', { className: 'text-left px-4 py-3 font-medium text-stone-600 text-xs uppercase tracking-wider' }, T[lang].thCompany),
+                  React.createElement('th', { className: 'text-left px-4 py-3 font-medium text-stone-600 text-xs uppercase tracking-wider' }, T[lang].thId),
+                  React.createElement('th', { className: 'text-left px-4 py-3 font-medium text-stone-600 text-xs uppercase tracking-wider' }, T[lang].thContact),
+                  React.createElement('th', { className: 'text-left px-4 py-3 font-medium text-stone-600 text-xs uppercase tracking-wider' }, T[lang].thStatus),
+                  React.createElement('th', { className: 'text-left px-4 py-3 font-medium text-stone-600 text-xs uppercase tracking-wider' }, T[lang].thDate),
+                  React.createElement('th', { className: 'text-left px-4 py-3 font-medium text-stone-600 text-xs uppercase tracking-wider' }, T[lang].thScore),
+                  React.createElement('th', { className: 'text-right px-4 py-3 font-medium text-stone-600 text-xs uppercase tracking-wider' }, T[lang].thActions)
                 )
               ),
               React.createElement('tbody', null,
                 filtered.length === 0 ? React.createElement('tr', null,
-                  React.createElement('td', { colSpan: 7, className: 'px-4 py-12 text-center text-stone-400' }, 'კომპანიები ვერ მოიძებნა')
+                  React.createElement('td', { colSpan: 7, className: 'px-4 py-12 text-center text-stone-400' }, T[lang].noCompanies)
                 ) : filtered.map(c => {
                   const answers = allAnswersByCompany[c.id] || [];
                   const stats = calcStats(answers);
@@ -445,8 +633,8 @@
                       onClick: () => onSelectCompany(c.id)
                     },
                       c.is_locked
-                        ? React.createElement('span', { className: 'inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium bg-emerald-50 text-emerald-700 border border-emerald-200' }, '✓ შევსებული')
-                        : React.createElement('span', { className: 'inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium bg-amber-50 text-amber-700 border border-amber-200' }, '◷ მიმდინარე')
+                        ? React.createElement('span', { className: 'inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium bg-emerald-50 text-emerald-700 border border-emerald-200' }, T[lang].statusSubmitted)
+                        : React.createElement('span', { className: 'inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium bg-amber-50 text-amber-700 border border-amber-200' }, T[lang].statusInProgress)
                     ),
                     React.createElement('td', { 
                       className: 'px-4 py-3 text-stone-600 text-xs cursor-pointer',
@@ -464,11 +652,11 @@
                       React.createElement('button', {
                         onClick: e => { e.stopPropagation(); onSelectCompany(c.id); },
                         className: 'text-blue-700 hover:text-blue-900 text-xs font-medium mr-3'
-                      }, 'ნახვა'),
+                      }, T[lang].actionView),
                       React.createElement('button', {
                         onClick: e => { e.stopPropagation(); setConfirmDelete({ id: c.id, name: c.name }); },
                         className: 'text-rose-600 hover:text-rose-800 text-xs font-medium'
-                      }, 'წაშლა')
+                      }, T[lang].actionDelete)
                     )
                   );
                 })
@@ -491,11 +679,11 @@
                 className: 'w-12 h-12 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center text-2xl flex-shrink-0'
               }, '⚠'),
               React.createElement('div', null,
-                React.createElement('h3', { className: 'text-base font-semibold text-stone-900 mb-1' }, 'კომპანიის წაშლა'),
+                React.createElement('h3', { className: 'text-base font-semibold text-stone-900 mb-1' }, T[lang].deleteTitle),
                 React.createElement('p', { className: 'text-sm text-stone-600' },
-                  'დარწმუნებული ხართ, რომ გსურთ კომპანიის "',
+                  T[lang].deleteConfirm1,
                   React.createElement('span', { className: 'font-semibold text-stone-900' }, confirmDelete.name || confirmDelete.id),
-                  '" წაშლა? ყველა პასუხი სამუდამოდ წაიშლება. ეს მოქმედება არ გადადის უკან.'
+                  T[lang].deleteConfirm2
                 )
               )
             ),
@@ -504,12 +692,12 @@
                 onClick: () => setConfirmDelete(null),
                 disabled: deleting,
                 className: 'h-10 px-4 text-sm text-stone-700 border border-stone-200 hover:bg-stone-50 rounded-lg transition disabled:opacity-50'
-              }, 'გაუქმება'),
+              }, T[lang].cancel),
               React.createElement('button', {
                 onClick: handleDelete,
                 disabled: deleting,
                 className: 'h-10 px-4 text-sm font-medium bg-rose-600 hover:bg-rose-700 text-white rounded-lg transition disabled:opacity-50'
-              }, deleting ? 'იშლება...' : 'წაშლა')
+              }, deleting ? T[lang].deleting : T[lang].confirmDelete)
             )
           )
         ) : null
@@ -543,7 +731,7 @@
       );
     }
     // ----------- COMPANY DETAIL SCREEN -----------
-    function CompanyDetailScreen({ companyId, onBack }) {
+    function CompanyDetailScreen({ companyId, onBack, lang }) {
       const [company, setCompany] = useState(null);
       const [answers, setAnswers] = useState([]);
       const [loading, setLoading] = useState(true);
@@ -560,12 +748,12 @@
         })();
       }, [companyId]);
 
-      if (loading) return React.createElement('div', { className: 'text-center py-20 text-stone-400' }, 'იტვირთება...');
-      if (!company) return React.createElement('div', { className: 'text-center py-20 text-stone-400' }, 'კომპანია ვერ მოიძებნა');
+      if (loading) return React.createElement('div', { className: 'text-center py-20 text-stone-400' }, T[lang].loadingItem);
+      if (!company) return React.createElement('div', { className: 'text-center py-20 text-stone-400' }, T[lang].companyNotFound);
 
       const stats = calcStats(answers);
       const sectionStats = calcSectionStats(answers);
-      const formatDate = (d) => d ? new Date(d).toLocaleDateString('ka-GE', { year: 'numeric', month: 'long', day: 'numeric' }) : '—';
+      const formatDate = (d) => d ? new Date(d).toLocaleDateString(lang === 'ka' ? 'ka-GE' : 'en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : '—';
 
       // Group answers by section
       const answersBySection = SECTION_PREFIXES.map(() => []);
@@ -579,10 +767,10 @@
       const downloadPdf = async () => {
         setPdfLoading(true);
         try {
-          await generateCompanyPDF(company, answers, sectionStats, stats);
+          await generateCompanyPDF(company, answers, sectionStats, stats, lang);
         } catch (e) {
           console.error(e);
-          alert('PDF შექმნა ვერ მოხერხდა: ' + (e.message || ''));
+          alert(T[lang].pdfFailed + (e.message || ''));
         } finally {
           setPdfLoading(false);
         }
@@ -594,13 +782,13 @@
           React.createElement('button', {
             onClick: onBack,
             className: 'text-sm text-stone-600 hover:text-stone-900 flex items-center gap-1.5'
-          }, '←', ' კომპანიების სია'),
+          }, '← ', T[lang].backToList),
           React.createElement('button', {
             onClick: downloadPdf,
             disabled: pdfLoading,
             className: 'h-10 px-4 text-sm font-medium text-white rounded-lg shadow-sm hover:shadow disabled:opacity-50',
             style: { background: 'linear-gradient(135deg, #0E5BA8, #1976D2)' }
-          }, pdfLoading ? '⌛ იქმნება...' : '📄 PDF ჩამოტვირთვა')
+          }, pdfLoading ? T[lang].generating : T[lang].downloadPdf)
         ),
 
         // Company info card
@@ -610,22 +798,22 @@
               React.createElement('h1', { className: 'text-xl font-semibold text-stone-900 mb-1' }, company.name || '—'),
               React.createElement('div', { className: 'flex flex-wrap gap-x-5 gap-y-1 text-xs text-stone-500' },
                 React.createElement('div', null, React.createElement('span', { className: 'font-medium' }, 'ID: '), React.createElement('span', { className: 'font-mono' }, company.id)),
-                React.createElement('div', null, React.createElement('span', { className: 'font-medium' }, 'კონტაქტი: '), company.contact || '—'),
-                React.createElement('div', null, React.createElement('span', { className: 'font-medium' }, 'შევსების თარიღი: '), formatDate(company.submitted_at)),
-                React.createElement('div', null, React.createElement('span', { className: 'font-medium' }, 'სტატუსი: '),
+                React.createElement('div', null, React.createElement('span', { className: 'font-medium' }, T[lang].contactLabel + ': '), company.contact || '—'),
+                React.createElement('div', null, React.createElement('span', { className: 'font-medium' }, T[lang].dateLabel + ': '), formatDate(company.submitted_at)),
+                React.createElement('div', null, React.createElement('span', { className: 'font-medium' }, T[lang].statusLabel + ': '),
                   company.is_locked
-                    ? React.createElement('span', { className: 'text-emerald-700 font-medium' }, '✓ შევსებული')
-                    : React.createElement('span', { className: 'text-amber-700 font-medium' }, '◷ მიმდინარე')
+                    ? React.createElement('span', { className: 'text-emerald-700 font-medium' }, T[lang].statusSubmitted)
+                    : React.createElement('span', { className: 'text-amber-700 font-medium' }, T[lang].statusInProgress)
                 )
               )
             ),
             React.createElement('div', { className: 'text-right' },
-              React.createElement('div', { className: 'text-[11px] text-stone-400 uppercase tracking-wider font-medium' }, 'საერთო ESG ქულა'),
+              React.createElement('div', { className: 'text-[11px] text-stone-400 uppercase tracking-wider font-medium' }, T[lang].totalScore),
               React.createElement('div', {
                 className: 'text-3xl font-semibold',
                 style: { color: stats.score >= 70 ? '#059669' : stats.score >= 40 ? '#d97706' : '#dc2626' }
               }, stats.score + '%'),
-              React.createElement('div', { className: 'text-[11px] text-stone-500' }, stats.yes + ' კი • ' + stats.partial + ' ნაწილ. • ' + stats.no + ' არა')
+              React.createElement('div', { className: 'text-[11px] text-stone-500' }, stats.yes + ' ' + T[lang].yesShort + ' • ' + stats.partial + ' ' + T[lang].partialShort + ' • ' + stats.no + ' ' + T[lang].noShort)
             )
           )
         ),
@@ -633,35 +821,35 @@
         // Section scores
         React.createElement('div', { className: 'grid grid-cols-1 lg:grid-cols-[1fr_2fr] gap-5 mb-5' },
           React.createElement('div', { className: 'bg-white border border-stone-200 rounded-xl p-5 shadow-sm' },
-            React.createElement('h3', { className: 'text-sm font-semibold text-stone-900 mb-4' }, 'სექციების მიხედვით'),
-            React.createElement(SectionScoreBars, { sectionStats })
+            React.createElement('h3', { className: 'text-sm font-semibold text-stone-900 mb-4' }, T[lang].sectionScores),
+            React.createElement(SectionScoreBars, { sectionStats, lang })
           ),
           React.createElement('div', { className: 'bg-white border border-stone-200 rounded-xl p-5 shadow-sm' },
-            React.createElement('h3', { className: 'text-sm font-semibold text-stone-900 mb-4' }, 'პასუხების განაწილება'),
-            React.createElement(AnswerDistribution, { stats })
+            React.createElement('h3', { className: 'text-sm font-semibold text-stone-900 mb-4' }, T[lang].answerDistribution),
+            React.createElement(AnswerDistribution, { stats, lang })
           )
         ),
 
         // All answers grouped by section
         React.createElement('div', { className: 'bg-white border border-stone-200 rounded-xl p-5 shadow-sm' },
-          React.createElement('h3', { className: 'text-sm font-semibold text-stone-900 mb-4' }, 'სრული პასუხები'),
+          React.createElement('h3', { className: 'text-sm font-semibold text-stone-900 mb-4' }, T[lang].fullAnswers),
           answersBySection.map((arr, sIdx) => {
             if (arr.length === 0) return null;
             return React.createElement('div', { key: sIdx, className: 'mb-6 last:mb-0' },
               React.createElement('h4', {
                 className: 'text-[13px] font-semibold text-blue-700 mb-2 pb-2 border-b border-stone-200 flex items-center justify-between'
               },
-                React.createElement('span', null, (sIdx + 1) + '. ' + SECTION_NAMES.ka[sIdx]),
+                React.createElement('span', null, (sIdx + 1) + '. ' + SECTION_NAMES[lang][sIdx]),
                 React.createElement('span', { className: 'text-xs text-stone-400 font-normal' }, sectionStats[sIdx].score + '%')
               ),
               React.createElement('div', { className: 'space-y-1.5' },
                 arr.map(a => {
-                  const qText = QUESTIONS[a.question_id] ? QUESTIONS[a.question_id].ka : a.question_id;
-                  const ansLabel = a.answer === 'yes' ? '✓ კი' : a.answer === 'no' ? '✗ არა' : '◐ ნაწილ.';
+                  const qText = QUESTIONS[a.question_id] ? QUESTIONS[a.question_id][lang] : a.question_id;
+                  const ansLabel = a.answer === 'yes' ? '✓ ' + T[lang].yesShort : a.answer === 'no' ? '✗ ' + T[lang].noShort : '◐ ' + T[lang].partialShort;
                   const ansColor = a.answer === 'yes' ? 'bg-emerald-50 text-emerald-800 border-emerald-200' :
                                    a.answer === 'no' ? 'bg-rose-50 text-rose-800 border-rose-200' :
                                    'bg-amber-50 text-amber-800 border-amber-200';
-                  const auto = a.was_auto_suggested ? React.createElement('span', { className: 'text-[10px] text-stone-400 ml-1.5' }, '(ავტო)') : null;
+                  const auto = a.was_auto_suggested ? React.createElement('span', { className: 'text-[10px] text-stone-400 ml-1.5' }, '(' + T[lang].autoFilled + ')') : null;
                   return React.createElement('div', {
                     key: a.question_id,
                     className: 'flex gap-3 items-start py-2.5 px-3 hover:bg-stone-50 rounded border-b border-stone-50 last:border-0'
@@ -670,7 +858,7 @@
                       React.createElement('div', { className: 'text-[13px] text-stone-800 leading-snug mb-1' }, qText),
                       a.partial_text
                         ? React.createElement('div', { className: 'text-[12px] text-stone-500 italic mt-1' },
-                            React.createElement('span', { className: 'font-medium not-italic text-amber-700' }, 'შენიშვნა: '),
+                            React.createElement('span', { className: 'font-medium not-italic text-amber-700' }, T[lang].noteLabel + ': '),
                             a.partial_text
                           )
                         : null,
@@ -688,7 +876,7 @@
     }
 
     // ----------- ANSWER DISTRIBUTION CHART -----------
-    function AnswerDistribution({ stats }) {
+    function AnswerDistribution({ stats, lang }) {
       const total = stats.total || 1;
       const yesPct = (stats.yes / total) * 100;
       const partialPct = (stats.partial / total) * 100;
@@ -702,17 +890,17 @@
         ),
         React.createElement('div', { className: 'grid grid-cols-3 gap-3' },
           React.createElement('div', { className: 'bg-emerald-50 border border-emerald-100 rounded-lg p-3 text-center' },
-            React.createElement('div', { className: 'text-[10px] text-emerald-700 uppercase tracking-wider font-medium mb-1' }, 'კი'),
+            React.createElement('div', { className: 'text-[10px] text-emerald-700 uppercase tracking-wider font-medium mb-1' }, T[lang].yesLabel),
             React.createElement('div', { className: 'text-2xl font-semibold text-emerald-700' }, stats.yes),
             React.createElement('div', { className: 'text-[10px] text-emerald-600' }, Math.round(yesPct) + '%')
           ),
           React.createElement('div', { className: 'bg-amber-50 border border-amber-100 rounded-lg p-3 text-center' },
-            React.createElement('div', { className: 'text-[10px] text-amber-700 uppercase tracking-wider font-medium mb-1' }, 'ნაწილობრივ'),
+            React.createElement('div', { className: 'text-[10px] text-amber-700 uppercase tracking-wider font-medium mb-1' }, T[lang].partialLabel),
             React.createElement('div', { className: 'text-2xl font-semibold text-amber-700' }, stats.partial),
             React.createElement('div', { className: 'text-[10px] text-amber-600' }, Math.round(partialPct) + '%')
           ),
           React.createElement('div', { className: 'bg-rose-50 border border-rose-100 rounded-lg p-3 text-center' },
-            React.createElement('div', { className: 'text-[10px] text-rose-700 uppercase tracking-wider font-medium mb-1' }, 'არა'),
+            React.createElement('div', { className: 'text-[10px] text-rose-700 uppercase tracking-wider font-medium mb-1' }, T[lang].noLabel),
             React.createElement('div', { className: 'text-2xl font-semibold text-rose-700' }, stats.no),
             React.createElement('div', { className: 'text-[10px] text-rose-600' }, Math.round(noPct) + '%')
           )
@@ -723,7 +911,7 @@
     // ============================================
     // PDF GENERATION
     // ============================================
-    async function generateCompanyPDF(company, answers, sectionStats, stats) {
+    async function generateCompanyPDF(company, answers, sectionStats, stats, lang) {
       const { jsPDF } = window.jspdf;
       const doc = new jsPDF({ unit: 'mm', format: 'a4' });
 
@@ -737,8 +925,8 @@
       container.style.fontFamily = "'Noto Sans Georgian', 'Inter', sans-serif";
       container.style.color = '#1c1917';
 
-      const dateStr = new Date().toLocaleDateString('ka-GE', { year: 'numeric', month: 'long', day: 'numeric' });
-      const submittedStr = company.submitted_at ? new Date(company.submitted_at).toLocaleDateString('ka-GE', { year: 'numeric', month: 'long', day: 'numeric' }) : '—';
+      const dateStr = new Date().toLocaleDateString(lang === 'ka' ? 'ka-GE' : 'en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+      const submittedStr = company.submitted_at ? new Date(company.submitted_at).toLocaleDateString(lang === 'ka' ? 'ka-GE' : 'en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : '—';
       const scoreColor = stats.score >= 70 ? '#059669' : stats.score >= 40 ? '#d97706' : '#dc2626';
 
       // Group answers by section
@@ -753,44 +941,44 @@
         <div style="border-bottom: 3px solid #0E5BA8; padding-bottom: 20px; margin-bottom: 24px; display: flex; justify-content: space-between; align-items: flex-start;">
           <div>
             <img src="${LOGO_URL}" style="height: 50px; width: auto; margin-bottom: 12px;" />
-            <h1 style="font-size: 22px; font-weight: 600; margin: 0; color: #1c1917;">ESG შეფასების ანგარიში</h1>
-            <p style="font-size: 11px; color: #78716c; margin: 4px 0 0;">Admin Report</p>
+            <h1 style="font-size: 22px; font-weight: 600; margin: 0; color: #1c1917;">${T[lang].pdfTitle}</h1>
+            <p style="font-size: 11px; color: #78716c; margin: 4px 0 0;">${T[lang].pdfSubtitle}</p>
           </div>
           <div style="text-align: right;">
-            <div style="font-size: 11px; color: #78716c; font-weight: 500; margin-bottom: 4px;">საერთო ESG ქულა</div>
+            <div style="font-size: 11px; color: #78716c; font-weight: 500; margin-bottom: 4px;">${T[lang].pdfTotalScore}</div>
             <div style="font-size: 32px; font-weight: 600; color: ${scoreColor}; line-height: 1;">${stats.score}%</div>
-            <div style="font-size: 10px; color: #78716c; margin-top: 4px;">გენერ.: ${dateStr}</div>
+            <div style="font-size: 10px; color: #78716c; margin-top: 4px;">${T[lang].pdfGenerated}: ${dateStr}</div>
           </div>
         </div>
 
         <div style="background: #F5F8FC; border: 1px solid #E0E7F0; border-radius: 10px; padding: 16px 20px; margin-bottom: 24px;">
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px 24px; font-size: 12px;">
             <div>
-              <div style="color: #78716c; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 500; margin-bottom: 3px;">კომპანია</div>
+              <div style="color: #78716c; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 500; margin-bottom: 3px;">${T[lang].pdfCompany}</div>
               <div style="font-weight: 500;">${escapeHtml(company.name || '—')}</div>
             </div>
             <div>
-              <div style="color: #78716c; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 500; margin-bottom: 3px;">საიდენტიფიკაციო ნომერი</div>
+              <div style="color: #78716c; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 500; margin-bottom: 3px;">${T[lang].pdfId}</div>
               <div style="font-weight: 500;">${escapeHtml(company.id || '')}</div>
             </div>
             <div>
-              <div style="color: #78716c; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 500; margin-bottom: 3px;">კონტაქტი</div>
+              <div style="color: #78716c; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 500; margin-bottom: 3px;">${T[lang].pdfContact}</div>
               <div style="font-weight: 500;">${escapeHtml(company.contact || '—')}</div>
             </div>
             <div>
-              <div style="color: #78716c; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 500; margin-bottom: 3px;">შევსების თარიღი</div>
+              <div style="color: #78716c; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 500; margin-bottom: 3px;">${T[lang].pdfDate}</div>
               <div style="font-weight: 500;">${submittedStr}</div>
             </div>
           </div>
         </div>
 
-        <h2 style="font-size: 14px; font-weight: 600; color: #0E5BA8; margin: 0 0 12px; padding-bottom: 6px; border-bottom: 1px solid #E0E7F0;">სექციების მიხედვით ქულები</h2>
+        <h2 style="font-size: 14px; font-weight: 600; color: #0E5BA8; margin: 0 0 12px; padding-bottom: 6px; border-bottom: 1px solid #E0E7F0;">${T[lang].pdfSectionScoresTitle}</h2>
         <div style="margin-bottom: 24px;">
           ${sectionStats.map((s, i) => {
             const c = s.score >= 70 ? '#059669' : s.score >= 40 ? '#d97706' : '#dc2626';
             return `<div style="margin-bottom: 8px;">
               <div style="display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 3px;">
-                <span style="font-weight: 500;">${i+1}. ${escapeHtml(SECTION_NAMES.ka[i])}</span>
+                <span style="font-weight: 500;">${i+1}. ${escapeHtml(SECTION_NAMES[lang][i])}</span>
                 <span style="font-weight: 600; color: ${c};">${s.score}%</span>
               </div>
               <div style="height: 6px; background: #f0f0f0; border-radius: 3px; overflow: hidden;">
@@ -806,24 +994,24 @@
         if (arr.length === 0) return;
         html += `<div style="margin-bottom: 20px; page-break-inside: avoid;">
           <h2 style="font-size: 14px; font-weight: 600; color: #0E5BA8; margin: 0 0 10px; padding-bottom: 6px; border-bottom: 1px solid #E0E7F0;">
-            ${sIdx + 1}. ${escapeHtml(SECTION_NAMES.ka[sIdx])} 
+            ${sIdx + 1}. ${escapeHtml(SECTION_NAMES[lang][sIdx])} 
             <span style="float: right; font-size: 11px; color: #78716c; font-weight: 500;">${sectionStats[sIdx].score}%</span>
           </h2>`;
 
         arr.forEach((a, qIdx) => {
-          const qText = QUESTIONS[a.question_id] ? QUESTIONS[a.question_id].ka : a.question_id;
+          const qText = QUESTIONS[a.question_id] ? QUESTIONS[a.question_id][lang] : a.question_id;
           const ansVal = a.answer || '';
-          const ansLabel = ansVal === 'yes' ? '✓ კი' : ansVal === 'no' ? '✗ არა' : ansVal === 'partial' ? '◐ ნაწილ.' : '—';
+          const ansLabel = ansVal === 'yes' ? '✓ ' + T[lang].yesShort : ansVal === 'no' ? '✗ ' + T[lang].noShort : ansVal === 'partial' ? '◐ ' + T[lang].partialShort : '—';
           const ansColor = ansVal === 'yes' ? '#059669' : ansVal === 'no' ? '#dc2626' : ansVal === 'partial' ? '#d97706' : '#78716c';
           const ansBg = ansVal === 'yes' ? '#ECFDF5' : ansVal === 'no' ? '#FEF2F2' : ansVal === 'partial' ? '#FFFBEB' : '#F5F5F4';
-          const auto = a.was_auto_suggested ? ' (ავტო)' : '';
+          const auto = a.was_auto_suggested ? ' (' + T[lang].autoFilled + ')' : '';
 
           html += `<div style="margin-bottom: 6px; padding: 8px 12px; border: 1px solid #E7E5E4; border-radius: 6px; background: white;">
             <div style="display: flex; gap: 10px; align-items: flex-start;">
               <div style="font-size: 10px; color: #a8a29e; font-weight: 500; min-width: 22px;">${qIdx + 1}.</div>
               <div style="flex: 1;">
                 <div style="font-size: 11px; line-height: 1.5; color: #1c1917; margin-bottom: 3px;">${escapeHtml(qText)}</div>
-                ${a.partial_text ? '<div style="font-size: 10px; color: #92400e; font-style: italic; margin-top: 4px;">შენიშვნა: ' + escapeHtml(a.partial_text) + '</div>' : ''}
+                ${a.partial_text ? '<div style="font-size: 10px; color: #92400e; font-style: italic; margin-top: 4px;">' + T[lang].noteLabel + ': ' + escapeHtml(a.partial_text) + '</div>' : ''}
               </div>
               <div style="font-size: 10px; font-weight: 600; color: ${ansColor}; background: ${ansBg}; padding: 3px 8px; border-radius: 4px; white-space: nowrap;">${ansLabel}${auto}</div>
             </div>
@@ -834,7 +1022,7 @@
       });
 
       html += `<div style="margin-top: 30px; padding-top: 16px; border-top: 1px solid #E0E7F0; text-align: center; font-size: 10px; color: #a8a29e;">
-        ENERGO-PRO Georgia • ESG Admin Report • ${dateStr}
+        ${T[lang].pdfFooter} • ${dateStr}
       </div>`;
 
       container.innerHTML = html;
@@ -858,7 +1046,7 @@
           doc.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
           heightLeft -= pageHeight;
         }
-        const filename = `ESG_Admin_${(company.name || 'company').replace(/[^a-zA-Z0-9-_]/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf`;
+        const filename = `ESG_Admin_${(company.name || 'company').replace(/[^a-zA-Z0-9-_]/g, '_')}_${new Date().toISOString().split('T')[0]}_${lang}.pdf`;
         doc.save(filename);
       } finally {
         document.body.removeChild(container);
@@ -875,6 +1063,12 @@
       const [companies, setCompanies] = useState([]);
       const [allAnswersByCompany, setAllAnswersByCompany] = useState({});
       const [loading, setLoading] = useState(false);
+      const [lang, setLang] = useState(() => localStorage.getItem('esg_admin_lang') || 'ka');
+
+      useEffect(() => {
+        localStorage.setItem('esg_admin_lang', lang);
+        document.documentElement.lang = lang;
+      }, [lang]);
 
       const refresh = async () => {
         setLoading(true);
@@ -899,26 +1093,29 @@
         setAuthed(false);
       };
 
-      if (!authed) return React.createElement(LoginScreen, { onLogin: () => setAuthed(true) });
+      if (!authed) return React.createElement(LoginScreen, { onLogin: () => setAuthed(true), lang, setLang });
 
       return React.createElement('div', { className: 'min-h-screen' },
         React.createElement(AdminHeader, {
           onLogout,
           currentView: view,
-          onNavigate: (v) => { setView(v); if (v === 'list') refresh(); }
+          onNavigate: (v) => { setView(v); if (v === 'list') refresh(); },
+          lang, setLang
         }),
         React.createElement('main', { className: 'max-w-7xl mx-auto px-6 py-6' },
           loading
-            ? React.createElement('div', { className: 'text-center py-20 text-stone-400 text-sm' }, 'იტვირთება მონაცემები...')
+            ? React.createElement('div', { className: 'text-center py-20 text-stone-400 text-sm' }, T[lang].loadingData)
             : view === 'list'
               ? React.createElement(CompanyListScreen, {
                   companies, allAnswersByCompany,
                   onSelectCompany: (id) => { setSelectedId(id); setView('detail'); },
-                  onRefresh: refresh
+                  onRefresh: refresh,
+                  lang
                 })
               : React.createElement(CompanyDetailScreen, {
                   companyId: selectedId,
-                  onBack: () => setView('list')
+                  onBack: () => setView('list'),
+                  lang
                 })
         )
       );
