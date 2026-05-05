@@ -107,6 +107,12 @@
         sectionScores: 'სექციების მიხედვით',
         answerDistribution: 'პასუხების განაწილება',
         fullAnswers: 'სრული პასუხები',
+        partialSummary: 'ნაწილობრივი პასუხების შეჯამება',
+        partialSummaryDesc: 'კონტრაქტორის მიერ მოცემული განმარტებები',
+        partialEmpty: 'ნაწილობრივი პასუხები არ არის',
+        questionLabel: 'კითხვა',
+        explanationLabel: 'განმარტება',
+        section: 'სექცია',
         yesLabel: 'კი',
         partialLabel: 'ნაწილობრივ',
         noLabel: 'არა',
@@ -187,6 +193,12 @@
         sectionScores: 'By sections',
         answerDistribution: 'Answer distribution',
         fullAnswers: 'Full answers',
+        partialSummary: 'Partial answers summary',
+        partialSummaryDesc: 'Explanations provided by the contractor',
+        partialEmpty: 'No partial answers',
+        questionLabel: 'Question',
+        explanationLabel: 'Explanation',
+        section: 'Section',
         yesLabel: 'Yes',
         partialLabel: 'Partial',
         noLabel: 'No',
@@ -830,6 +842,63 @@
           )
         ),
 
+        // Partial answers summary - prominently displayed
+        (() => {
+          const partialAnswers = answers.filter(a => a.answer === 'partial');
+          // Sort by section and question id
+          partialAnswers.sort((a, b) => a.question_id.localeCompare(b.question_id));
+          return React.createElement('div', {
+            className: 'bg-amber-50 border-2 border-amber-200 rounded-xl p-5 shadow-sm mb-5'
+          },
+            React.createElement('div', { className: 'flex items-center gap-2 mb-1' },
+              React.createElement('span', { style: { fontSize: '20px' } }, '◐'),
+              React.createElement('h3', { className: 'text-sm font-semibold text-amber-900' }, T[lang].partialSummary),
+              React.createElement('span', {
+                className: 'ml-auto text-[11px] font-semibold bg-amber-200 text-amber-900 px-2 py-0.5 rounded-full'
+              }, partialAnswers.length)
+            ),
+            React.createElement('p', { className: 'text-[12px] text-amber-700 mb-4' }, T[lang].partialSummaryDesc),
+            partialAnswers.length === 0
+              ? React.createElement('div', { className: 'text-center py-6 text-amber-600 text-sm italic' }, T[lang].partialEmpty)
+              : React.createElement('div', { className: 'space-y-2.5' },
+                  partialAnswers.map(a => {
+                    const sIdx = getSectionIndex(a.question_id);
+                    const sName = sIdx >= 0 ? SECTION_NAMES[lang][sIdx] : '';
+                    const qText = QUESTIONS[a.question_id] ? QUESTIONS[a.question_id][lang] : a.question_id;
+                    const hasText = a.partial_text && a.partial_text.trim();
+                    return React.createElement('div', {
+                      key: a.question_id,
+                      className: 'bg-white border border-amber-200 rounded-lg p-4'
+                    },
+                      // Section badge
+                      React.createElement('div', { className: 'flex items-center gap-2 mb-2 flex-wrap' },
+                        React.createElement('span', {
+                          className: 'text-[10px] font-semibold uppercase tracking-wider text-blue-700 bg-blue-50 px-2 py-0.5 rounded'
+                        }, T[lang].section + ' ' + (sIdx + 1) + ' • ' + sName),
+                        React.createElement('span', { className: 'text-[10px] text-stone-300 font-mono' }, a.question_id)
+                      ),
+                      // Question text
+                      React.createElement('div', { className: 'mb-2' },
+                        React.createElement('div', { className: 'text-[10px] font-semibold text-stone-500 uppercase tracking-wider mb-1' }, T[lang].questionLabel),
+                        React.createElement('div', { className: 'text-[14px] text-stone-900 leading-snug' }, qText)
+                      ),
+                      // Explanation
+                      React.createElement('div', null,
+                        React.createElement('div', { className: 'text-[10px] font-semibold text-amber-700 uppercase tracking-wider mb-1' }, T[lang].explanationLabel),
+                        hasText
+                          ? React.createElement('div', {
+                              className: 'text-[13px] text-stone-800 leading-relaxed whitespace-pre-wrap break-words bg-amber-50 border-l-4 border-amber-400 px-3 py-2 rounded-r'
+                            }, a.partial_text)
+                          : React.createElement('div', {
+                              className: 'text-[12px] text-stone-400 italic'
+                            }, lang === 'ka' ? 'განმარტება არ არის მითითებული' : 'No explanation provided')
+                      )
+                    );
+                  })
+                )
+          );
+        })(),
+
         // All answers grouped by section
         React.createElement('div', { className: 'bg-white border border-stone-200 rounded-xl p-5 shadow-sm' },
           React.createElement('h3', { className: 'text-sm font-semibold text-stone-900 mb-4' }, T[lang].fullAnswers),
@@ -850,22 +919,34 @@
                                    a.answer === 'no' ? 'bg-rose-50 text-rose-800 border-rose-200' :
                                    'bg-amber-50 text-amber-800 border-amber-200';
                   const auto = a.was_auto_suggested ? React.createElement('span', { className: 'text-[10px] text-stone-400 ml-1.5' }, '(' + T[lang].autoFilled + ')') : null;
+                  const isPartial = a.answer === 'partial';
+                  const hasPartialText = a.partial_text && a.partial_text.trim();
                   return React.createElement('div', {
                     key: a.question_id,
-                    className: 'flex gap-3 items-start py-2.5 px-3 hover:bg-stone-50 rounded border-b border-stone-50 last:border-0'
+                    className: 'py-2.5 px-3 hover:bg-stone-50 rounded border-b border-stone-50 last:border-0'
                   },
-                    React.createElement('div', { className: 'flex-1 min-w-0' },
-                      React.createElement('div', { className: 'text-[13px] text-stone-800 leading-snug mb-1' }, qText),
-                      a.partial_text
-                        ? React.createElement('div', { className: 'text-[12px] text-stone-500 italic mt-1' },
-                            React.createElement('span', { className: 'font-medium not-italic text-amber-700' }, T[lang].noteLabel + ': '),
-                            a.partial_text
-                          )
-                        : null,
-                      React.createElement('div', { className: 'text-[10px] text-stone-300 font-mono mt-1' }, a.question_id)
+                    React.createElement('div', { className: 'flex gap-3 items-start' },
+                      React.createElement('div', { className: 'flex-1 min-w-0' },
+                        React.createElement('div', { className: 'text-[13px] text-stone-800 leading-snug mb-1' }, qText),
+                        React.createElement('div', { className: 'text-[10px] text-stone-300 font-mono' }, a.question_id)
+                      ),
+                      React.createElement('span', { className: 'text-[11px] font-semibold px-2 py-1 rounded border whitespace-nowrap flex-shrink-0 mt-0.5 ' + ansColor }, ansLabel),
+                      auto
                     ),
-                    React.createElement('span', { className: 'text-[11px] font-semibold px-2 py-1 rounded border whitespace-nowrap flex-shrink-0 mt-0.5 ' + ansColor }, ansLabel),
-                    auto
+                    // Highlighted partial-answer box
+                    isPartial ? React.createElement('div', {
+                      className: 'mt-2 ml-0 p-3 bg-amber-50 border-l-4 border-amber-400 rounded-r-md'
+                    },
+                      React.createElement('div', { className: 'flex items-start gap-2' },
+                        React.createElement('span', { className: 'text-amber-600 text-sm flex-shrink-0' }, '◐'),
+                        React.createElement('div', { className: 'flex-1 min-w-0' },
+                          React.createElement('div', { className: 'text-[10px] font-semibold text-amber-700 uppercase tracking-wider mb-1' }, T[lang].noteLabel),
+                          hasPartialText
+                            ? React.createElement('div', { className: 'text-[13px] text-stone-800 leading-relaxed whitespace-pre-wrap break-words' }, a.partial_text)
+                            : React.createElement('div', { className: 'text-[12px] text-stone-400 italic' }, lang === 'ka' ? 'განმარტება არ არის მითითებული' : 'No explanation provided')
+                        )
+                      )
+                    ) : null
                   );
                 })
               )
@@ -989,6 +1070,42 @@
         </div>
       `;
 
+      // Partial answers summary section (prominent)
+      const partialAnswers = answers.filter(a => a.answer === 'partial');
+      partialAnswers.sort((a, b) => a.question_id.localeCompare(b.question_id));
+      if (partialAnswers.length > 0) {
+        html += `<div style="background: #FFFBEB; border: 2px solid #FCD34D; border-radius: 8px; padding: 14px 16px; margin-bottom: 24px; page-break-inside: avoid;">
+          <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+            <span style="font-size: 16px;">◐</span>
+            <h2 style="font-size: 13px; font-weight: 600; color: #92400e; margin: 0;">${T[lang].partialSummary}</h2>
+            <span style="margin-left: auto; background: #FCD34D; color: #78350F; font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 10px;">${partialAnswers.length}</span>
+          </div>
+          <p style="font-size: 10px; color: #B45309; margin: 0 0 12px;">${T[lang].partialSummaryDesc}</p>`;
+        partialAnswers.forEach(a => {
+          const sIdx = getSectionIndex(a.question_id);
+          const sName = sIdx >= 0 ? SECTION_NAMES[lang][sIdx] : '';
+          const qText = QUESTIONS[a.question_id] ? QUESTIONS[a.question_id][lang] : a.question_id;
+          const hasText = a.partial_text && a.partial_text.trim();
+          html += `<div style="background: white; border: 1px solid #FDE68A; border-radius: 6px; padding: 10px 12px; margin-bottom: 8px;">
+            <div style="margin-bottom: 6px;">
+              <span style="font-size: 9px; font-weight: 600; color: #1d4ed8; background: #DBEAFE; padding: 2px 6px; border-radius: 3px; text-transform: uppercase; letter-spacing: 0.5px;">${T[lang].section} ${sIdx + 1} • ${escapeHtml(sName)}</span>
+              <span style="font-size: 9px; color: #d6d3d1; font-family: monospace; margin-left: 6px;">${escapeHtml(a.question_id)}</span>
+            </div>
+            <div style="margin-bottom: 6px;">
+              <div style="font-size: 9px; font-weight: 600; color: #78716c; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px;">${T[lang].questionLabel}</div>
+              <div style="font-size: 11px; color: #1c1917; line-height: 1.4;">${escapeHtml(qText)}</div>
+            </div>
+            <div>
+              <div style="font-size: 9px; font-weight: 600; color: #92400e; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px;">${T[lang].explanationLabel}</div>
+              ${hasText
+                ? `<div style="font-size: 10.5px; color: #1c1917; line-height: 1.5; background: #FFFBEB; border-left: 3px solid #F59E0B; padding: 6px 10px; border-radius: 0 4px 4px 0; white-space: pre-wrap;">${escapeHtml(a.partial_text)}</div>`
+                : `<div style="font-size: 10px; color: #a8a29e; font-style: italic;">${lang === 'ka' ? 'განმარტება არ არის მითითებული' : 'No explanation provided'}</div>`}
+            </div>
+          </div>`;
+        });
+        html += `</div>`;
+      }
+
       // Section answers
       answersBySection.forEach((arr, sIdx) => {
         if (arr.length === 0) return;
@@ -1010,11 +1127,14 @@
             <div style="display: flex; gap: 10px; align-items: flex-start;">
               <div style="font-size: 10px; color: #a8a29e; font-weight: 500; min-width: 22px;">${qIdx + 1}.</div>
               <div style="flex: 1;">
-                <div style="font-size: 11px; line-height: 1.5; color: #1c1917; margin-bottom: 3px;">${escapeHtml(qText)}</div>
-                ${a.partial_text ? '<div style="font-size: 10px; color: #92400e; font-style: italic; margin-top: 4px;">' + T[lang].noteLabel + ': ' + escapeHtml(a.partial_text) + '</div>' : ''}
+                <div style="font-size: 11px; line-height: 1.5; color: #1c1917;">${escapeHtml(qText)}</div>
               </div>
               <div style="font-size: 10px; font-weight: 600; color: ${ansColor}; background: ${ansBg}; padding: 3px 8px; border-radius: 4px; white-space: nowrap;">${ansLabel}${auto}</div>
             </div>
+            ${ansVal === 'partial' ? `<div style="margin-top: 8px; margin-left: 32px; padding: 8px 10px; background: #FFFBEB; border-left: 3px solid #F59E0B; border-radius: 0 4px 4px 0;">
+              <div style="font-size: 9px; font-weight: 600; color: #92400e; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 3px;">${T[lang].noteLabel}</div>
+              <div style="font-size: 10.5px; line-height: 1.5; color: #1c1917; white-space: pre-wrap;">${a.partial_text ? escapeHtml(a.partial_text) : '<span style="color:#a8a29e; font-style: italic;">' + (lang === 'ka' ? 'განმარტება არ არის მითითებული' : 'No explanation provided') + '</span>'}</div>
+            </div>` : ''}
           </div>`;
         });
 
