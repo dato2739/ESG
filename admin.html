@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="ka">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ESG Admin Panel — ENERGO-PRO Georgia</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Georgian:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Noto Sans Georgian', 'Inter', sans-serif; -webkit-font-smoothing: antialiased; }
+    .fade-in { animation: fadeIn 0.25s ease-out; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+    .scrollbar-thin::-webkit-scrollbar { width: 6px; height: 6px; }
+    .scrollbar-thin::-webkit-scrollbar-thumb { background: #d6d3d1; border-radius: 3px; }
+  </style>
+  <script type="importmap">
+  {
+    "imports": {
+      "react": "https://esm.sh/react@18.3.1",
+      "react-dom/client": "https://esm.sh/react-dom@18.3.1/client",
+      "@supabase/supabase-js": "https://esm.sh/@supabase/supabase-js@2"
+    }
+  }
+  </script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+</head>
+<body class="bg-stone-50 min-h-screen">
+  <div id="root"></div>
+
+  <script type="module">
+    import React, { useState, useEffect, useMemo } from 'react';
+    import { createRoot } from 'react-dom/client';
+    import { createClient } from '@supabase/supabase-js';
+
+    // ============================================
+    // CONFIG
+    // ============================================
+    const SUPABASE_URL = 'https://zdmvuilqvthjzxajmxee.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_-3Uv3MnReeoMq02eLQYzpQ_2GqQ2DJ9';
+    const ADMIN_PASSWORD = 'energo2024';
+
+    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const LOGO_URL = 'data:image/jpeg;base64,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';
+
+    // ============================================
+    // SECTIONS DATA (loaded from main app questions)
+    // ============================================
+    const SECTION_NAMES = {
+      ka: ['ხარისხი', 'ადამიანის უფლებები', 'შრომა', 'გარემო', 'ანტი-კორუფცია', 'ჯანდაცვა და უსაფრთხოება', 'კლიმატის ცვლილება'],
+      en: ['Quality', 'Human Rights', 'Labour', 'Environment', 'Anti-Corruption', 'Health & Safety', 'Climate Change']
+    };
+
+    const SECTION_PREFIXES = ['q_2_', 'q_3_', 'q_4_', 'q_5_', 'q_6_', 'q_7_', 'q_8_'];
+
+    function getSectionIndex(qid) {
+      for (let i = 0; i < SECTION_PREFIXES.length; i++) {
+        if (qid.startsWith(SECTION_PREFIXES[i])) return i;
+      }
+      return -1;
+    }
+
+    // Helper: escape HTML
+    function escapeHtml(s) {
+      if (!s) return '';
+      return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    }
+
+    // ============================================
+    // DATA LOADING
+    // ============================================
+    async function loadAllCompanies() {
+      const { data, error } = await supabase
+        .from('esg_companies')
+        .select('*')
+        .order('created_at', { ascending: false });
+      if (error) console.error('Load companies error:', error);
+      return data || [];
+    }
+
+    async function loadCompanyAnswers(companyId) {
+      const { data, error } = await supabase
+        .from('esg_answers')
+        .select('*')
+        .eq('company_id', companyId);
+      if (error) console.error('Load answers error:', error);
+      return data || [];
+    }
+
+    // Calculate stats from answers array
+    function calcStats(answers) {
+      const total = answers.length;
+      const yes = answers.filter(a => a.answer === 'yes').length;
+      const no = answers.filter(a => a.answer === 'no').length;
+      const partial = answers.filter(a => a.answer === 'partial').length;
+      const score = total > 0 ? Math.round(((yes + partial * 0.5) / total) * 100) : 0;
+      return { total, yes, no, partial, score };
+    }
+
+    // Calculate per-section stats
+    function calcSectionStats(answers) {
+      const sections = SECTION_PREFIXES.map(() => ({ yes: 0, no: 0, partial: 0, total: 0 }));
+      answers.forEach(a => {
+        const idx = getSectionIndex(a.question_id);
+        if (idx === -1) return;
+        sections[idx].total++;
+        if (a.answer === 'yes') sections[idx].yes++;
+        else if (a.answer === 'no') sections[idx].no++;
+        else if (a.answer === 'partial') sections[idx].partial++;
+      });
+      return sections.map(s => ({
+        ...s,
+        score: s.total > 0 ? Math.round(((s.yes + s.partial * 0.5) / s.total) * 100) : 0
+      }));
+    }
+    // ============================================
+    // UI COMPONENTS
+    // ============================================
+
+    // ----------- LOGIN -----------
+    function LoginScreen({ onLogin }) {
+      const [pw, setPw] = useState('');
+      const [error, setError] = useState('');
+
+      const submit = () => {
+        if (pw === ADMIN_PASSWORD) {
+          sessionStorage.setItem('esg_admin_auth', '1');
+          onLogin();
+        } else {
+          setError('არასწორი პაროლი');
+          setPw('');
+        }
+      };
+
+      return React.createElement('div', { className: 'min-h-screen flex items-center justify-center px-4' },
+        React.createElement('div', { className: 'w-full max-w-sm fade-in' },
+          React.createElement('div', { className: 'text-center mb-8' },
+            React.createElement('img', {
+              src: LOGO_URL, alt: 'ENERGO-PRO',
+              className: 'h-12 w-auto mx-auto mb-5 rounded'
+            }),
+            React.createElement('h1', { className: 'text-xl font-semibold text-stone-900 mb-1' }, 'ESG Admin Panel'),
+            React.createElement('p', { className: 'text-xs text-stone-500' }, 'შესასვლელად შეიყვანეთ პაროლი')
+          ),
+          React.createElement('div', { className: 'bg-white border border-stone-200 rounded-2xl p-7 shadow-sm' },
+            React.createElement('input', {
+              type: 'password', value: pw, onChange: e => setPw(e.target.value),
+              onKeyDown: e => e.key === 'Enter' && submit(),
+              placeholder: 'პაროლი',
+              autoFocus: true,
+              className: 'w-full h-11 px-3.5 text-sm bg-stone-50 border border-stone-200 rounded-lg focus:outline-none focus:bg-white focus:border-blue-700 transition mb-3'
+            }),
+            error ? React.createElement('div', { className: 'text-xs text-rose-600 mb-3' }, error) : null,
+            React.createElement('button', {
+              onClick: submit,
+              className: 'w-full h-11 text-white text-sm font-medium rounded-lg transition shadow-sm hover:shadow',
+              style: { background: 'linear-gradient(135deg, #0E5BA8, #1976D2)' }
+            }, 'შესვლა')
+          )
+        )
+      );
+    }
+
+    // ----------- HEADER -----------
+    function AdminHeader({ onLogout, currentView, onNavigate }) {
+      return React.createElement('header', {
+        className: 'bg-white border-b border-stone-200 sticky top-0 z-40 shadow-sm'
+      },
+        React.createElement('div', { className: 'max-w-7xl mx-auto px-6 py-3 flex items-center justify-between gap-4' },
+          React.createElement('div', { className: 'flex items-center gap-4' },
+            React.createElement('img', {
+              src: LOGO_URL, alt: 'ENERGO-PRO',
+              className: 'h-9 w-auto rounded cursor-pointer',
+              onClick: () => onNavigate('list')
+            }),
+            React.createElement('div', { className: 'pl-3 border-l border-stone-200' },
+              React.createElement('div', { className: 'text-[11px] text-stone-400 uppercase tracking-wider font-medium' }, 'ADMIN PANEL'),
+              React.createElement('div', { className: 'text-sm font-medium text-stone-900' }, 'ESG შეფასებები')
+            )
+          ),
+          React.createElement('button', {
+            onClick: onLogout,
+            className: 'text-xs text-stone-500 hover:text-stone-900 hover:bg-stone-100 px-3 py-1.5 rounded-md transition'
+          }, 'გასვლა')
+        )
+      );
+    }
+
+    // ----------- DASHBOARD STATS -----------
+    function DashboardStats({ companies, allAnswersByCompany }) {
+      const total = companies.length;
+      const submitted = companies.filter(c => c.is_locked).length;
+      const inProgress = total - submitted;
+
+      // Average score across submitted companies
+      let avgScore = 0;
+      const submittedCompanies = companies.filter(c => c.is_locked);
+      if (submittedCompanies.length > 0) {
+        const scores = submittedCompanies.map(c => {
+          const answers = allAnswersByCompany[c.id] || [];
+          return calcStats(answers).score;
+        });
+        avgScore = Math.round(scores.reduce((a, b) => a + b, 0) / scores.length);
+      }
+
+      const cards = [
+        { label: 'სულ კომპანიები', value: total, color: 'blue' },
+        { label: 'შევსებული', value: submitted, color: 'emerald' },
+        { label: 'მიმდინარე', value: inProgress, color: 'amber' },
+        { label: 'საშ. ESG ქულა', value: avgScore + '%', color: 'indigo' }
+      ];
+
+      const colorMap = {
+        blue: 'bg-blue-50 text-blue-700 border-blue-100',
+        emerald: 'bg-emerald-50 text-emerald-700 border-emerald-100',
+        amber: 'bg-amber-50 text-amber-700 border-amber-100',
+        indigo: 'bg-indigo-50 text-indigo-700 border-indigo-100'
+      };
+
+      return React.createElement('div', { className: 'grid grid-cols-2 md:grid-cols-4 gap-3 mb-6' },
+        cards.map((c, i) => React.createElement('div', {
+          key: i,
+          className: `rounded-xl border p-4 ${colorMap[c.color]}`
+        },
+          React.createElement('div', { className: 'text-[11px] uppercase tracking-wider font-medium opacity-70 mb-1' }, c.label),
+          React.createElement('div', { className: 'text-2xl font-semibold' }, c.value)
+        ))
+      );
+    }
+    // ----------- COMPANY LIST -----------
+    function CompanyListScreen({ companies, allAnswersByCompany, onSelectCompany, onRefresh }) {
+      const [search, setSearch] = useState('');
+      const [filter, setFilter] = useState('all'); // all, submitted, in_progress
+
+      const filtered = useMemo(() => {
+        return companies.filter(c => {
+          if (filter === 'submitted' && !c.is_locked) return false;
+          if (filter === 'in_progress' && c.is_locked) return false;
+          if (search) {
+            const s = search.toLowerCase();
+            return (c.name || '').toLowerCase().includes(s) ||
+                   (c.id || '').toLowerCase().includes(s) ||
+                   (c.contact || '').toLowerCase().includes(s);
+          }
+          return true;
+        });
+      }, [companies, search, filter]);
+
+      const formatDate = (d) => {
+        if (!d) return '—';
+        return new Date(d).toLocaleDateString('ka-GE', { year: 'numeric', month: 'short', day: 'numeric' });
+      };
+
+      return React.createElement('div', { className: 'fade-in' },
+        React.createElement(DashboardStats, { companies, allAnswersByCompany }),
+
+        // Filters
+        React.createElement('div', { className: 'flex flex-wrap items-center gap-3 mb-4' },
+          React.createElement('input', {
+            type: 'text', value: search, onChange: e => setSearch(e.target.value),
+            placeholder: 'ძებნა კომპანიის სახელით ან ID-ით...',
+            className: 'flex-1 min-w-[200px] h-10 px-3.5 text-sm bg-white border border-stone-200 rounded-lg focus:outline-none focus:border-blue-700 transition'
+          }),
+          React.createElement('div', { className: 'inline-flex bg-white rounded-lg p-0.5 border border-stone-200' },
+            ['all', 'submitted', 'in_progress'].map(f => React.createElement('button', {
+              key: f,
+              onClick: () => setFilter(f),
+              className: `px-3 py-1.5 text-xs font-medium rounded-md transition ${filter === f ? 'bg-blue-700 text-white' : 'text-stone-600 hover:text-stone-900'}`
+            }, f === 'all' ? 'ყველა' : f === 'submitted' ? 'შევსებული' : 'მიმდინარე'))
+          ),
+          React.createElement('button', {
+            onClick: onRefresh,
+            className: 'h-10 px-3 text-xs font-medium text-stone-600 hover:text-stone-900 hover:bg-stone-100 rounded-lg transition'
+          }, '↻ განახლება')
+        ),
+
+        // Table
+        React.createElement('div', { className: 'bg-white border border-stone-200 rounded-xl overflow-hidden shadow-sm' },
+          React.createElement('div', { className: 'overflow-x-auto' },
+            React.createElement('table', { className: 'w-full text-sm' },
+              React.createElement('thead', { className: 'bg-stone-50 border-b border-stone-200' },
+                React.createElement('tr', null,
+                  React.createElement('th', { className: 'text-left px-4 py-3 font-medium text-stone-600 text-xs uppercase tracking-wider' }, 'კომპანია'),
+                  React.createElement('th', { className: 'text-left px-4 py-3 font-medium text-stone-600 text-xs uppercase tracking-wider' }, 'ID'),
+                  React.createElement('th', { className: 'text-left px-4 py-3 font-medium text-stone-600 text-xs uppercase tracking-wider' }, 'კონტაქტი'),
+                  React.createElement('th', { className: 'text-left px-4 py-3 font-medium text-stone-600 text-xs uppercase tracking-wider' }, 'სტატუსი'),
+                  React.createElement('th', { className: 'text-left px-4 py-3 font-medium text-stone-600 text-xs uppercase tracking-wider' }, 'შევსების თარიღი'),
+                  React.createElement('th', { className: 'text-left px-4 py-3 font-medium text-stone-600 text-xs uppercase tracking-wider' }, 'ESG ქულა'),
+                  React.createElement('th', { className: 'text-right px-4 py-3 font-medium text-stone-600 text-xs uppercase tracking-wider' }, '')
+                )
+              ),
+              React.createElement('tbody', null,
+                filtered.length === 0 ? React.createElement('tr', null,
+                  React.createElement('td', { colSpan: 7, className: 'px-4 py-12 text-center text-stone-400' }, 'კომპანიები ვერ მოიძებნა')
+                ) : filtered.map(c => {
+                  const answers = allAnswersByCompany[c.id] || [];
+                  const stats = calcStats(answers);
+                  const scoreColor = stats.score >= 70 ? 'text-emerald-700 bg-emerald-50' :
+                                     stats.score >= 40 ? 'text-amber-700 bg-amber-50' :
+                                     'text-rose-700 bg-rose-50';
+                  return React.createElement('tr', {
+                    key: c.id,
+                    onClick: () => onSelectCompany(c.id),
+                    className: 'border-b border-stone-100 hover:bg-stone-50 cursor-pointer transition'
+                  },
+                    React.createElement('td', { className: 'px-4 py-3 font-medium text-stone-900' }, c.name || '—'),
+                    React.createElement('td', { className: 'px-4 py-3 text-stone-600 font-mono text-xs' }, c.id),
+                    React.createElement('td', { className: 'px-4 py-3 text-stone-600' }, c.contact || '—'),
+                    React.createElement('td', { className: 'px-4 py-3' },
+                      c.is_locked
+                        ? React.createElement('span', { className: 'inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium bg-emerald-50 text-emerald-700 border border-emerald-200' }, '✓ შევსებული')
+                        : React.createElement('span', { className: 'inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium bg-amber-50 text-amber-700 border border-amber-200' }, '◷ მიმდინარე')
+                    ),
+                    React.createElement('td', { className: 'px-4 py-3 text-stone-600 text-xs' }, formatDate(c.submitted_at)),
+                    React.createElement('td', { className: 'px-4 py-3' },
+                      stats.total > 0
+                        ? React.createElement('span', { className: `inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold ${scoreColor}` }, stats.score + '%')
+                        : React.createElement('span', { className: 'text-stone-400 text-xs' }, '—')
+                    ),
+                    React.createElement('td', { className: 'px-4 py-3 text-right' },
+                      React.createElement('button', {
+                        onClick: e => { e.stopPropagation(); onSelectCompany(c.id); },
+                        className: 'text-blue-700 hover:text-blue-900 text-xs font-medium'
+                      }, 'ნახვა →')
+                    )
+                  );
+                })
+              )
+            )
+          )
+        )
+      );
+    }
+
+    // ----------- SECTION SCORES BAR CHART -----------
+    function SectionScoreBars({ sectionStats, lang = 'ka' }) {
+      return React.createElement('div', { className: 'space-y-2.5' },
+        sectionStats.map((s, i) => {
+          const color = s.score >= 70 ? '#059669' : s.score >= 40 ? '#d97706' : '#dc2626';
+          const bg = s.score >= 70 ? 'bg-emerald-500' : s.score >= 40 ? 'bg-amber-500' : 'bg-rose-500';
+          return React.createElement('div', { key: i },
+            React.createElement('div', { className: 'flex justify-between items-center mb-1' },
+              React.createElement('span', { className: 'text-[13px] font-medium text-stone-700' }, SECTION_NAMES[lang][i]),
+              React.createElement('span', { className: 'text-[13px] font-semibold', style: { color } }, s.score + '%')
+            ),
+            React.createElement('div', { className: 'h-2 bg-stone-100 rounded-full overflow-hidden' },
+              React.createElement('div', {
+                className: bg + ' h-full transition-all duration-500',
+                style: { width: s.score + '%' }
+              })
+            ),
+            React.createElement('div', { className: 'flex gap-3 mt-1 text-[10px] text-stone-500' },
+              React.createElement('span', { className: 'text-emerald-600' }, '✓ ', s.yes),
+              React.createElement('span', { className: 'text-amber-600' }, '◐ ', s.partial),
+              React.createElement('span', { className: 'text-rose-600' }, '✗ ', s.no)
+            )
+          );
+        })
+      );
+    }
+    // ----------- COMPANY DETAIL SCREEN -----------
+    function CompanyDetailScreen({ companyId, onBack }) {
+      const [company, setCompany] = useState(null);
+      const [answers, setAnswers] = useState([]);
+      const [loading, setLoading] = useState(true);
+      const [pdfLoading, setPdfLoading] = useState(false);
+
+      useEffect(() => {
+        (async () => {
+          setLoading(true);
+          const { data: c } = await supabase.from('esg_companies').select('*').eq('id', companyId).maybeSingle();
+          const { data: a } = await supabase.from('esg_answers').select('*').eq('company_id', companyId);
+          setCompany(c);
+          setAnswers(a || []);
+          setLoading(false);
+        })();
+      }, [companyId]);
+
+      if (loading) return React.createElement('div', { className: 'text-center py-20 text-stone-400' }, 'იტვირთება...');
+      if (!company) return React.createElement('div', { className: 'text-center py-20 text-stone-400' }, 'კომპანია ვერ მოიძებნა');
+
+      const stats = calcStats(answers);
+      const sectionStats = calcSectionStats(answers);
+      const formatDate = (d) => d ? new Date(d).toLocaleDateString('ka-GE', { year: 'numeric', month: 'long', day: 'numeric' }) : '—';
+
+      // Group answers by section
+      const answersBySection = SECTION_PREFIXES.map(() => []);
+      answers.forEach(a => {
+        const idx = getSectionIndex(a.question_id);
+        if (idx >= 0) answersBySection[idx].push(a);
+      });
+      // Sort within sections by question id
+      answersBySection.forEach(arr => arr.sort((a, b) => a.question_id.localeCompare(b.question_id)));
+
+      const downloadPdf = async () => {
+        setPdfLoading(true);
+        try {
+          await generateCompanyPDF(company, answers, sectionStats, stats);
+        } catch (e) {
+          console.error(e);
+          alert('PDF შექმნა ვერ მოხერხდა: ' + (e.message || ''));
+        } finally {
+          setPdfLoading(false);
+        }
+      };
+
+      return React.createElement('div', { className: 'fade-in' },
+        // Header bar
+        React.createElement('div', { className: 'flex flex-wrap items-center justify-between gap-3 mb-5' },
+          React.createElement('button', {
+            onClick: onBack,
+            className: 'text-sm text-stone-600 hover:text-stone-900 flex items-center gap-1.5'
+          }, '←', ' კომპანიების სია'),
+          React.createElement('button', {
+            onClick: downloadPdf,
+            disabled: pdfLoading,
+            className: 'h-10 px-4 text-sm font-medium text-white rounded-lg shadow-sm hover:shadow disabled:opacity-50',
+            style: { background: 'linear-gradient(135deg, #0E5BA8, #1976D2)' }
+          }, pdfLoading ? '⌛ იქმნება...' : '📄 PDF ჩამოტვირთვა')
+        ),
+
+        // Company info card
+        React.createElement('div', { className: 'bg-white border border-stone-200 rounded-xl p-6 mb-5 shadow-sm' },
+          React.createElement('div', { className: 'flex items-start justify-between gap-4 flex-wrap' },
+            React.createElement('div', null,
+              React.createElement('h1', { className: 'text-xl font-semibold text-stone-900 mb-1' }, company.name || '—'),
+              React.createElement('div', { className: 'flex flex-wrap gap-x-5 gap-y-1 text-xs text-stone-500' },
+                React.createElement('div', null, React.createElement('span', { className: 'font-medium' }, 'ID: '), React.createElement('span', { className: 'font-mono' }, company.id)),
+                React.createElement('div', null, React.createElement('span', { className: 'font-medium' }, 'კონტაქტი: '), company.contact || '—'),
+                React.createElement('div', null, React.createElement('span', { className: 'font-medium' }, 'შევსების თარიღი: '), formatDate(company.submitted_at)),
+                React.createElement('div', null, React.createElement('span', { className: 'font-medium' }, 'სტატუსი: '),
+                  company.is_locked
+                    ? React.createElement('span', { className: 'text-emerald-700 font-medium' }, '✓ შევსებული')
+                    : React.createElement('span', { className: 'text-amber-700 font-medium' }, '◷ მიმდინარე')
+                )
+              )
+            ),
+            React.createElement('div', { className: 'text-right' },
+              React.createElement('div', { className: 'text-[11px] text-stone-400 uppercase tracking-wider font-medium' }, 'საერთო ESG ქულა'),
+              React.createElement('div', {
+                className: 'text-3xl font-semibold',
+                style: { color: stats.score >= 70 ? '#059669' : stats.score >= 40 ? '#d97706' : '#dc2626' }
+              }, stats.score + '%'),
+              React.createElement('div', { className: 'text-[11px] text-stone-500' }, stats.yes + ' კი • ' + stats.partial + ' ნაწილ. • ' + stats.no + ' არა')
+            )
+          )
+        ),
+
+        // Section scores
+        React.createElement('div', { className: 'grid grid-cols-1 lg:grid-cols-[1fr_2fr] gap-5 mb-5' },
+          React.createElement('div', { className: 'bg-white border border-stone-200 rounded-xl p-5 shadow-sm' },
+            React.createElement('h3', { className: 'text-sm font-semibold text-stone-900 mb-4' }, 'სექციების მიხედვით'),
+            React.createElement(SectionScoreBars, { sectionStats })
+          ),
+          React.createElement('div', { className: 'bg-white border border-stone-200 rounded-xl p-5 shadow-sm' },
+            React.createElement('h3', { className: 'text-sm font-semibold text-stone-900 mb-4' }, 'პასუხების განაწილება'),
+            React.createElement(AnswerDistribution, { stats })
+          )
+        ),
+
+        // All answers grouped by section
+        React.createElement('div', { className: 'bg-white border border-stone-200 rounded-xl p-5 shadow-sm' },
+          React.createElement('h3', { className: 'text-sm font-semibold text-stone-900 mb-4' }, 'სრული პასუხები'),
+          answersBySection.map((arr, sIdx) => {
+            if (arr.length === 0) return null;
+            return React.createElement('div', { key: sIdx, className: 'mb-6 last:mb-0' },
+              React.createElement('h4', {
+                className: 'text-[13px] font-semibold text-blue-700 mb-2 pb-2 border-b border-stone-200 flex items-center justify-between'
+              },
+                React.createElement('span', null, (sIdx + 1) + '. ' + SECTION_NAMES.ka[sIdx]),
+                React.createElement('span', { className: 'text-xs text-stone-400 font-normal' }, sectionStats[sIdx].score + '%')
+              ),
+              React.createElement('div', { className: 'space-y-1.5' },
+                arr.map(a => {
+                  const ansLabel = a.answer === 'yes' ? '✓ კი' : a.answer === 'no' ? '✗ არა' : '◐ ნაწილ.';
+                  const ansColor = a.answer === 'yes' ? 'bg-emerald-50 text-emerald-800 border-emerald-200' :
+                                   a.answer === 'no' ? 'bg-rose-50 text-rose-800 border-rose-200' :
+                                   'bg-amber-50 text-amber-800 border-amber-200';
+                  const auto = a.was_auto_suggested ? React.createElement('span', { className: 'text-[10px] text-stone-400 ml-1.5' }, '(ავტო)') : null;
+                  return React.createElement('div', {
+                    key: a.question_id,
+                    className: 'flex gap-3 items-start py-2 px-3 hover:bg-stone-50 rounded'
+                  },
+                    React.createElement('span', { className: 'text-[11px] text-stone-400 font-mono mt-1 min-w-[60px]' }, a.question_id),
+                    React.createElement('div', { className: 'flex-1 text-[13px] text-stone-700' },
+                      a.partial_text
+                        ? React.createElement('div', null,
+                            React.createElement('span', { className: 'text-stone-500 italic' }, 'შენიშვნა: '),
+                            a.partial_text
+                          )
+                        : React.createElement('span', { className: 'text-stone-400 italic text-[12px]' }, '—')
+                    ),
+                    React.createElement('span', { className: 'text-[11px] font-semibold px-2 py-0.5 rounded border whitespace-nowrap ' + ansColor }, ansLabel),
+                    auto
+                  );
+                })
+              )
+            );
+          })
+        )
+      );
+    }
+
+    // ----------- ANSWER DISTRIBUTION CHART -----------
+    function AnswerDistribution({ stats }) {
+      const total = stats.total || 1;
+      const yesPct = (stats.yes / total) * 100;
+      const partialPct = (stats.partial / total) * 100;
+      const noPct = (stats.no / total) * 100;
+
+      return React.createElement('div', null,
+        React.createElement('div', { className: 'h-3 rounded-full overflow-hidden flex bg-stone-100 mb-4' },
+          React.createElement('div', { className: 'bg-emerald-500', style: { width: yesPct + '%' } }),
+          React.createElement('div', { className: 'bg-amber-500', style: { width: partialPct + '%' } }),
+          React.createElement('div', { className: 'bg-rose-500', style: { width: noPct + '%' } })
+        ),
+        React.createElement('div', { className: 'grid grid-cols-3 gap-3' },
+          React.createElement('div', { className: 'bg-emerald-50 border border-emerald-100 rounded-lg p-3 text-center' },
+            React.createElement('div', { className: 'text-[10px] text-emerald-700 uppercase tracking-wider font-medium mb-1' }, 'კი'),
+            React.createElement('div', { className: 'text-2xl font-semibold text-emerald-700' }, stats.yes),
+            React.createElement('div', { className: 'text-[10px] text-emerald-600' }, Math.round(yesPct) + '%')
+          ),
+          React.createElement('div', { className: 'bg-amber-50 border border-amber-100 rounded-lg p-3 text-center' },
+            React.createElement('div', { className: 'text-[10px] text-amber-700 uppercase tracking-wider font-medium mb-1' }, 'ნაწილობრივ'),
+            React.createElement('div', { className: 'text-2xl font-semibold text-amber-700' }, stats.partial),
+            React.createElement('div', { className: 'text-[10px] text-amber-600' }, Math.round(partialPct) + '%')
+          ),
+          React.createElement('div', { className: 'bg-rose-50 border border-rose-100 rounded-lg p-3 text-center' },
+            React.createElement('div', { className: 'text-[10px] text-rose-700 uppercase tracking-wider font-medium mb-1' }, 'არა'),
+            React.createElement('div', { className: 'text-2xl font-semibold text-rose-700' }, stats.no),
+            React.createElement('div', { className: 'text-[10px] text-rose-600' }, Math.round(noPct) + '%')
+          )
+        )
+      );
+    }
+
+    // ============================================
+    // PDF GENERATION
+    // ============================================
+    async function generateCompanyPDF(company, answers, sectionStats, stats) {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({ unit: 'mm', format: 'a4' });
+
+      const container = document.createElement('div');
+      container.style.position = 'fixed';
+      container.style.left = '-10000px';
+      container.style.top = '0';
+      container.style.width = '794px';
+      container.style.padding = '40px 50px';
+      container.style.background = 'white';
+      container.style.fontFamily = "'Noto Sans Georgian', 'Inter', sans-serif";
+      container.style.color = '#1c1917';
+
+      const dateStr = new Date().toLocaleDateString('ka-GE', { year: 'numeric', month: 'long', day: 'numeric' });
+      const submittedStr = company.submitted_at ? new Date(company.submitted_at).toLocaleDateString('ka-GE', { year: 'numeric', month: 'long', day: 'numeric' }) : '—';
+      const scoreColor = stats.score >= 70 ? '#059669' : stats.score >= 40 ? '#d97706' : '#dc2626';
+
+      // Group answers by section
+      const answersBySection = SECTION_PREFIXES.map(() => []);
+      answers.forEach(a => {
+        const idx = getSectionIndex(a.question_id);
+        if (idx >= 0) answersBySection[idx].push(a);
+      });
+      answersBySection.forEach(arr => arr.sort((a, b) => a.question_id.localeCompare(b.question_id)));
+
+      let html = `
+        <div style="border-bottom: 3px solid #0E5BA8; padding-bottom: 20px; margin-bottom: 24px; display: flex; justify-content: space-between; align-items: flex-start;">
+          <div>
+            <img src="${LOGO_URL}" style="height: 50px; width: auto; margin-bottom: 12px;" />
+            <h1 style="font-size: 22px; font-weight: 600; margin: 0; color: #1c1917;">ESG შეფასების ანგარიში</h1>
+            <p style="font-size: 11px; color: #78716c; margin: 4px 0 0;">Admin Report</p>
+          </div>
+          <div style="text-align: right;">
+            <div style="font-size: 11px; color: #78716c; font-weight: 500; margin-bottom: 4px;">საერთო ESG ქულა</div>
+            <div style="font-size: 32px; font-weight: 600; color: ${scoreColor}; line-height: 1;">${stats.score}%</div>
+            <div style="font-size: 10px; color: #78716c; margin-top: 4px;">გენერ.: ${dateStr}</div>
+          </div>
+        </div>
+
+        <div style="background: #F5F8FC; border: 1px solid #E0E7F0; border-radius: 10px; padding: 16px 20px; margin-bottom: 24px;">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px 24px; font-size: 12px;">
+            <div>
+              <div style="color: #78716c; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 500; margin-bottom: 3px;">კომპანია</div>
+              <div style="font-weight: 500;">${escapeHtml(company.name || '—')}</div>
+            </div>
+            <div>
+              <div style="color: #78716c; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 500; margin-bottom: 3px;">საიდენტიფიკაციო ნომერი</div>
+              <div style="font-weight: 500;">${escapeHtml(company.id || '')}</div>
+            </div>
+            <div>
+              <div style="color: #78716c; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 500; margin-bottom: 3px;">კონტაქტი</div>
+              <div style="font-weight: 500;">${escapeHtml(company.contact || '—')}</div>
+            </div>
+            <div>
+              <div style="color: #78716c; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 500; margin-bottom: 3px;">შევსების თარიღი</div>
+              <div style="font-weight: 500;">${submittedStr}</div>
+            </div>
+          </div>
+        </div>
+
+        <h2 style="font-size: 14px; font-weight: 600; color: #0E5BA8; margin: 0 0 12px; padding-bottom: 6px; border-bottom: 1px solid #E0E7F0;">სექციების მიხედვით ქულები</h2>
+        <div style="margin-bottom: 24px;">
+          ${sectionStats.map((s, i) => {
+            const c = s.score >= 70 ? '#059669' : s.score >= 40 ? '#d97706' : '#dc2626';
+            return `<div style="margin-bottom: 8px;">
+              <div style="display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 3px;">
+                <span style="font-weight: 500;">${i+1}. ${escapeHtml(SECTION_NAMES.ka[i])}</span>
+                <span style="font-weight: 600; color: ${c};">${s.score}%</span>
+              </div>
+              <div style="height: 6px; background: #f0f0f0; border-radius: 3px; overflow: hidden;">
+                <div style="height: 100%; width: ${s.score}%; background: ${c};"></div>
+              </div>
+            </div>`;
+          }).join('')}
+        </div>
+      `;
+
+      // Section answers
+      answersBySection.forEach((arr, sIdx) => {
+        if (arr.length === 0) return;
+        html += `<div style="margin-bottom: 20px; page-break-inside: avoid;">
+          <h2 style="font-size: 14px; font-weight: 600; color: #0E5BA8; margin: 0 0 10px; padding-bottom: 6px; border-bottom: 1px solid #E0E7F0;">
+            ${sIdx + 1}. ${escapeHtml(SECTION_NAMES.ka[sIdx])} 
+            <span style="float: right; font-size: 11px; color: #78716c; font-weight: 500;">${sectionStats[sIdx].score}%</span>
+          </h2>`;
+
+        arr.forEach((a, qIdx) => {
+          const ansVal = a.answer || '';
+          const ansLabel = ansVal === 'yes' ? '✓ კი' : ansVal === 'no' ? '✗ არა' : ansVal === 'partial' ? '◐ ნაწილ.' : '—';
+          const ansColor = ansVal === 'yes' ? '#059669' : ansVal === 'no' ? '#dc2626' : ansVal === 'partial' ? '#d97706' : '#78716c';
+          const ansBg = ansVal === 'yes' ? '#ECFDF5' : ansVal === 'no' ? '#FEF2F2' : ansVal === 'partial' ? '#FFFBEB' : '#F5F5F4';
+          const auto = a.was_auto_suggested ? ' (ავტო)' : '';
+
+          html += `<div style="margin-bottom: 6px; padding: 8px 12px; border: 1px solid #E7E5E4; border-radius: 6px; background: white;">
+            <div style="display: flex; gap: 10px; align-items: flex-start;">
+              <div style="font-size: 10px; color: #78716c; font-family: monospace; min-width: 48px;">${escapeHtml(a.question_id)}</div>
+              <div style="flex: 1; font-size: 11px; line-height: 1.5; color: #57534e;">${a.partial_text ? '<i>შენიშვნა: ' + escapeHtml(a.partial_text) + '</i>' : '<span style="color: #a8a29e;">—</span>'}</div>
+              <div style="font-size: 10px; font-weight: 600; color: ${ansColor}; background: ${ansBg}; padding: 3px 8px; border-radius: 4px; white-space: nowrap;">${ansLabel}${auto}</div>
+            </div>
+          </div>`;
+        });
+
+        html += `</div>`;
+      });
+
+      html += `<div style="margin-top: 30px; padding-top: 16px; border-top: 1px solid #E0E7F0; text-align: center; font-size: 10px; color: #a8a29e;">
+        ENERGO-PRO Georgia • ESG Admin Report • ${dateStr}
+      </div>`;
+
+      container.innerHTML = html;
+      document.body.appendChild(container);
+
+      try {
+        await new Promise(r => setTimeout(r, 800));
+        const canvas = await html2canvas(container, {
+          scale: 2, useCORS: true, allowTaint: true, backgroundColor: '#ffffff',
+          logging: false, windowWidth: 794, imageTimeout: 5000
+        });
+        const imgWidth = 210, pageHeight = 297;
+        const imgHeight = (canvas.height * imgWidth) / canvas.width;
+        let heightLeft = imgHeight, position = 0;
+        const imgData = canvas.toDataURL('image/jpeg', 0.92);
+        doc.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+        while (heightLeft > 0) {
+          position = heightLeft - imgHeight;
+          doc.addPage();
+          doc.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
+          heightLeft -= pageHeight;
+        }
+        const filename = `ESG_Admin_${(company.name || 'company').replace(/[^a-zA-Z0-9-_]/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf`;
+        doc.save(filename);
+      } finally {
+        document.body.removeChild(container);
+      }
+    }
+
+    // ============================================
+    // ROOT APP
+    // ============================================
+    function App() {
+      const [authed, setAuthed] = useState(sessionStorage.getItem('esg_admin_auth') === '1');
+      const [view, setView] = useState('list'); // 'list' or 'detail'
+      const [selectedId, setSelectedId] = useState(null);
+      const [companies, setCompanies] = useState([]);
+      const [allAnswersByCompany, setAllAnswersByCompany] = useState({});
+      const [loading, setLoading] = useState(false);
+
+      const refresh = async () => {
+        setLoading(true);
+        const list = await loadAllCompanies();
+        setCompanies(list);
+        // Load answers for each in parallel
+        const answersMap = {};
+        await Promise.all(list.map(async c => {
+          const a = await loadCompanyAnswers(c.id);
+          answersMap[c.id] = a;
+        }));
+        setAllAnswersByCompany(answersMap);
+        setLoading(false);
+      };
+
+      useEffect(() => {
+        if (authed) refresh();
+      }, [authed]);
+
+      const onLogout = () => {
+        sessionStorage.removeItem('esg_admin_auth');
+        setAuthed(false);
+      };
+
+      if (!authed) return React.createElement(LoginScreen, { onLogin: () => setAuthed(true) });
+
+      return React.createElement('div', { className: 'min-h-screen' },
+        React.createElement(AdminHeader, {
+          onLogout,
+          currentView: view,
+          onNavigate: (v) => { setView(v); if (v === 'list') refresh(); }
+        }),
+        React.createElement('main', { className: 'max-w-7xl mx-auto px-6 py-6' },
+          loading
+            ? React.createElement('div', { className: 'text-center py-20 text-stone-400 text-sm' }, 'იტვირთება მონაცემები...')
+            : view === 'list'
+              ? React.createElement(CompanyListScreen, {
+                  companies, allAnswersByCompany,
+                  onSelectCompany: (id) => { setSelectedId(id); setView('detail'); },
+                  onRefresh: refresh
+                })
+              : React.createElement(CompanyDetailScreen, {
+                  companyId: selectedId,
+                  onBack: () => setView('list')
+                })
+        )
+      );
+    }
+
+    const root = createRoot(document.getElementById('root'));
+    root.render(React.createElement(App));
+  </script>
+</body>
+</html>
