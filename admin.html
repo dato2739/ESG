@@ -55,6 +55,90 @@
 
     const SECTION_PREFIXES = ['q_2_', 'q_3_', 'q_4_', 'q_5_', 'q_6_', 'q_7_', 'q_8_'];
 
+    const QUESTIONS = {
+      'q_2_1': { ka: 'აქვს კომპანიას ხარისხის მართვის სერტიფიკატი?', en: 'Are there any certifications for the quality management system?' },
+      'q_2_2': { ka: 'აქვს კომპანიას ხარისხის სახელმძღვანელო?', en: 'Is there a quality manual defining production procedures?' },
+      'q_2_2_1': { ka: 'სახელმძღვანელო შეიცავს ხარისხის ინდიკატორებს და სამიზნე მიზნებს?', en: 'Does the manual contain quality indicators and target goals?' },
+      'q_2_3': { ka: 'აქვს კომპანიას მენეჯმენტის გადახედვის პროცესი?', en: 'Does the supplier have a management review process?' },
+      'q_2_4': { ka: 'ტარდება შიდა აუდიტი?', en: 'Are there internal audits?' },
+      'q_2_5': { ka: 'აქვს მომწოდებელს ხარისხის გაუმჯობესების სამოქმედო გეგმა?', en: 'Does the supplier have an action plan for quality improvement?' },
+      'q_2_6': { ka: 'აქვს კომპანიას ორგანიზაციული სტრუქტურა გამოფენილი?', en: 'Does the supplier have an organizational chart displayed?' },
+      'q_2_7': { ka: 'არსებობს უწყვეტი გაუმჯობესების სტრატეგია?', en: 'Does a continuous improvement strategy exist?' },
+      'q_2_8': { ka: 'გამოაქვეყნებს კომპანია წლიურ ESG რეპორტს?', en: 'Does the company publish an annual ESG/Sustainability Report?' },
+      'q_2_9': { ka: 'არის კლიენტთა კმაყოფილების შეფასების პროცედურა?', en: 'Are there customer satisfaction procedures?' },
+      'q_2_10': { ka: 'არსებობს საჩივრებისა და კრიზის მართვის პროცედურა?', en: 'Does a claim and crisis management procedure exist?' },
+      'q_2_11': { ka: 'არის შეკვეთის თვალყურის-დევნების პროცედურა?', en: 'Are there order follow-up procedures?' },
+      'q_2_12': { ka: 'აქვს მომწოდებელს დოკუმენტების მართვის სისტემა?', en: 'Does the supplier have a document management system?' },
+      'q_2_13': { ka: 'არის ტრენინგ-პროგრამები მენეჯმენტისთვის და თანამშრომლებისთვის?', en: 'Are there training programs for management and employees?' },
+      'q_2_13_1': { ka: 'თანამშრომლები საკმარისად კვალიფიციურები არიან?', en: 'Are the employees properly skilled for their role?' },
+      'q_2_13_2': { ka: 'არის მუშათა ტრენინგისა და ცოდნის ამაღლების პროგრამა?', en: 'Are there worker training or knowledge programs?' },
+      'q_2_14': { ka: 'მოწოდებული მასალები მოწმდება შემოსვლისას?', en: 'Are incoming materials inspected upon arrival?' },
+      'q_2_14_1': { ka: 'არის შემოსული მასალების ინსპექციის წერილობითი პროცედურა?', en: 'Are there written inspection procedures for incoming materials?' },
+      'q_2_14_2': { ka: 'მიღებული და უარყოფილი მასალები ცალ-ცალკე ინახება?', en: 'Are accepted vs rejected materials kept segregated?' },
+      'q_2_15': { ka: 'არის წერილობითი პროცედურები ყველა საწარმოო პროცესისთვის?', en: 'Are there written procedures for all manufacturing processes?' },
+      'q_2_15_1': { ka: 'მნიშვნელოვანი მახასიათებლები მონიტორინგდება წარმოების დროს?', en: 'Are important characteristics monitored during production?' },
+      'q_2_15_2': { ka: 'ტარდება საბოლოო ინსპექცია თითოეულ პარტიაზე?', en: 'Is final inspection performed on each lot?' },
+      'q_3_1': { ka: 'აქვს კომპანიას ადამიანის უფლებების დაცვის პოლიტიკა?', en: 'Has the company established human rights policies?' },
+      'q_3_1_1': { ka: 'უზრუნველყოფს უსაფრთხო და ჯანსაღ სამუშაო პირობებს?', en: 'Are safe and healthy working conditions provided?' },
+      'q_3_1_2': { ka: 'უზრუნველყოფს გაერთიანების თავისუფლებას?', en: 'Is freedom of association guaranteed?' },
+      'q_3_1_3': { ka: 'უზრუნველყოფს არადისკრიმინაციულ კადრების პოლიტიკას?', en: 'Is non-discrimination ensured in personnel practices?' },
+      'q_3_1_4': { ka: 'არ იყენებს იძულებით ან ბავშვთა შრომას?', en: 'Is forced or child labour avoided directly and indirectly?' },
+      'q_3_2': { ka: 'ჩაატარა კომპანიამ ადამიანის უფლებების შეფასება იმ ქვეყნებში, სადაც საქმიანობს?', en: 'Has the company performed a human rights assessment in operating countries?' },
+      'q_3_2_1': { ka: 'აქვს კომპანიას მკაფიო პოლიტიკა, რომელიც იცავს როგორც საკუთარი თანამშრომლების, ასევე მიწოდების ჯაჭვის მუშაკთა უფლებებს?', en: 'Does the company have explicit policies protecting workers human rights in employment and supply chain?' },
+      'q_3_2_2': { ka: 'აქვს მონიტორინგის სისტემა?', en: 'Has the company established monitoring/tracking system?' },
+      'q_3_2_3': { ka: 'აქვს პოლიტიკა, რომ უსაფრთხოების ღონისძიებები არ იწვევდეს უფლებების დარღვევას?', en: 'Does security policy avoid contributing to human rights violations?' },
+      'q_4_1': { ka: 'კომპანია პატივს სცემს მუშაკთა უფლებას შექმნან პროფკავშირები?', en: 'Does the company respect workers right to form trade unions?' },
+      'q_4_1_1': { ka: 'აქვს არადისკრიმინაციული პოლიტიკა და პროცედურები?', en: 'Are non-discriminatory policies and procedures in place?' },
+      'q_4_1_2': { ka: 'მუშაკთა წარმომადგენლებს ეძლევათ შესაბამისი საშუალებები?', en: 'Are workers representatives provided appropriate facilities?' },
+      'q_4_1_3': { ka: 'არ ერევა მუშაკთა წარმომადგენლების საქმიანობაში?', en: 'Does the company avoid interfering with worker representatives?' },
+      'q_4_2': { ka: 'კომპანიას აქვს მკაფიო პოლიტიკა იძულებითი შრომის წინააღმდეგ?', en: 'Does the company have clear policy against forced labour?' },
+      'q_4_2_1': { ka: 'ყველა თანამშრომელს ესმის, რა არის იძულებითი შრომა?', en: 'Do all officials understand what forced labour means?' },
+      'q_4_2_2': { ka: 'შრომითი ხელშეკრულებები იწერება მუშაკისთვის გასაგებ ენაზე?', en: 'Are employment contracts written in workers language?' },
+      'q_4_2_3': { ka: 'კომპანია იცის რომელ ქვეყნებში/სექტორებში იძულებითი შრომის რისკი მაღალია?', en: 'Is the company aware of high-risk regions/sectors?' },
+      'q_4_2_4': { ka: 'კომპანია არ ჩამოართმევს მუშაკებს პირადობის დოკუმენტებს?', en: 'Does the company avoid confiscating workers identity documents?' },
+      'q_4_2_5': { ka: 'მონიტორინგდება მიწოდების ჯაჭვი და სუბკონტრაქტორები?', en: 'Are supply chains and subcontractors monitored?' },
+      'q_4_3': { ka: 'კომპანია ანვითარებს ცნობიერებას ბავშვთა შრომის მიზეზებსა და შედეგებზე?', en: 'Is awareness of child labour developed within the company?' },
+      'q_4_3_1': { ka: 'იცავს ეროვნული კანონით დადგენილ მინიმალურ ასაკობრივ ნორმებს?', en: 'Does the company adhere to minimum age provisions?' },
+      'q_4_3_2': { ka: 'ცნობს ბავშვთა შრომის რისკ-ქვეყნებსა და სექტორებს?', en: 'Is the company aware of high-risk regions for child labour?' },
+      'q_4_3_3': { ka: 'იყენებს ასაკის შემოწმების მექანიზმებს დაქირავებისას?', en: 'Are age verification mechanisms used in recruitment?' },
+      'q_4_3_4': { ka: 'აქვს პოლიტიკა 18 წლამდე პირების დაქირავების წინააღმდეგ?', en: 'Does the company have policy against hiring under 18?' },
+      'q_4_3_5': { ka: 'ახდენს გავლენას ქვე-კონტრაქტორებზე ბავშვთა შრომის წინააღმდეგ?', en: 'Does the company influence subcontractors against child labour?' },
+      'q_4_3_6': { ka: 'შემუშავებული აქვს ბავშვთა შრომის გამოვლენის მექანიზმი?', en: 'Has the company developed mechanisms to detect child labour?' },
+      'q_4_4': { ka: 'კვალიფიკაცია, უნარები და გამოცდილება არის დაქირავების და დაწინაურების საფუძველი?', en: 'Are qualifications, skill, experience the basis for recruitment/promotion?' },
+      'q_4_4_1': { ka: 'მაღალი დონის პასუხისმგებელი პირი დანიშნულია თანასწორი დასაქმების საკითხებზე?', en: 'Is high-level responsibility assigned for equal employment?' },
+      'q_4_4_2': { ka: 'ინახება განახლებული ჩანაწერები დაქირავების, ტრენინგის და დაწინაურების შესახებ?', en: 'Are records kept on recruitment, training, promotion?' },
+      'q_4_4_3': { ka: 'ტარდება არაცნობიერი მიკერძოების ტრენინგი?', en: 'Is unconscious bias training conducted?' },
+      'q_4_4_4': { ka: 'აქვს საჩივრების წარდგენის პროცედურა დისკრიმინაციის შემთხვევაში?', en: 'Are grievance procedures developed for discrimination?' },
+      'q_4_4_5': { ka: 'ტარდება არადისკრიმინაციული პოლიტიკის ტრენინგი?', en: 'Is non-discrimination training provided?' },
+      'q_4_4_6': { ka: 'აქვს უნარების განვითარების ხელმისაწვდომობის პროგრამა?', en: 'Are programs in place to promote access to skills training?' },
+      'q_5_1': { ka: 'აქვს კომპანიას ქცევის კოდექსი ჯანმრთელობასა და გარემოზე ზრუნვისთვის?', en: 'Does the company have code of conduct for health/environment care?' },
+      'q_5_1_1': { ka: 'აქვს მენეჯერული კომიტეტი წინდახედული მიდგომის ზედამხედველობისთვის?', en: 'Is there a managerial committee overseeing precautionary application?' },
+      'q_5_1_2': { ka: 'დამყარებულია ორმხრივი კომუნიკაცია დაინტერესებულ მხარეებთან?', en: 'Is two-way communication established with stakeholders?' },
+      'q_5_1_3': { ka: 'იყენებს მრავალმხრივ შეხვედრებს და ფოკუს-ჯგუფებს?', en: 'Does the company use multi-stakeholder meetings and focus groups?' },
+      'q_5_2': { ka: 'აქვს განსაზღვრული მდგრადი განვითარების ხედვა?', en: 'Are sustainable development vision and policies defined?' },
+      'q_5_2_1': { ka: 'შემუშავებულია მდგრადობის სამიზნე მაჩვენებლები?', en: 'Are sustainability targets and indicators developed?' },
+      'q_5_2_2': { ka: 'აქვს მდგრადი წარმოების და მოხმარების პროგრამა?', en: 'Is there sustainable production/consumption programme?' },
+      'q_5_2_3': { ka: 'მუშაობს დიზაინერებთან და მომწოდებლებთან გარემოსდაცვითი მაჩვენებლების გასაუმჯობესებლად?', en: 'Does the company work with designers/suppliers to improve environmental performance?' },
+      'q_5_2_4': { ka: 'ზომავს და აცნობს პროგრესს მდგრადობის პრინციპებზე?', en: 'Does the company measure/communicate sustainability progress?' },
+      'q_5_3': { ka: 'აქვს კომპანიას პოლიტიკა გარემოსდაცვითი ტექნოლოგიების გამოყენებაზე?', en: 'Is there policy on use of environmentally sound technologies?' },
+      'q_5_3_1': { ka: 'აწვდის ინფორმაციას ტექნოლოგიების გარემოსდაცვითი მაჩვენებლების შესახებ?', en: 'Is information made available about environmental performance?' },
+      'q_5_3_2': { ka: 'იყენებს ცხოვრების ციკლის შეფასებას (LCA) ახალი ტექნოლოგიებისთვის?', en: 'Is life cycle assessment used in new technology development?' },
+      'q_5_3_3': { ka: 'ამოწმებს კრიტერიუმებს მომწოდებელთა შესარჩევად?', en: 'Are criteria examined for supplier selection?' },
+      'q_5_3_4': { ka: 'თანამშრომლობს ინდუსტრიის პარტნიორებთან საუკეთესო ტექნოლოგიების უზრუნველსაყოფად?', en: 'Does the company cooperate with industry partners on best technology?' },
+      'q_6_1': { ka: 'აქვს კომპანიას ანტიკორუფციული პოლიტიკა და პროგრამები?', en: 'Does the company have anti-corruption policies and programmes?' },
+      'q_6_1_1': { ka: 'წლიურ ანგარიშებში მოცემულია ანტიკორუფციული მუშაობის შედეგები?', en: 'Is anti-corruption work reported in annual reports?' },
+      'q_6_1_2': { ka: 'კომპანია იზიარებს გამოცდილებას და საუკეთესო პრაქტიკას?', en: 'Does the company share experiences and best practices?' },
+      'q_6_1_3': { ka: 'თანამშრომლობს ინდუსტრიის თანატოლებთან ანტიკორუფციული ძალისხმევის გასაძლიერებლად?', en: 'Does the company join forces with industry peers in anti-corruption?' },
+      'q_7_1': { ka: 'აქვს კომპანიას ჯანდაცვისა და უსაფრთხოების პოლიტიკა?', en: 'Does the company have H&S policy and procedures?' },
+      'q_7_1_1': { ka: 'ხელმისაწვდომია H&S სტატისტიკა (ინციდენტები, ფატალური შემთხვევები)?', en: 'Are H&S statistics available (incidents, fatalities)?' },
+      'q_7_1_2': { ka: 'კომპანია გადასცემს მუშაკებს H&S შედეგებსა და სტატისტიკას?', en: 'Does the company communicate H&S performance to workers?' },
+      'q_7_1_3': { ka: 'არის გეგმები რომლებიც უზრუნველყოფს PPE-ს (პირადი დაცვის საშუალებები)?', en: 'Are there plans/standards committing to PPE for workers?' },
+      'q_8_1': { ka: 'აქვს კომპანიას დეკარბონიზაციის გეგმა?', en: 'Does the company have a decarbonization plan?' },
+      'q_8_1_1': { ka: 'აქვს კომპანიას ნახშირბადის შემცირების სამიზნე მაჩვენებლები?', en: 'Does the company have carbon reduction targets?' },
+      'q_8_1_2': { ka: 'იდენტიფიცირებული აქვს დეკარბონიზაციის სტრატეგიის ძირითადი დაბრკოლებები?', en: 'Has the company identified main obstacles of decarbonization?' },
+      'q_8_2': { ka: 'იდენტიფიცირებული აქვს კლიმატთან ადაპტაციის რისკები და ღონისძიებები?', en: 'Has the company identified climate adaptation risks and measures?' },
+    };
+
     function getSectionIndex(qid) {
       for (let i = 0; i < SECTION_PREFIXES.length; i++) {
         if (qid.startsWith(SECTION_PREFIXES[i])) return i;
@@ -87,6 +171,31 @@
         .eq('company_id', companyId);
       if (error) console.error('Load answers error:', error);
       return data || [];
+    }
+
+    async function deleteCompany(companyId) {
+      // Need to delete answers first (FK constraint)
+      const { error: ansErr } = await supabase
+        .from('esg_answers')
+        .delete()
+        .eq('company_id', companyId);
+      if (ansErr) {
+        console.error('Delete answers error:', ansErr);
+        return { error: ansErr };
+      }
+      // Also try admin_answers if any
+      await supabase.from('esg_admin_answers').delete().eq('company_id', companyId);
+      // Need to unlock first if locked, because RLS prevents updating locked companies
+      // Use a workaround: directly delete (RLS may need to allow this)
+      const { error: compErr } = await supabase
+        .from('esg_companies')
+        .delete()
+        .eq('id', companyId);
+      if (compErr) {
+        console.error('Delete company error:', compErr);
+        return { error: compErr };
+      }
+      return { success: true };
     }
 
     // Calculate stats from answers array
@@ -233,6 +342,8 @@
     function CompanyListScreen({ companies, allAnswersByCompany, onSelectCompany, onRefresh }) {
       const [search, setSearch] = useState('');
       const [filter, setFilter] = useState('all'); // all, submitted, in_progress
+      const [confirmDelete, setConfirmDelete] = useState(null); // { id, name }
+      const [deleting, setDeleting] = useState(false);
 
       const filtered = useMemo(() => {
         return companies.filter(c => {
@@ -251,6 +362,19 @@
       const formatDate = (d) => {
         if (!d) return '—';
         return new Date(d).toLocaleDateString('ka-GE', { year: 'numeric', month: 'short', day: 'numeric' });
+      };
+
+      const handleDelete = async () => {
+        if (!confirmDelete) return;
+        setDeleting(true);
+        const result = await deleteCompany(confirmDelete.id);
+        setDeleting(false);
+        if (result.error) {
+          alert('წაშლა ვერ მოხერხდა: ' + (result.error.message || result.error.code || 'უცნობი შეცდომა'));
+        } else {
+          setConfirmDelete(null);
+          onRefresh();
+        }
       };
 
       return React.createElement('div', { className: 'fade-in' },
@@ -288,7 +412,7 @@
                   React.createElement('th', { className: 'text-left px-4 py-3 font-medium text-stone-600 text-xs uppercase tracking-wider' }, 'სტატუსი'),
                   React.createElement('th', { className: 'text-left px-4 py-3 font-medium text-stone-600 text-xs uppercase tracking-wider' }, 'შევსების თარიღი'),
                   React.createElement('th', { className: 'text-left px-4 py-3 font-medium text-stone-600 text-xs uppercase tracking-wider' }, 'ESG ქულა'),
-                  React.createElement('th', { className: 'text-right px-4 py-3 font-medium text-stone-600 text-xs uppercase tracking-wider' }, '')
+                  React.createElement('th', { className: 'text-right px-4 py-3 font-medium text-stone-600 text-xs uppercase tracking-wider' }, 'მოქმედებები')
                 )
               ),
               React.createElement('tbody', null,
@@ -302,35 +426,93 @@
                                      'text-rose-700 bg-rose-50';
                   return React.createElement('tr', {
                     key: c.id,
-                    onClick: () => onSelectCompany(c.id),
-                    className: 'border-b border-stone-100 hover:bg-stone-50 cursor-pointer transition'
+                    className: 'border-b border-stone-100 hover:bg-stone-50 transition'
                   },
-                    React.createElement('td', { className: 'px-4 py-3 font-medium text-stone-900' }, c.name || '—'),
-                    React.createElement('td', { className: 'px-4 py-3 text-stone-600 font-mono text-xs' }, c.id),
-                    React.createElement('td', { className: 'px-4 py-3 text-stone-600' }, c.contact || '—'),
-                    React.createElement('td', { className: 'px-4 py-3' },
+                    React.createElement('td', { 
+                      className: 'px-4 py-3 font-medium text-stone-900 cursor-pointer',
+                      onClick: () => onSelectCompany(c.id)
+                    }, c.name || '—'),
+                    React.createElement('td', { 
+                      className: 'px-4 py-3 text-stone-600 font-mono text-xs cursor-pointer',
+                      onClick: () => onSelectCompany(c.id)
+                    }, c.id),
+                    React.createElement('td', { 
+                      className: 'px-4 py-3 text-stone-600 cursor-pointer',
+                      onClick: () => onSelectCompany(c.id)
+                    }, c.contact || '—'),
+                    React.createElement('td', { 
+                      className: 'px-4 py-3 cursor-pointer',
+                      onClick: () => onSelectCompany(c.id)
+                    },
                       c.is_locked
                         ? React.createElement('span', { className: 'inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium bg-emerald-50 text-emerald-700 border border-emerald-200' }, '✓ შევსებული')
                         : React.createElement('span', { className: 'inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium bg-amber-50 text-amber-700 border border-amber-200' }, '◷ მიმდინარე')
                     ),
-                    React.createElement('td', { className: 'px-4 py-3 text-stone-600 text-xs' }, formatDate(c.submitted_at)),
-                    React.createElement('td', { className: 'px-4 py-3' },
+                    React.createElement('td', { 
+                      className: 'px-4 py-3 text-stone-600 text-xs cursor-pointer',
+                      onClick: () => onSelectCompany(c.id)
+                    }, formatDate(c.submitted_at)),
+                    React.createElement('td', { 
+                      className: 'px-4 py-3 cursor-pointer',
+                      onClick: () => onSelectCompany(c.id)
+                    },
                       stats.total > 0
                         ? React.createElement('span', { className: `inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold ${scoreColor}` }, stats.score + '%')
                         : React.createElement('span', { className: 'text-stone-400 text-xs' }, '—')
                     ),
-                    React.createElement('td', { className: 'px-4 py-3 text-right' },
+                    React.createElement('td', { className: 'px-4 py-3 text-right whitespace-nowrap' },
                       React.createElement('button', {
                         onClick: e => { e.stopPropagation(); onSelectCompany(c.id); },
-                        className: 'text-blue-700 hover:text-blue-900 text-xs font-medium'
-                      }, 'ნახვა →')
+                        className: 'text-blue-700 hover:text-blue-900 text-xs font-medium mr-3'
+                      }, 'ნახვა'),
+                      React.createElement('button', {
+                        onClick: e => { e.stopPropagation(); setConfirmDelete({ id: c.id, name: c.name }); },
+                        className: 'text-rose-600 hover:text-rose-800 text-xs font-medium'
+                      }, 'წაშლა')
                     )
                   );
                 })
               )
             )
           )
-        )
+        ),
+
+        // Delete confirmation modal
+        confirmDelete ? React.createElement('div', {
+          className: 'fixed inset-0 bg-black/50 flex items-center justify-center px-4 z-50 fade-in',
+          onClick: () => !deleting && setConfirmDelete(null)
+        },
+          React.createElement('div', {
+            className: 'bg-white rounded-xl max-w-md w-full p-6 shadow-2xl',
+            onClick: e => e.stopPropagation()
+          },
+            React.createElement('div', { className: 'flex items-start gap-4 mb-5' },
+              React.createElement('div', {
+                className: 'w-12 h-12 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center text-2xl flex-shrink-0'
+              }, '⚠'),
+              React.createElement('div', null,
+                React.createElement('h3', { className: 'text-base font-semibold text-stone-900 mb-1' }, 'კომპანიის წაშლა'),
+                React.createElement('p', { className: 'text-sm text-stone-600' },
+                  'დარწმუნებული ხართ, რომ გსურთ კომპანიის "',
+                  React.createElement('span', { className: 'font-semibold text-stone-900' }, confirmDelete.name || confirmDelete.id),
+                  '" წაშლა? ყველა პასუხი სამუდამოდ წაიშლება. ეს მოქმედება არ გადადის უკან.'
+                )
+              )
+            ),
+            React.createElement('div', { className: 'flex gap-2 justify-end' },
+              React.createElement('button', {
+                onClick: () => setConfirmDelete(null),
+                disabled: deleting,
+                className: 'h-10 px-4 text-sm text-stone-700 border border-stone-200 hover:bg-stone-50 rounded-lg transition disabled:opacity-50'
+              }, 'გაუქმება'),
+              React.createElement('button', {
+                onClick: handleDelete,
+                disabled: deleting,
+                className: 'h-10 px-4 text-sm font-medium bg-rose-600 hover:bg-rose-700 text-white rounded-lg transition disabled:opacity-50'
+              }, deleting ? 'იშლება...' : 'წაშლა')
+            )
+          )
+        ) : null
       );
     }
 
@@ -474,6 +656,7 @@
               ),
               React.createElement('div', { className: 'space-y-1.5' },
                 arr.map(a => {
+                  const qText = QUESTIONS[a.question_id] ? QUESTIONS[a.question_id].ka : a.question_id;
                   const ansLabel = a.answer === 'yes' ? '✓ კი' : a.answer === 'no' ? '✗ არა' : '◐ ნაწილ.';
                   const ansColor = a.answer === 'yes' ? 'bg-emerald-50 text-emerald-800 border-emerald-200' :
                                    a.answer === 'no' ? 'bg-rose-50 text-rose-800 border-rose-200' :
@@ -481,18 +664,19 @@
                   const auto = a.was_auto_suggested ? React.createElement('span', { className: 'text-[10px] text-stone-400 ml-1.5' }, '(ავტო)') : null;
                   return React.createElement('div', {
                     key: a.question_id,
-                    className: 'flex gap-3 items-start py-2 px-3 hover:bg-stone-50 rounded'
+                    className: 'flex gap-3 items-start py-2.5 px-3 hover:bg-stone-50 rounded border-b border-stone-50 last:border-0'
                   },
-                    React.createElement('span', { className: 'text-[11px] text-stone-400 font-mono mt-1 min-w-[60px]' }, a.question_id),
-                    React.createElement('div', { className: 'flex-1 text-[13px] text-stone-700' },
+                    React.createElement('div', { className: 'flex-1 min-w-0' },
+                      React.createElement('div', { className: 'text-[13px] text-stone-800 leading-snug mb-1' }, qText),
                       a.partial_text
-                        ? React.createElement('div', null,
-                            React.createElement('span', { className: 'text-stone-500 italic' }, 'შენიშვნა: '),
+                        ? React.createElement('div', { className: 'text-[12px] text-stone-500 italic mt-1' },
+                            React.createElement('span', { className: 'font-medium not-italic text-amber-700' }, 'შენიშვნა: '),
                             a.partial_text
                           )
-                        : React.createElement('span', { className: 'text-stone-400 italic text-[12px]' }, '—')
+                        : null,
+                      React.createElement('div', { className: 'text-[10px] text-stone-300 font-mono mt-1' }, a.question_id)
                     ),
-                    React.createElement('span', { className: 'text-[11px] font-semibold px-2 py-0.5 rounded border whitespace-nowrap ' + ansColor }, ansLabel),
+                    React.createElement('span', { className: 'text-[11px] font-semibold px-2 py-1 rounded border whitespace-nowrap flex-shrink-0 mt-0.5 ' + ansColor }, ansLabel),
                     auto
                   );
                 })
@@ -627,6 +811,7 @@
           </h2>`;
 
         arr.forEach((a, qIdx) => {
+          const qText = QUESTIONS[a.question_id] ? QUESTIONS[a.question_id].ka : a.question_id;
           const ansVal = a.answer || '';
           const ansLabel = ansVal === 'yes' ? '✓ კი' : ansVal === 'no' ? '✗ არა' : ansVal === 'partial' ? '◐ ნაწილ.' : '—';
           const ansColor = ansVal === 'yes' ? '#059669' : ansVal === 'no' ? '#dc2626' : ansVal === 'partial' ? '#d97706' : '#78716c';
@@ -635,8 +820,11 @@
 
           html += `<div style="margin-bottom: 6px; padding: 8px 12px; border: 1px solid #E7E5E4; border-radius: 6px; background: white;">
             <div style="display: flex; gap: 10px; align-items: flex-start;">
-              <div style="font-size: 10px; color: #78716c; font-family: monospace; min-width: 48px;">${escapeHtml(a.question_id)}</div>
-              <div style="flex: 1; font-size: 11px; line-height: 1.5; color: #57534e;">${a.partial_text ? '<i>შენიშვნა: ' + escapeHtml(a.partial_text) + '</i>' : '<span style="color: #a8a29e;">—</span>'}</div>
+              <div style="font-size: 10px; color: #a8a29e; font-weight: 500; min-width: 22px;">${qIdx + 1}.</div>
+              <div style="flex: 1;">
+                <div style="font-size: 11px; line-height: 1.5; color: #1c1917; margin-bottom: 3px;">${escapeHtml(qText)}</div>
+                ${a.partial_text ? '<div style="font-size: 10px; color: #92400e; font-style: italic; margin-top: 4px;">შენიშვნა: ' + escapeHtml(a.partial_text) + '</div>' : ''}
+              </div>
               <div style="font-size: 10px; font-weight: 600; color: ${ansColor}; background: ${ansBg}; padding: 3px 8px; border-radius: 4px; white-space: nowrap;">${ansLabel}${auto}</div>
             </div>
           </div>`;
