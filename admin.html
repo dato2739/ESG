@@ -148,7 +148,7 @@
         emailCopy: 'დაკოპირება',
         emailCopied: '✓ დაკოპირდა',
         emailSubjectLabel: 'საგანი:',
-        emailNoItems: 'ამ კომპანიას არ აქვს დადებითი ან ნაწილობრივი პასუხები დოკუმენტის მოსათხოვად.',
+        emailNoItems: 'ამ კომპანიას არ აქვს არცერთი „დიახ" ან „ნაწილობრივ" პასუხი იმ კატეგორიებში, რომლებზეც წერილი იქმნება. წერილის გენერაცია შეუძლებელია.',
         emailSubject: 'ESG თვითშეფასების ფორმის დაზუსტება',
         emailGreeting: 'მოგესალმებით,',
         emailP1: 'უპირველეს ყოვლისა, მადლობას გიხდით ფორმის შევსებისათვის გამოყოფილი დროისთვის — თქვენი ჩართულობა ჩვენთვის მნიშვნელოვანია.',
@@ -288,7 +288,7 @@
         emailCopy: 'Copy',
         emailCopied: '✓ Copied',
         emailSubjectLabel: 'Subject:',
-        emailNoItems: 'This company has no Yes or Partial answers requiring documentation.',
+        emailNoItems: 'This company has no "Yes" or "Partial" answers in the categories used for letter generation. Letter generation is not possible.',
         emailSubject: 'Clarification of ESG Self-Assessment Form',
         emailGreeting: 'Hello,',
         emailP1: 'First and foremost, thank you for taking the time to complete the form — your engagement is important to us.',
@@ -1135,7 +1135,13 @@
           }, '← ', T[lang].backToList),
           React.createElement('div', { className: 'flex items-center gap-2' },
             React.createElement('button', {
-              onClick: () => setShowEmail(true),
+              onClick: () => {
+                if (emailItems.length === 0) {
+                  alert(T[lang].emailNoItems);
+                  return;
+                }
+                setShowEmail(true);
+              },
               className: 'h-10 px-4 text-sm font-medium text-blue-700 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition'
             }, T[lang].emailBtn),
             React.createElement('button', {
