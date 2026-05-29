@@ -1050,15 +1050,21 @@
         }
       };
 
-      // Collect items for email: CAT3 yes/partial first (max 5), then fill from CAT2 yes/partial
+      // Collect items for email:
+      // - All CAT3 yes/partial answers (no limit)
+      // - If CAT3 count < 5, fill from CAT2 yes/partial to reach 5
       const buildEmailItems = () => {
         const relevant = answers.filter(a => a.answer === 'yes' || a.answer === 'partial');
         const cat3 = relevant.filter(a => getCategory(a.question_id) === 3);
         const cat2 = relevant.filter(a => getCategory(a.question_id) === 2);
         cat3.sort((a, b) => a.question_id.localeCompare(b.question_id));
         cat2.sort((a, b) => a.question_id.localeCompare(b.question_id));
-        const combined = [...cat3, ...cat2].slice(0, 5);
-        return combined;
+        if (cat3.length >= 5) {
+          return cat3; // all CAT3 items
+        }
+        // CAT3 < 5: fill from CAT2 up to 5 total
+        const needed = 5 - cat3.length;
+        return [...cat3, ...cat2.slice(0, needed)];
       };
 
       const emailItems = buildEmailItems();
