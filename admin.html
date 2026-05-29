@@ -163,7 +163,38 @@
         emailSignTitle: 'შესყიდვების განყოფილების სპეციალისტი',
         emailSignCompany: 'ENERGO-PRO Georgia',
         emailSignEmail: 'teona.qvelidze@energo-pro.ge',
-        emailSignPhone: '577 35 00 90'
+        emailSignPhone: '577 35 00 90',
+        // Categories management page
+        catsBtn: '📊 კატეგორიების მართვა',
+        catsPageTitle: 'კითხვების კატეგორიების მართვა',
+        catsPageSubtitle: 'გადაიტანეთ კითხვები კატეგორიებს შორის (drag-and-drop). ცვლილებები აისახება მთელ აპში.',
+        catsSave: '💾 ცვლილებების შენახვა',
+        catsSaved: '✓ შენახულია',
+        catsHasChanges: 'არ არის შენახული',
+        catsReset: '↺ საწყისზე დაბრუნება',
+        catsResetConfirmTitle: 'საწყისზე დაბრუნება',
+        catsResetConfirmMsg: 'ნამდვილად გსურთ კატეგორიების სრულად საწყის (default) მდგომარეობაში დაბრუნება? ყველა თქვენი ცვლილება დაიკარგება.',
+        catsResetConfirmBtn: 'საწყისზე დაბრუნება',
+        catsSaveFailed: 'შენახვა ვერ მოხერხდა: ',
+        cat1Title: 'კატეგორია 1 — ვენდობით',
+        cat1Desc: 'გადამოწმება არ ღირს',
+        cat2Title: 'კატეგორია 2 — გასაუბრება',
+        cat2Desc: 'გასაუბრებით დადგენა',
+        cat3Title: 'კატეგორია 3 — დოკუმენტი',
+        cat3Desc: 'დამადასტურებელი დოკუმენტი',
+        catStatsYes: 'დიახ',
+        catStatsPartial: 'ნაწილ.',
+        catStatsNo: 'არა',
+        catCompaniesListTitle: 'კომპანიების სია',
+        catCompaniesNoData: 'არ არის კომპანიები ამ პასუხით',
+        // Unlock
+        unlockBtn: '🔓 გადახდა',
+        unlockTitle: 'კომპანიის სტატუსის შეცვლა',
+        unlockMsg: 'ნამდვილად გსურთ კომპანიის "',
+        unlockMsg2: '" განბლოკვა? ის შეძლებს თავისი პასუხების კორექტირებას და ხელახლა გადაგზავნას. წინა პასუხები შეინახება.',
+        unlockConfirm: 'განბლოკვა',
+        unlocking: 'მუშავდება...',
+        unlockFailed: 'განბლოკვა ვერ მოხერხდა: '
       },
       en: {
         // Login
@@ -271,19 +302,68 @@
         emailSignTitle: 'Procurement Department Specialist',
         emailSignCompany: 'ENERGO-PRO Georgia',
         emailSignEmail: 'teona.qvelidze@energo-pro.ge',
-        emailSignPhone: '577 35 00 90'
+        emailSignPhone: '577 35 00 90',
+        // Categories management page
+        catsBtn: '📊 Categories management',
+        catsPageTitle: 'Question categories management',
+        catsPageSubtitle: 'Drag and drop questions between categories. Changes apply across the app.',
+        catsSave: '💾 Save changes',
+        catsSaved: '✓ Saved',
+        catsHasChanges: 'Unsaved changes',
+        catsReset: '↺ Reset to default',
+        catsResetConfirmTitle: 'Reset to default',
+        catsResetConfirmMsg: 'Are you sure you want to reset categories to the original default state? All your changes will be lost.',
+        catsResetConfirmBtn: 'Reset to default',
+        catsSaveFailed: 'Save failed: ',
+        cat1Title: 'Category 1 — Trusted',
+        cat1Desc: 'No verification needed',
+        cat2Title: 'Category 2 — Interview',
+        cat2Desc: 'Verify via interview',
+        cat3Title: 'Category 3 — Document',
+        cat3Desc: 'Supporting document required',
+        catStatsYes: 'Yes',
+        catStatsPartial: 'Partial',
+        catStatsNo: 'No',
+        catCompaniesListTitle: 'Companies',
+        catCompaniesNoData: 'No companies with this answer',
+        // Unlock
+        unlockBtn: '🔓 Unlock',
+        unlockTitle: 'Change company status',
+        unlockMsg: 'Are you sure you want to unlock company "',
+        unlockMsg2: '"? They will be able to correct their answers and re-submit. Previous answers will be preserved.',
+        unlockConfirm: 'Unlock',
+        unlocking: 'Processing...',
+        unlockFailed: 'Unlock failed: '
       }
     };
 
     const SECTION_PREFIXES = ['q_2_', 'q_3_', 'q_4_', 'q_5_', 'q_6_', 'q_7_', 'q_8_'];
 
-    // Question verification categories
-    const CAT1 = ['q_2_2_1','q_2_3','q_2_6','q_2_7','q_2_9','q_2_11','q_2_13_1','q_3_1_1','q_3_1_2','q_3_1_3','q_3_1_4','q_3_2','q_3_2_3','q_4_1','q_4_1_2','q_4_1_3','q_4_2_1','q_4_2_3','q_4_2_4','q_4_3','q_4_3_1','q_4_3_2','q_4_3_3','q_4_3_4','q_4_3_5','q_4_4','q_4_4_3','q_4_4_6','q_5_1_1','q_5_1_2','q_5_1_3','q_5_2_2','q_5_2_3','q_5_3_4','q_6_1_2','q_6_1_3','q_8_1_2','q_8_2'];
-    const CAT3 = ['q_2_1','q_2_2','q_2_8','q_6_1_1','q_7_1_1','q_4_2_2','q_5_2_1','q_8_1_1'];
+    // Default categories (initial state)
+    const DEFAULT_CAT1 = ['q_2_2_1','q_2_3','q_2_6','q_2_7','q_2_9','q_2_11','q_2_13_1','q_3_1_1','q_3_1_2','q_3_1_3','q_3_1_4','q_3_2','q_3_2_3','q_4_1','q_4_1_2','q_4_1_3','q_4_2_1','q_4_2_3','q_4_2_4','q_4_3','q_4_3_1','q_4_3_2','q_4_3_3','q_4_3_4','q_4_3_5','q_4_4','q_4_4_3','q_4_4_6','q_5_1_1','q_5_1_2','q_5_1_3','q_5_2_2','q_5_2_3','q_5_3_4','q_6_1_2','q_6_1_3','q_8_1_2','q_8_2'];
+    const DEFAULT_CAT3 = ['q_2_1','q_2_2','q_2_8','q_6_1_1','q_7_1_1','q_4_2_2','q_5_2_1','q_8_1_1'];
+
+    // Build default category map: qid -> 1|2|3
+    function buildDefaultCategoryMap() {
+      const map = {};
+      DEFAULT_CAT1.forEach(q => map[q] = 1);
+      DEFAULT_CAT3.forEach(q => map[q] = 3);
+      // CAT2 = everything else (will be filled when questions list is available)
+      return map;
+    }
+
+    // Global mutable category map (populated from DB or defaults)
+    let CATEGORY_MAP = buildDefaultCategoryMap();
+
     function getCategory(qid) {
-      if (CAT3.includes(qid)) return 3;
-      if (CAT1.includes(qid)) return 1;
-      return 2;
+      if (CATEGORY_MAP[qid]) return CATEGORY_MAP[qid];
+      return 2; // default if not classified
+    }
+
+    function getCategoryColor(cat) {
+      if (cat === 1) return { bg: 'bg-emerald-50', border: 'border-emerald-200', text: 'text-emerald-700', solid: '#059669' };
+      if (cat === 3) return { bg: 'bg-rose-50', border: 'border-rose-200', text: 'text-rose-700', solid: '#dc2626' };
+      return { bg: 'bg-amber-50', border: 'border-amber-200', text: 'text-amber-700', solid: '#d97706' };
     }
 
     const QUESTIONS = {
@@ -429,6 +509,71 @@
       return { success: true };
     }
 
+    // Unlock a company so it can be edited again
+    async function unlockCompany(companyId) {
+      const { error } = await supabase
+        .from('esg_companies')
+        .update({ is_locked: false, submitted_at: null })
+        .eq('id', companyId);
+      return { error };
+    }
+
+    // ============================================
+    // CATEGORY MANAGEMENT (Supabase-backed)
+    // ============================================
+    async function loadCategoriesFromDb() {
+      const { data, error } = await supabase
+        .from('esg_question_categories')
+        .select('*');
+      if (error) {
+        console.error('Load categories error:', error);
+        return null;
+      }
+      if (!data || data.length === 0) return null;
+      const map = {};
+      data.forEach(r => { map[r.question_id] = r.category; });
+      return map;
+    }
+
+    async function saveCategoriesToDb(categoryMap) {
+      // Upsert all entries
+      const rows = Object.entries(categoryMap).map(([qid, cat]) => ({
+        question_id: qid,
+        category: cat,
+        updated_at: new Date().toISOString()
+      }));
+      const { error } = await supabase
+        .from('esg_question_categories')
+        .upsert(rows, { onConflict: 'question_id' });
+      return { error };
+    }
+
+    async function resetCategoriesToDefault() {
+      // Delete all category rows from DB
+      const { error } = await supabase
+        .from('esg_question_categories')
+        .delete()
+        .neq('question_id', '___nonexistent___');
+      if (!error) {
+        CATEGORY_MAP = buildDefaultCategoryMap();
+      }
+      return { error };
+    }
+
+    async function initCategoryMap(allQuestionIds) {
+      const fromDb = await loadCategoriesFromDb();
+      if (fromDb) {
+        CATEGORY_MAP = fromDb;
+      } else {
+        CATEGORY_MAP = buildDefaultCategoryMap();
+      }
+      // Ensure ALL questions have a category (default to 2 if missing)
+      allQuestionIds.forEach(qid => {
+        if (!CATEGORY_MAP[qid]) CATEGORY_MAP[qid] = 2;
+      });
+      return CATEGORY_MAP;
+    }
+
     // Calculate stats from answers array
     function calcStats(answers) {
       const total = answers.length;
@@ -541,6 +686,10 @@
             )
           ),
           React.createElement('div', { className: 'flex items-center gap-3' },
+            React.createElement('button', {
+              onClick: () => onNavigate('categories'),
+              className: `text-xs font-medium px-3 py-1.5 rounded-md transition ${currentView === 'categories' ? 'bg-blue-50 text-blue-700' : 'text-stone-600 hover:text-stone-900 hover:bg-stone-100'}`
+            }, T[lang].catsBtn),
             React.createElement(LangSwitch, { lang, setLang }),
             React.createElement('button', {
               onClick: onLogout,
@@ -597,6 +746,8 @@
       const [filter, setFilter] = useState('all'); // all, submitted, in_progress
       const [confirmDelete, setConfirmDelete] = useState(null); // { id, name }
       const [deleting, setDeleting] = useState(false);
+      const [confirmUnlock, setConfirmUnlock] = useState(null); // { id, name }
+      const [unlocking, setUnlocking] = useState(false);
 
       const filtered = useMemo(() => {
         return companies.filter(c => {
@@ -626,6 +777,19 @@
           alert(T[lang].deleteFailed + (result.error.message || result.error.code || 'unknown error'));
         } else {
           setConfirmDelete(null);
+          onRefresh();
+        }
+      };
+
+      const handleUnlock = async () => {
+        if (!confirmUnlock) return;
+        setUnlocking(true);
+        const { error } = await unlockCompany(confirmUnlock.id);
+        setUnlocking(false);
+        if (error) {
+          alert(T[lang].unlockFailed + (error.message || error.code || 'unknown error'));
+        } else {
+          setConfirmUnlock(null);
           onRefresh();
         }
       };
@@ -718,6 +882,10 @@
                         onClick: e => { e.stopPropagation(); onSelectCompany(c.id); },
                         className: 'text-blue-700 hover:text-blue-900 text-xs font-medium mr-3'
                       }, T[lang].actionView),
+                      c.is_locked ? React.createElement('button', {
+                        onClick: e => { e.stopPropagation(); setConfirmUnlock({ id: c.id, name: c.name }); },
+                        className: 'text-amber-600 hover:text-amber-800 text-xs font-medium mr-3'
+                      }, T[lang].unlockBtn) : null,
                       React.createElement('button', {
                         onClick: e => { e.stopPropagation(); setConfirmDelete({ id: c.id, name: c.name }); },
                         className: 'text-rose-600 hover:text-rose-800 text-xs font-medium'
@@ -763,6 +931,43 @@
                 disabled: deleting,
                 className: 'h-10 px-4 text-sm font-medium bg-rose-600 hover:bg-rose-700 text-white rounded-lg transition disabled:opacity-50'
               }, deleting ? T[lang].deleting : T[lang].confirmDelete)
+            )
+          )
+        ) : null,
+
+        // Unlock confirmation modal
+        confirmUnlock ? React.createElement('div', {
+          className: 'fixed inset-0 bg-black/50 flex items-center justify-center px-4 z-50 fade-in',
+          onClick: () => !unlocking && setConfirmUnlock(null)
+        },
+          React.createElement('div', {
+            className: 'bg-white rounded-xl max-w-md w-full p-6 shadow-2xl',
+            onClick: e => e.stopPropagation()
+          },
+            React.createElement('div', { className: 'flex items-start gap-4 mb-5' },
+              React.createElement('div', {
+                className: 'w-12 h-12 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center text-2xl flex-shrink-0'
+              }, '🔓'),
+              React.createElement('div', null,
+                React.createElement('h3', { className: 'text-base font-semibold text-stone-900 mb-1' }, T[lang].unlockTitle),
+                React.createElement('p', { className: 'text-sm text-stone-600' },
+                  T[lang].unlockMsg,
+                  React.createElement('span', { className: 'font-semibold text-stone-900' }, confirmUnlock.name || confirmUnlock.id),
+                  T[lang].unlockMsg2
+                )
+              )
+            ),
+            React.createElement('div', { className: 'flex gap-2 justify-end' },
+              React.createElement('button', {
+                onClick: () => setConfirmUnlock(null),
+                disabled: unlocking,
+                className: 'h-10 px-4 text-sm text-stone-700 border border-stone-200 hover:bg-stone-50 rounded-lg transition disabled:opacity-50'
+              }, T[lang].cancel),
+              React.createElement('button', {
+                onClick: handleUnlock,
+                disabled: unlocking,
+                className: 'h-10 px-4 text-sm font-medium bg-amber-600 hover:bg-amber-700 text-white rounded-lg transition disabled:opacity-50'
+              }, unlocking ? T[lang].unlocking : T[lang].unlockConfirm)
             )
           )
         ) : null
@@ -1258,6 +1463,297 @@
     }
 
     // ============================================
+    // CATEGORIES MANAGEMENT SCREEN
+    // ============================================
+    function CategoriesScreen({ companies, allAnswersByCompany, lang }) {
+      // Local state: copy of CATEGORY_MAP for editing
+      const [localMap, setLocalMap] = useState({ ...CATEGORY_MAP });
+      const [savedMap, setSavedMap] = useState({ ...CATEGORY_MAP });
+      const [saving, setSaving] = useState(false);
+      const [saved, setSaved] = useState(false);
+      const [confirmReset, setConfirmReset] = useState(false);
+      const [resetting, setResetting] = useState(false);
+      const [companiesPopup, setCompaniesPopup] = useState(null); // { qid, answer, list[] }
+      const [draggedQid, setDraggedQid] = useState(null);
+      const [dragOverCat, setDragOverCat] = useState(null);
+
+      const allQids = Object.keys(QUESTIONS).sort();
+
+      // Compute stats per question
+      const questionStats = useMemo(() => {
+        const stats = {};
+        allQids.forEach(qid => {
+          stats[qid] = { yes: [], no: [], partial: [] };
+        });
+        companies.forEach(c => {
+          const ans = allAnswersByCompany[c.id] || [];
+          ans.forEach(a => {
+            if (stats[a.question_id]) {
+              if (a.answer === 'yes') stats[a.question_id].yes.push(c);
+              else if (a.answer === 'no') stats[a.question_id].no.push(c);
+              else if (a.answer === 'partial') stats[a.question_id].partial.push(c);
+            }
+          });
+        });
+        return stats;
+      }, [companies, allAnswersByCompany]);
+
+      // Group questions by current local category
+      const grouped = useMemo(() => {
+        const g = { 1: [], 2: [], 3: [] };
+        allQids.forEach(qid => {
+          const cat = localMap[qid] || 2;
+          g[cat].push(qid);
+        });
+        return g;
+      }, [localMap]);
+
+      const hasChanges = JSON.stringify(localMap) !== JSON.stringify(savedMap);
+
+      const handleDragStart = (qid) => setDraggedQid(qid);
+      const handleDragEnd = () => { setDraggedQid(null); setDragOverCat(null); };
+      const handleDragOver = (e, cat) => {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        setDragOverCat(cat);
+      };
+      const handleDragLeave = (e) => {
+        // only clear if actually leaving (not entering child)
+        if (e.currentTarget.contains(e.relatedTarget)) return;
+        setDragOverCat(null);
+      };
+      const handleDrop = (e, cat) => {
+        e.preventDefault();
+        if (draggedQid && localMap[draggedQid] !== cat) {
+          setLocalMap({ ...localMap, [draggedQid]: cat });
+        }
+        setDraggedQid(null);
+        setDragOverCat(null);
+      };
+
+      const handleSave = async () => {
+        setSaving(true);
+        const { error } = await saveCategoriesToDb(localMap);
+        setSaving(false);
+        if (error) {
+          alert(T[lang].catsSaveFailed + (error.message || error.code || 'unknown'));
+          return;
+        }
+        // Update global CATEGORY_MAP
+        CATEGORY_MAP = { ...localMap };
+        setSavedMap({ ...localMap });
+        setSaved(true);
+        setTimeout(() => setSaved(false), 2500);
+      };
+
+      const handleReset = async () => {
+        setResetting(true);
+        const { error } = await resetCategoriesToDefault();
+        setResetting(false);
+        if (error) {
+          alert(T[lang].catsSaveFailed + (error.message || error.code || 'unknown'));
+          return;
+        }
+        const defaults = buildDefaultCategoryMap();
+        allQids.forEach(qid => { if (!defaults[qid]) defaults[qid] = 2; });
+        CATEGORY_MAP = { ...defaults };
+        setLocalMap({ ...defaults });
+        setSavedMap({ ...defaults });
+        setConfirmReset(false);
+      };
+
+      const renderColumn = (cat) => {
+        const titles = { 1: T[lang].cat1Title, 2: T[lang].cat2Title, 3: T[lang].cat3Title };
+        const descs = { 1: T[lang].cat1Desc, 2: T[lang].cat2Desc, 3: T[lang].cat3Desc };
+        const color = getCategoryColor(cat);
+        const isDropTarget = dragOverCat === cat;
+        const list = grouped[cat];
+        return React.createElement('div', {
+          key: cat,
+          onDragOver: (e) => handleDragOver(e, cat),
+          onDragLeave: handleDragLeave,
+          onDrop: (e) => handleDrop(e, cat),
+          className: `rounded-xl border-2 ${isDropTarget ? 'border-blue-400 bg-blue-50' : color.border + ' ' + color.bg} p-3 transition`,
+          style: { minHeight: '300px' }
+        },
+          // Header
+          React.createElement('div', { className: 'mb-3 px-2' },
+            React.createElement('div', { className: 'flex items-center justify-between mb-1' },
+              React.createElement('h3', { className: `text-sm font-semibold ${color.text}` }, titles[cat]),
+              React.createElement('span', {
+                className: `text-[11px] font-bold rounded-full px-2 py-0.5 bg-white ${color.text} border ${color.border}`
+              }, list.length)
+            ),
+            React.createElement('p', { className: 'text-[11px] text-stone-500' }, descs[cat])
+          ),
+          // Questions list
+          React.createElement('div', { className: 'space-y-1.5' },
+            list.length === 0
+              ? React.createElement('div', { className: 'text-center py-6 text-xs text-stone-400 italic' }, '—')
+              : list.map(qid => {
+                  const qText = QUESTIONS[qid] ? QUESTIONS[qid][lang] : qid;
+                  const s = questionStats[qid] || { yes: [], no: [], partial: [] };
+                  const isDragging = draggedQid === qid;
+                  return React.createElement('div', {
+                    key: qid,
+                    draggable: true,
+                    onDragStart: () => handleDragStart(qid),
+                    onDragEnd: handleDragEnd,
+                    className: `bg-white border border-stone-200 rounded-lg p-2.5 cursor-move hover:shadow-sm hover:border-blue-300 transition ${isDragging ? 'opacity-40' : ''}`
+                  },
+                    React.createElement('div', { className: 'flex items-start gap-2 mb-1.5' },
+                      React.createElement('span', { className: 'text-stone-300 text-sm flex-shrink-0 mt-0.5' }, '⋮⋮'),
+                      React.createElement('div', { className: 'flex-1 min-w-0' },
+                        React.createElement('div', { className: 'text-[12px] text-stone-800 leading-snug' }, qText),
+                        React.createElement('div', { className: 'text-[9px] text-stone-300 font-mono mt-0.5' }, qid)
+                      )
+                    ),
+                    // Mini stats
+                    React.createElement('div', { className: 'flex gap-1 text-[10px] mt-1.5 ml-5' },
+                      React.createElement('button', {
+                        onClick: (e) => { e.stopPropagation(); if (s.yes.length > 0) setCompaniesPopup({ qid, qText, answer: 'yes', list: s.yes }); },
+                        disabled: s.yes.length === 0,
+                        className: 'flex items-center gap-1 px-1.5 py-0.5 bg-emerald-50 border border-emerald-200 text-emerald-700 rounded hover:bg-emerald-100 transition disabled:opacity-40 disabled:cursor-default'
+                      },
+                        React.createElement('span', { className: 'font-medium' }, '✓'),
+                        React.createElement('span', { className: 'font-semibold' }, s.yes.length)
+                      ),
+                      React.createElement('button', {
+                        onClick: (e) => { e.stopPropagation(); if (s.partial.length > 0) setCompaniesPopup({ qid, qText, answer: 'partial', list: s.partial }); },
+                        disabled: s.partial.length === 0,
+                        className: 'flex items-center gap-1 px-1.5 py-0.5 bg-amber-50 border border-amber-200 text-amber-700 rounded hover:bg-amber-100 transition disabled:opacity-40 disabled:cursor-default'
+                      },
+                        React.createElement('span', { className: 'font-medium' }, '◐'),
+                        React.createElement('span', { className: 'font-semibold' }, s.partial.length)
+                      ),
+                      React.createElement('button', {
+                        onClick: (e) => { e.stopPropagation(); if (s.no.length > 0) setCompaniesPopup({ qid, qText, answer: 'no', list: s.no }); },
+                        disabled: s.no.length === 0,
+                        className: 'flex items-center gap-1 px-1.5 py-0.5 bg-rose-50 border border-rose-200 text-rose-700 rounded hover:bg-rose-100 transition disabled:opacity-40 disabled:cursor-default'
+                      },
+                        React.createElement('span', { className: 'font-medium' }, '✗'),
+                        React.createElement('span', { className: 'font-semibold' }, s.no.length)
+                      )
+                    )
+                  );
+                })
+          )
+        );
+      };
+
+      return React.createElement('div', { className: 'fade-in' },
+        // Header
+        React.createElement('div', { className: 'flex flex-wrap items-start justify-between gap-3 mb-5' },
+          React.createElement('div', null,
+            React.createElement('h1', { className: 'text-xl font-semibold text-stone-900' }, T[lang].catsPageTitle),
+            React.createElement('p', { className: 'text-sm text-stone-500 mt-1 max-w-2xl' }, T[lang].catsPageSubtitle)
+          ),
+          React.createElement('div', { className: 'flex flex-wrap gap-2 items-center' },
+            hasChanges && !saved ? React.createElement('span', {
+              className: 'text-xs px-2 py-1 bg-amber-50 text-amber-700 border border-amber-200 rounded-md'
+            }, '● ' + T[lang].catsHasChanges) : null,
+            React.createElement('button', {
+              onClick: () => setConfirmReset(true),
+              className: 'h-10 px-4 text-sm font-medium text-stone-700 border border-stone-300 hover:bg-stone-50 rounded-lg transition'
+            }, T[lang].catsReset),
+            React.createElement('button', {
+              onClick: handleSave,
+              disabled: !hasChanges || saving,
+              className: 'h-10 px-5 text-sm font-medium text-white rounded-lg shadow-sm hover:shadow disabled:opacity-50 transition',
+              style: { background: saved ? '#059669' : 'linear-gradient(135deg, #0E5BA8, #1976D2)' }
+            }, saving ? '...' : (saved ? T[lang].catsSaved : T[lang].catsSave))
+          )
+        ),
+
+        // Three columns
+        React.createElement('div', { className: 'grid grid-cols-1 md:grid-cols-3 gap-4' },
+          renderColumn(1),
+          renderColumn(2),
+          renderColumn(3)
+        ),
+
+        // Companies popup
+        companiesPopup ? React.createElement('div', {
+          className: 'fixed inset-0 bg-black/50 flex items-center justify-center px-4 py-6 z-50 fade-in',
+          onClick: () => setCompaniesPopup(null)
+        },
+          React.createElement('div', {
+            className: 'bg-white rounded-2xl max-w-lg w-full max-h-[calc(100vh-100px)] shadow-2xl overflow-hidden flex flex-col',
+            onClick: e => e.stopPropagation()
+          },
+            React.createElement('div', {
+              className: 'flex items-center justify-between px-5 py-4 border-b border-stone-100',
+              style: { background: 'linear-gradient(135deg, #0E5BA8, #1976D2)' }
+            },
+              React.createElement('div', null,
+                React.createElement('div', { className: 'text-[11px] uppercase tracking-wider font-semibold text-white/80 mb-0.5' }, T[lang].catCompaniesListTitle),
+                React.createElement('div', { className: 'text-sm font-medium text-white' },
+                  companiesPopup.answer === 'yes' ? '✓ ' + T[lang].yesLabel
+                    : companiesPopup.answer === 'no' ? '✗ ' + T[lang].noLabel
+                    : '◐ ' + T[lang].partialLabel,
+                  ' · ', companiesPopup.list.length
+                )
+              ),
+              React.createElement('button', {
+                onClick: () => setCompaniesPopup(null),
+                className: 'w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 text-white flex items-center justify-center'
+              }, '✕')
+            ),
+            React.createElement('div', { className: 'p-4 border-b border-stone-100 bg-stone-50' },
+              React.createElement('div', { className: 'text-[12px] text-stone-600 leading-snug' }, companiesPopup.qText)
+            ),
+            React.createElement('div', { className: 'overflow-y-auto flex-1 scrollbar-thin' },
+              companiesPopup.list.length === 0
+                ? React.createElement('div', { className: 'text-center py-8 text-stone-400 text-sm' }, T[lang].catCompaniesNoData)
+                : React.createElement('div', { className: 'divide-y divide-stone-100' },
+                    companiesPopup.list.map(c => React.createElement('div', {
+                      key: c.id,
+                      className: 'px-5 py-3 hover:bg-stone-50'
+                    },
+                      React.createElement('div', { className: 'text-sm font-medium text-stone-900' }, c.name || '—'),
+                      React.createElement('div', { className: 'text-[11px] text-stone-400 font-mono mt-0.5' }, c.id, ' · ', c.contact || '—')
+                    ))
+                  )
+            )
+          )
+        ) : null,
+
+        // Reset confirmation modal
+        confirmReset ? React.createElement('div', {
+          className: 'fixed inset-0 bg-black/50 flex items-center justify-center px-4 z-50 fade-in',
+          onClick: () => !resetting && setConfirmReset(false)
+        },
+          React.createElement('div', {
+            className: 'bg-white rounded-xl max-w-md w-full p-6 shadow-2xl',
+            onClick: e => e.stopPropagation()
+          },
+            React.createElement('div', { className: 'flex items-start gap-4 mb-5' },
+              React.createElement('div', {
+                className: 'w-12 h-12 rounded-full bg-stone-100 text-stone-600 flex items-center justify-center text-2xl flex-shrink-0'
+              }, '↺'),
+              React.createElement('div', null,
+                React.createElement('h3', { className: 'text-base font-semibold text-stone-900 mb-1' }, T[lang].catsResetConfirmTitle),
+                React.createElement('p', { className: 'text-sm text-stone-600' }, T[lang].catsResetConfirmMsg)
+              )
+            ),
+            React.createElement('div', { className: 'flex gap-2 justify-end' },
+              React.createElement('button', {
+                onClick: () => setConfirmReset(false),
+                disabled: resetting,
+                className: 'h-10 px-4 text-sm text-stone-700 border border-stone-200 hover:bg-stone-50 rounded-lg transition disabled:opacity-50'
+              }, T[lang].cancel),
+              React.createElement('button', {
+                onClick: handleReset,
+                disabled: resetting,
+                className: 'h-10 px-4 text-sm font-medium bg-stone-700 hover:bg-stone-800 text-white rounded-lg transition disabled:opacity-50'
+              }, resetting ? '...' : T[lang].catsResetConfirmBtn)
+            )
+          )
+        ) : null
+      );
+    }
+
+    // ============================================
     // ROOT APP
     // ============================================
     function App() {
@@ -1285,6 +1781,8 @@
           answersMap[c.id] = a;
         }));
         setAllAnswersByCompany(answersMap);
+        // Initialize category map from DB (or defaults)
+        await initCategoryMap(Object.keys(QUESTIONS));
         setLoading(false);
       };
 
@@ -1316,11 +1814,15 @@
                   onRefresh: refresh,
                   lang
                 })
-              : React.createElement(CompanyDetailScreen, {
-                  companyId: selectedId,
-                  onBack: () => setView('list'),
-                  lang
-                })
+              : view === 'categories'
+                ? React.createElement(CategoriesScreen, {
+                    companies, allAnswersByCompany, lang
+                  })
+                : React.createElement(CompanyDetailScreen, {
+                    companyId: selectedId,
+                    onBack: () => setView('list'),
+                    lang
+                  })
         )
       );
     }
