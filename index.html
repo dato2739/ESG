@@ -799,7 +799,6 @@
         const trimmedName = name.trim();
         const trimmedContact = contact.trim();
         if (!trimmedId) { setError(T[lang].idRequired); return; }
-        if (!trimmedName || !trimmedContact) { setError(T[lang].fillRequired); return; }
         setError(''); setLoading(true);
         try {
           await onLogin(trimmedId, trimmedName, trimmedContact);
@@ -831,7 +830,7 @@
               ),
               React.createElement('div', null,
                 React.createElement('label', { className: 'block text-xs font-medium text-stone-600 mb-2' },
-                  T[lang].companyName, React.createElement('span', { className: 'text-rose-500 ml-1' }, '*')
+                  T[lang].companyName
                 ),
                 React.createElement('input', {
                   type: 'text', value: name, onChange: e => setName(e.target.value),
@@ -841,7 +840,7 @@
               ),
               React.createElement('div', null,
                 React.createElement('label', { className: 'block text-xs font-medium text-stone-600 mb-2' },
-                  T[lang].contact, React.createElement('span', { className: 'text-rose-500 ml-1' }, '*')
+                  T[lang].contact
                 ),
                 React.createElement('input', {
                   type: 'text', value: contact, onChange: e => setContact(e.target.value),

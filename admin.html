@@ -195,7 +195,12 @@
         unlockMsg2: '" განბლოკვა? ის შეძლებს თავისი პასუხების კორექტირებას და ხელახლა გადაგზავნას. წინა პასუხები შეინახება.',
         unlockConfirm: 'განბლოკვა',
         unlocking: 'მუშავდება...',
-        unlockFailed: 'განბლოკვა ვერ მოხერხდა: '
+        unlockFailed: 'განბლოკვა ვერ მოხერხდა: ',
+        // History
+        historyPdfBtn: '📄 წინა ვერსიის PDF',
+        historyLoading: 'წინა ვერსიის ჩამოტვირთვა...',
+        historyNotFound: 'წინა ვერსია არ მოიძებნა',
+        historyPdfTitle: '(წინა ვერსია)'
       },
       en: {
         // Login
@@ -335,7 +340,12 @@
         unlockMsg2: '"? They will be able to correct their answers and re-submit. Previous answers will be preserved.',
         unlockConfirm: 'Unlock',
         unlocking: 'Processing...',
-        unlockFailed: 'Unlock failed: '
+        unlockFailed: 'Unlock failed: ',
+        // History
+        historyPdfBtn: '📄 Previous version PDF',
+        historyLoading: 'Loading previous version...',
+        historyNotFound: 'No previous version found',
+        historyPdfTitle: '(Previous version)'
       }
     };
 
@@ -512,12 +522,64 @@
     }
 
     // Unlock a company so it can be edited again
+    // Also archive current answers to history table (preserves previous version)
     async function unlockCompany(companyId) {
+      // Step 1: Get current answers
+      const { data: currentAnswers, error: loadErr } = await supabase
+        .from('esg_answers')
+        .select('*')
+        .eq('company_id', companyId);
+      if (loadErr) return { error: loadErr };
+
+      // Step 2: Get submitted_at from company
+      const { data: companyData } = await supabase
+        .from('esg_companies')
+        .select('submitted_at')
+        .eq('id', companyId)
+        .single();
+      const submittedAt = companyData ? companyData.submitted_at : null;
+
+      // Step 3: Delete any existing history for this company (we only keep one version)
+      await supabase
+        .from('esg_answers_history')
+        .delete()
+        .eq('company_id', companyId);
+
+      // Step 4: Insert current answers into history
+      if (currentAnswers && currentAnswers.length > 0) {
+        const historyRows = currentAnswers.map(a => ({
+          company_id: a.company_id,
+          question_id: a.question_id,
+          answer: a.answer,
+          partial_text: a.partial_text,
+          was_auto_suggested: a.was_auto_suggested,
+          submitted_at: submittedAt
+        }));
+        const { error: insErr } = await supabase
+          .from('esg_answers_history')
+          .insert(historyRows);
+        if (insErr) {
+          console.error('History insert error:', insErr);
+          // Continue anyway — unlock is more important than history
+        }
+      }
+
+      // Step 5: Unlock the company
       const { error } = await supabase
         .from('esg_companies')
         .update({ is_locked: false, submitted_at: null })
         .eq('id', companyId);
       return { error };
+    }
+
+    // Load history answers for a company (if any)
+    async function loadHistoryAnswers(companyId) {
+      const { data, error } = await supabase
+        .from('esg_answers_history')
+        .select('*')
+        .eq('company_id', companyId);
+      if (error) return { data: null, error };
+      return { data: data || [], error: null };
     }
 
     // ============================================
@@ -1010,6 +1072,8 @@
       const [pdfLoading, setPdfLoading] = useState(false);
       const [showEmail, setShowEmail] = useState(false);
       const [emailCopied, setEmailCopied] = useState(false);
+      const [historyAnswers, setHistoryAnswers] = useState(null); // null = not loaded yet, [] = no history
+      const [historyPdfLoading, setHistoryPdfLoading] = useState(false);
 
       useEffect(() => {
         (async () => {
@@ -1018,6 +1082,9 @@
           const { data: a } = await supabase.from('esg_answers').select('*').eq('company_id', companyId);
           setCompany(c);
           setAnswers(a || []);
+          // Load history (if any)
+          const { data: hist } = await loadHistoryAnswers(companyId);
+          setHistoryAnswers(hist || []);
           setLoading(false);
         })();
       }, [companyId]);
@@ -1047,6 +1114,31 @@
           alert(T[lang].pdfFailed + (e.message || ''));
         } finally {
           setPdfLoading(false);
+        }
+      };
+
+      const downloadHistoryPdf = async () => {
+        if (!historyAnswers || historyAnswers.length === 0) {
+          alert(T[lang].historyNotFound);
+          return;
+        }
+        setHistoryPdfLoading(true);
+        try {
+          const histStats = calcStats(historyAnswers);
+          const histSectionStats = calcSectionStats(historyAnswers);
+          // Build a "previous version" company object — use original submitted_at from history
+          const firstHist = historyAnswers[0];
+          const histCompany = {
+            ...company,
+            submitted_at: firstHist.submitted_at,
+            __isHistory: true
+          };
+          await generateCompanyPDF(histCompany, historyAnswers, histSectionStats, histStats, lang, true);
+        } catch (e) {
+          console.error(e);
+          alert(T[lang].pdfFailed + (e.message || ''));
+        } finally {
+          setHistoryPdfLoading(false);
         }
       };
 
@@ -1144,6 +1236,11 @@
               },
               className: 'h-10 px-4 text-sm font-medium text-blue-700 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition'
             }, T[lang].emailBtn),
+            historyAnswers && historyAnswers.length > 0 ? React.createElement('button', {
+              onClick: downloadHistoryPdf,
+              disabled: historyPdfLoading,
+              className: 'h-10 px-4 text-sm font-medium text-amber-700 bg-amber-50 border border-amber-200 rounded-lg hover:bg-amber-100 transition disabled:opacity-50'
+            }, historyPdfLoading ? T[lang].historyLoading : T[lang].historyPdfBtn) : null,
             React.createElement('button', {
               onClick: downloadPdf,
               disabled: pdfLoading,
@@ -1333,7 +1430,7 @@
     // ============================================
     // PDF GENERATION
     // ============================================
-    async function generateCompanyPDF(company, answers, sectionStats, stats, lang) {
+    async function generateCompanyPDF(company, answers, sectionStats, stats, lang, isHistory) {
       const { jsPDF } = window.jspdf;
       const doc = new jsPDF({ unit: 'mm', format: 'a4' });
 
@@ -1350,6 +1447,7 @@
       const dateStr = new Date().toLocaleDateString(lang === 'ka' ? 'ka-GE' : 'en-US', { year: 'numeric', month: 'long', day: 'numeric' });
       const submittedStr = company.submitted_at ? new Date(company.submitted_at).toLocaleDateString(lang === 'ka' ? 'ka-GE' : 'en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : '—';
       const scoreColor = stats.score >= 70 ? '#059669' : stats.score >= 40 ? '#d97706' : '#dc2626';
+      const historyBadge = isHistory ? ` <span style="font-size: 12px; color: #d97706; background: #FEF3C7; padding: 2px 8px; border-radius: 4px; vertical-align: middle; margin-left: 8px;">${T[lang].historyPdfTitle}</span>` : '';
 
       // Group answers by section
       const answersBySection = SECTION_PREFIXES.map(() => []);
@@ -1363,7 +1461,7 @@
         <div style="border-bottom: 3px solid #0E5BA8; padding-bottom: 20px; margin-bottom: 24px; display: flex; justify-content: space-between; align-items: flex-start;">
           <div>
             <img src="${LOGO_URL}" style="height: 50px; width: auto; margin-bottom: 12px;" />
-            <h1 style="font-size: 22px; font-weight: 600; margin: 0; color: #1c1917;">${T[lang].pdfTitle}</h1>
+            <h1 style="font-size: 22px; font-weight: 600; margin: 0; color: #1c1917;">${T[lang].pdfTitle}${historyBadge}</h1>
             <p style="font-size: 11px; color: #78716c; margin: 4px 0 0;">${T[lang].pdfSubtitle}</p>
           </div>
           <div style="text-align: right;">
@@ -1471,7 +1569,8 @@
           doc.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
           heightLeft -= pageHeight;
         }
-        const filename = `ESG_Admin_${(company.name || 'company').replace(/[^a-zA-Z0-9-_]/g, '_')}_${new Date().toISOString().split('T')[0]}_${lang}.pdf`;
+        const historySuffix = isHistory ? '_PREVIOUS' : '';
+        const filename = `ESG_Admin_${(company.name || 'company').replace(/[^a-zA-Z0-9-_]/g, '_')}${historySuffix}_${new Date().toISOString().split('T')[0]}_${lang}.pdf`;
         doc.save(filename);
       } finally {
         document.body.removeChild(container);
