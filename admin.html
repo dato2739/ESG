@@ -1122,24 +1122,31 @@
       };
 
       const downloadHistoryPdf = async () => {
-        if (!historyAnswers || historyAnswers.length === 0) {
-          alert(T[lang].historyNotFound);
-          return;
-        }
         setHistoryPdfLoading(true);
         try {
-          const histStats = calcStats(historyAnswers);
-          const histSectionStats = calcSectionStats(historyAnswers);
-          // Build a "previous version" company object — use original submitted_at from history
-          const firstHist = historyAnswers[0];
+          // Fetch history fresh from DB (in case state was empty)
+          const result = await loadHistoryAnswers(companyId);
+          console.log('[ESG] History fetch result:', result);
+          const histData = result && result.data ? result.data : [];
+          console.log('[ESG] History records found:', histData.length);
+
+          if (histData.length === 0) {
+            alert(T[lang].historyNotFound);
+            setHistoryPdfLoading(false);
+            return;
+          }
+
+          const histStats = calcStats(histData);
+          const histSectionStats = calcSectionStats(histData);
+          const firstHist = histData[0];
           const histCompany = {
             ...company,
             submitted_at: firstHist.submitted_at,
             __isHistory: true
           };
-          await generateCompanyPDF(histCompany, historyAnswers, histSectionStats, histStats, lang, true);
+          await generateCompanyPDF(histCompany, histData, histSectionStats, histStats, lang, true);
         } catch (e) {
-          console.error(e);
+          console.error('[ESG] History PDF error:', e);
           alert(T[lang].pdfFailed + (e.message || ''));
         } finally {
           setHistoryPdfLoading(false);
