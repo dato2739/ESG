@@ -1083,8 +1083,12 @@
           setCompany(c);
           setAnswers(a || []);
           // Load history (if any)
-          const { data: hist } = await loadHistoryAnswers(companyId);
-          setHistoryAnswers(hist || []);
+          console.log('[ESG DEBUG] Loading history for company:', companyId);
+          const histResult = await loadHistoryAnswers(companyId);
+          console.log('[ESG DEBUG] History result:', histResult);
+          const hist = histResult && histResult.data ? histResult.data : [];
+          console.log('[ESG DEBUG] History count:', hist.length);
+          setHistoryAnswers(hist);
           setLoading(false);
         })();
       }, [companyId]);
