@@ -1,0 +1,1958 @@
+<!DOCTYPE html>
+<html lang="ka">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ESG Admin Panel — ENERGO-PRO Georgia</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Georgian:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Noto Sans Georgian', 'Inter', sans-serif; -webkit-font-smoothing: antialiased; }
+    .fade-in { animation: fadeIn 0.25s ease-out; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+    .scrollbar-thin::-webkit-scrollbar { width: 6px; height: 6px; }
+    .scrollbar-thin::-webkit-scrollbar-thumb { background: #d6d3d1; border-radius: 3px; }
+  </style>
+  <script type="importmap">
+  {
+    "imports": {
+      "react": "https://esm.sh/react@18.3.1",
+      "react-dom/client": "https://esm.sh/react-dom@18.3.1/client",
+      "@supabase/supabase-js": "https://esm.sh/@supabase/supabase-js@2"
+    }
+  }
+  </script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+</head>
+<body class="bg-stone-50 min-h-screen">
+  <div id="root"></div>
+
+  <script type="module">
+    import React, { useState, useEffect, useMemo } from 'react';
+    import { createRoot } from 'react-dom/client';
+    import { createClient } from '@supabase/supabase-js';
+
+    // ============================================
+    // CONFIG
+    // ============================================
+    const SUPABASE_URL = 'https://zdmvuilqvthjzxajmxee.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_-3Uv3MnReeoMq02eLQYzpQ_2GqQ2DJ9';
+    const ADMIN_PASSWORD = 'energo2024';
+
+    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const LOGO_URL = 'data:image/jpeg;base64,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';
+
+    // ============================================
+    // SECTIONS DATA (loaded from main app questions)
+    // ============================================
+    const SECTION_NAMES = {
+      ka: ['ხარისხი', 'ადამიანის უფლებები', 'შრომა', 'გარემო', 'ანტი-კორუფცია', 'ჯანდაცვა და უსაფრთხოება', 'კლიმატის ცვლილება'],
+      en: ['Quality', 'Human Rights', 'Labour', 'Environment', 'Anti-Corruption', 'Health & Safety', 'Climate Change']
+    };
+
+    // ============================================
+    // TRANSLATIONS
+    // ============================================
+    const T = {
+      ka: {
+        // Login
+        adminPanel: 'ESG Admin Panel',
+        loginPrompt: 'შესასვლელად შეიყვანეთ პაროლი',
+        password: 'პაროლი',
+        login: 'შესვლა',
+        wrongPassword: 'არასწორი პაროლი',
+        // Header
+        adminLabel: 'ADMIN PANEL',
+        esgAssessments: 'ESG შეფასებები',
+        logout: 'გასვლა',
+        // Stats
+        statTotalCompanies: 'სულ კომპანიები',
+        statSubmitted: 'შევსებული',
+        statInProgress: 'მიმდინარე',
+        statAvgScore: 'საშ. ESG ქულა',
+        // Filters
+        searchPlaceholder: 'ძებნა კომპანიის სახელით ან ID-ით...',
+        filterAll: 'ყველა',
+        filterSubmitted: 'შევსებული',
+        filterInProgress: 'მიმდინარე',
+        refresh: '↻ განახლება',
+        // Table
+        thCompany: 'კომპანია',
+        thId: 'ID',
+        thContact: 'კონტაქტი',
+        thStatus: 'სტატუსი',
+        thDate: 'შევსების თარიღი',
+        thScore: 'ESG ქულა',
+        thActions: 'მოქმედებები',
+        statusSubmitted: '✓ შევსებული',
+        statusInProgress: '◷ მიმდინარე',
+        actionView: 'ნახვა',
+        actionDelete: 'წაშლა',
+        noCompanies: 'კომპანიები ვერ მოიძებნა',
+        // Detail
+        backToList: 'კომპანიების სია',
+        downloadPdf: '📄 PDF ჩამოტვირთვა',
+        generating: '⌛ იქმნება...',
+        idLabel: 'ID',
+        contactLabel: 'კონტაქტი',
+        dateLabel: 'შევსების თარიღი',
+        statusLabel: 'სტატუსი',
+        totalScore: 'საერთო ESG ქულა',
+        yesShort: 'კი',
+        partialShort: 'ნაწილ.',
+        noShort: 'არა',
+        sectionScores: 'სექციების მიხედვით',
+        answerDistribution: 'პასუხების განაწილება',
+        fullAnswers: 'სრული პასუხები',
+        partialSummary: 'ნაწილობრივი პასუხების შეჯამება',
+        partialSummaryDesc: 'კონტრაქტორის მიერ მოცემული განმარტებები',
+        partialEmpty: 'ნაწილობრივი პასუხები არ არის',
+        questionLabel: 'კითხვა',
+        explanationLabel: 'განმარტება',
+        section: 'სექცია',
+        yesLabel: 'კი',
+        partialLabel: 'ნაწილობრივ',
+        noLabel: 'არა',
+        autoFilled: 'ავტო',
+        noteLabel: 'შენიშვნა',
+        // Delete confirmation
+        deleteTitle: 'კომპანიის წაშლა',
+        deleteConfirm1: 'დარწმუნებული ხართ, რომ გსურთ კომპანიის "',
+        deleteConfirm2: '" წაშლა? ყველა პასუხი სამუდამოდ წაიშლება. ეს მოქმედება არ გადადის უკან.',
+        cancel: 'გაუქმება',
+        confirmDelete: 'წაშლა',
+        deleting: 'იშლება...',
+        deleteFailed: 'წაშლა ვერ მოხერხდა: ',
+        // Loading
+        loadingData: 'იტვირთება მონაცემები...',
+        loadingItem: 'იტვირთება...',
+        companyNotFound: 'კომპანია ვერ მოიძებნა',
+        pdfFailed: 'PDF შექმნა ვერ მოხერხდა: ',
+        // PDF
+        pdfTitle: 'ESG შეფასების ანგარიში',
+        pdfSubtitle: 'Admin Report',
+        pdfTotalScore: 'საერთო ESG ქულა',
+        pdfGenerated: 'გენერ.',
+        pdfCompany: 'კომპანია',
+        pdfId: 'საიდენტიფიკაციო ნომერი',
+        pdfContact: 'კონტაქტი',
+        pdfDate: 'შევსების თარიღი',
+        pdfSectionScoresTitle: 'სექციების მიხედვით ქულები',
+        pdfFooter: 'ENERGO-PRO Georgia • ESG Admin Report',
+        // Email generator
+        emailBtn: '✉ მეილის გენერაცია',
+        emailModalTitle: 'კომპანიასთან გასაგზავნი წერილი',
+        emailCopy: 'დაკოპირება',
+        emailCopied: '✓ დაკოპირდა',
+        emailSubjectLabel: 'საგანი:',
+        emailNoItems: 'ამ კომპანიას არ აქვს არცერთი „დიახ" ან „ნაწილობრივ" პასუხი იმ კატეგორიებში, რომლებზეც წერილი იქმნება. წერილის გენერაცია შეუძლებელია.',
+        emailSubject: 'ESG თვითშეფასების ფორმის დაზუსტება',
+        emailGreeting: 'მოგესალმებით,',
+        emailP1: 'უპირველეს ყოვლისა, მადლობას გიხდით ფორმის შევსებისათვის გამოყოფილი დროისთვის — თქვენი ჩართულობა ჩვენთვის მნიშვნელოვანია.',
+        emailP2: 'თქვენი პასუხების გაცნობის შემდეგ, რამდენიმე საკითხი დაგვრჩა, რომელიც დამატებით დაზუსტებას საჭიროებს. გვეჩვენება, რომ ზოგი კითხვის ფორმულირება არც თუ ისე ცხადი იყო და შესაძლოა ადგილი ჰქონდა გაუგებრობას. გვინდა დავრწმუნდეთ, რომ თქვენი პასუხები ზუსტად ასახავს კომპანიის რეალურ სურათს.',
+        emailP3: 'გვინდა შეგახსენოთ, რომ ENERGO-PRO Georgia-სა და თქვენს კომპანიას შორის თანამშრომლობის მოცულობა საკმაოდ მოცულობითია. ჩვენთვის, როგორც ESG (გარემოსდაცვითი, სოციალური და კორპორაციული მართვის) საერთაშორისო სტანდარტების მიმდევარი კომპანიისთვის, არსებითია ვიცოდეთ ვისთან გვაქვს საქმე და რა პრინციპებით მუშაობენ ჩვენი პარტნიორები.',
+        emailP4: 'ამიტომ, გთხოვთ, ქვემოთ ჩამოთვლილ პუნქტებთან დაკავშირებით (რომლებზეც „დიახ"-ი ან „ნაწილობრივი" თანხმობა მიგვითითეთ) მოგვაწოდოთ შესაბამისი განმარტებები და დამადასტურებელი დოკუმენტაცია:',
+        emailP5: 'ასევე, შეგიძლიათ თავიდან გადახედოთ ფორმის სხვა პუნქტებსაც — სურვილის შემთხვევაში, საწყისი პასუხების შესწორება სრულიად შესაძლებელია.',
+        emailWarning: 'გთხოვთ გაითვალისწინოთ: მოწოდებული ინფორმაცია და თანდართული დოკუმენტაცია ჩვენი მხრიდან თქვენი კომპანიის ESG შეფასების საფუძველი იქნება. შესაბამისად, ფორმის ფრთხილად და სრულყოფილად შევსება პირდაპირ აისახება შეფასების შედეგზე, რომლის გათვალისწინება მოგვიწევს სამომავლოდ.',
+        emailDeadline: 'დოკუმენტაცია ამ წერილზე საპასუხოდ მოგვაწოდეთ, 5 სამუშაო დღის ვადაში.',
+        emailClosing: 'წინასწარ მადლობას გიხდით თანამშრომლობისთვის. ნებისმიერი შეკითხვის შემთხვევაში, მოგვწერეთ ან დაგვირეკეთ ქვემოთ მითითებულ კონტაქტებზე.',
+        emailRegards: 'პატივისცემით,',
+        emailSignName: 'თეონა ქველიძე',
+        emailSignTitle: 'შესყიდვების განყოფილების სპეციალისტი',
+        emailSignCompany: 'ENERGO-PRO Georgia',
+        emailSignEmail: 'teona.qvelidze@energo-pro.ge',
+        emailSignPhone: '577 35 00 90',
+        // Categories management page
+        catsBtn: '📊 კატეგორიების მართვა',
+        catsPageTitle: 'კითხვების კატეგორიების მართვა',
+        catsPageSubtitle: 'გადაიტანეთ კითხვები კატეგორიებს შორის (drag-and-drop). ცვლილებები აისახება მთელ აპში.',
+        catsSave: '💾 ცვლილებების შენახვა',
+        catsSaved: '✓ შენახულია',
+        catsHasChanges: 'არ არის შენახული',
+        catsReset: '↺ საწყისზე დაბრუნება',
+        catsResetConfirmTitle: 'საწყისზე დაბრუნება',
+        catsResetConfirmMsg: 'ნამდვილად გსურთ კატეგორიების სრულად საწყის (default) მდგომარეობაში დაბრუნება? ყველა თქვენი ცვლილება დაიკარგება.',
+        catsResetConfirmBtn: 'საწყისზე დაბრუნება',
+        catsSaveFailed: 'შენახვა ვერ მოხერხდა: ',
+        cat1Title: 'კატეგორია 1 — ვენდობით',
+        cat1Desc: 'გადამოწმება არ ღირს',
+        cat2Title: 'კატეგორია 2 — გასაუბრება',
+        cat2Desc: 'გასაუბრებით დადგენა',
+        cat3Title: 'კატეგორია 3 — დოკუმენტი',
+        cat3Desc: 'დამადასტურებელი დოკუმენტი',
+        catStatsYes: 'დიახ',
+        catStatsPartial: 'ნაწილ.',
+        catStatsNo: 'არა',
+        catCompaniesListTitle: 'კომპანიების სია',
+        catCompaniesNoData: 'არ არის კომპანიები ამ პასუხით',
+        // Unlock
+        unlockBtn: '🔓 განბლოკვა',
+        unlockTitle: 'კომპანიის სტატუსის შეცვლა',
+        unlockMsg: 'ნამდვილად გსურთ კომპანიის "',
+        unlockMsg2: '" განბლოკვა? ის შეძლებს თავისი პასუხების კორექტირებას და ხელახლა გადაგზავნას. წინა პასუხები შეინახება.',
+        unlockConfirm: 'განბლოკვა',
+        unlocking: 'მუშავდება...',
+        unlockFailed: 'განბლოკვა ვერ მოხერხდა: ',
+        // History
+        historyPdfBtn: '📄 წინა ვერსიის PDF',
+        historyLoading: 'წინა ვერსიის ჩამოტვირთვა...',
+        historyNotFound: 'წინა ვერსია არ მოიძებნა',
+        historyPdfTitle: '(წინა ვერსია)'
+      },
+      en: {
+        // Login
+        adminPanel: 'ESG Admin Panel',
+        loginPrompt: 'Enter password to log in',
+        password: 'Password',
+        login: 'Log in',
+        wrongPassword: 'Incorrect password',
+        // Header
+        adminLabel: 'ADMIN PANEL',
+        esgAssessments: 'ESG Assessments',
+        logout: 'Log out',
+        // Stats
+        statTotalCompanies: 'Total companies',
+        statSubmitted: 'Submitted',
+        statInProgress: 'In progress',
+        statAvgScore: 'Avg. ESG score',
+        // Filters
+        searchPlaceholder: 'Search by company name or ID...',
+        filterAll: 'All',
+        filterSubmitted: 'Submitted',
+        filterInProgress: 'In progress',
+        refresh: '↻ Refresh',
+        // Table
+        thCompany: 'Company',
+        thId: 'ID',
+        thContact: 'Contact',
+        thStatus: 'Status',
+        thDate: 'Submission date',
+        thScore: 'ESG score',
+        thActions: 'Actions',
+        statusSubmitted: '✓ Submitted',
+        statusInProgress: '◷ In progress',
+        actionView: 'View',
+        actionDelete: 'Delete',
+        noCompanies: 'No companies found',
+        // Detail
+        backToList: 'Companies list',
+        downloadPdf: '📄 Download PDF',
+        generating: '⌛ Generating...',
+        idLabel: 'ID',
+        contactLabel: 'Contact',
+        dateLabel: 'Submission date',
+        statusLabel: 'Status',
+        totalScore: 'Overall ESG score',
+        yesShort: 'Yes',
+        partialShort: 'Partial',
+        noShort: 'No',
+        sectionScores: 'By sections',
+        answerDistribution: 'Answer distribution',
+        fullAnswers: 'Full answers',
+        partialSummary: 'Partial answers summary',
+        partialSummaryDesc: 'Explanations provided by the contractor',
+        partialEmpty: 'No partial answers',
+        questionLabel: 'Question',
+        explanationLabel: 'Explanation',
+        section: 'Section',
+        yesLabel: 'Yes',
+        partialLabel: 'Partial',
+        noLabel: 'No',
+        autoFilled: 'auto',
+        noteLabel: 'Note',
+        // Delete confirmation
+        deleteTitle: 'Delete company',
+        deleteConfirm1: 'Are you sure you want to delete "',
+        deleteConfirm2: '"? All answers will be permanently deleted. This action cannot be undone.',
+        cancel: 'Cancel',
+        confirmDelete: 'Delete',
+        deleting: 'Deleting...',
+        deleteFailed: 'Delete failed: ',
+        // Loading
+        loadingData: 'Loading data...',
+        loadingItem: 'Loading...',
+        companyNotFound: 'Company not found',
+        pdfFailed: 'PDF generation failed: ',
+        // PDF
+        pdfTitle: 'ESG Assessment Report',
+        pdfSubtitle: 'Admin Report',
+        pdfTotalScore: 'Overall ESG score',
+        pdfGenerated: 'Generated',
+        pdfCompany: 'Company',
+        pdfId: 'Identification number',
+        pdfContact: 'Contact',
+        pdfDate: 'Submission date',
+        pdfSectionScoresTitle: 'Section scores',
+        pdfFooter: 'ENERGO-PRO Georgia • ESG Admin Report',
+        // Email generator
+        emailBtn: '✉ Generate email',
+        emailModalTitle: 'Letter to send to the company',
+        emailCopy: 'Copy',
+        emailCopied: '✓ Copied',
+        emailSubjectLabel: 'Subject:',
+        emailNoItems: 'This company has no "Yes" or "Partial" answers in the categories used for letter generation. Letter generation is not possible.',
+        emailSubject: 'Clarification of ESG Self-Assessment Form',
+        emailGreeting: 'Hello,',
+        emailP1: 'First and foremost, thank you for taking the time to complete the form — your engagement is important to us.',
+        emailP2: 'After reviewing your answers, a few points came up that need additional clarification. It seems to us that the wording of some questions may not have been entirely clear, and there may have been some misunderstanding. We want to make sure that your answers accurately reflect the real picture of your company.',
+        emailP3: 'We would like to remind you that the volume of cooperation between ENERGO-PRO Georgia and your company is quite substantial. For us, as a company that follows international ESG (Environmental, Social, and Governance) standards, it is essential to know who we are dealing with and what principles our partners operate by.',
+        emailP4: 'For this reason, please provide the relevant explanations and supporting documentation for the items listed below (for which you indicated "Yes" or "Partial" agreement):',
+        emailP5: 'You are also welcome to review the other items of the form — if you wish, the initial answers can be corrected.',
+        emailWarning: 'Please note: the information you provide and the attached documentation will form the basis of our ESG evaluation of your company. Accordingly, careful and thorough completion of the form will directly affect the evaluation result, which we will need to take into account going forward.',
+        emailDeadline: 'Please send the documentation as a reply to this letter, within 5 business days.',
+        emailClosing: 'Thank you in advance for your cooperation. Should you have any questions, please write or call us using the contacts below.',
+        emailRegards: 'Best regards,',
+        emailSignName: 'Teona Kvelidze',
+        emailSignTitle: 'Procurement Department Specialist',
+        emailSignCompany: 'ENERGO-PRO Georgia',
+        emailSignEmail: 'teona.qvelidze@energo-pro.ge',
+        emailSignPhone: '577 35 00 90',
+        // Categories management page
+        catsBtn: '📊 Categories management',
+        catsPageTitle: 'Question categories management',
+        catsPageSubtitle: 'Drag and drop questions between categories. Changes apply across the app.',
+        catsSave: '💾 Save changes',
+        catsSaved: '✓ Saved',
+        catsHasChanges: 'Unsaved changes',
+        catsReset: '↺ Reset to default',
+        catsResetConfirmTitle: 'Reset to default',
+        catsResetConfirmMsg: 'Are you sure you want to reset categories to the original default state? All your changes will be lost.',
+        catsResetConfirmBtn: 'Reset to default',
+        catsSaveFailed: 'Save failed: ',
+        cat1Title: 'Category 1 — Trusted',
+        cat1Desc: 'No verification needed',
+        cat2Title: 'Category 2 — Interview',
+        cat2Desc: 'Verify via interview',
+        cat3Title: 'Category 3 — Document',
+        cat3Desc: 'Supporting document required',
+        catStatsYes: 'Yes',
+        catStatsPartial: 'Partial',
+        catStatsNo: 'No',
+        catCompaniesListTitle: 'Companies',
+        catCompaniesNoData: 'No companies with this answer',
+        // Unlock
+        unlockBtn: '🔓 Unlock',
+        unlockTitle: 'Change company status',
+        unlockMsg: 'Are you sure you want to unlock company "',
+        unlockMsg2: '"? They will be able to correct their answers and re-submit. Previous answers will be preserved.',
+        unlockConfirm: 'Unlock',
+        unlocking: 'Processing...',
+        unlockFailed: 'Unlock failed: ',
+        // History
+        historyPdfBtn: '📄 Previous version PDF',
+        historyLoading: 'Loading previous version...',
+        historyNotFound: 'No previous version found',
+        historyPdfTitle: '(Previous version)'
+      }
+    };
+
+    const SECTION_PREFIXES = ['q_2_', 'q_3_', 'q_4_', 'q_5_', 'q_6_', 'q_7_', 'q_8_'];
+
+    // Default categories (initial state)
+    const DEFAULT_CAT1 = ['q_2_2_1','q_2_3','q_2_6','q_2_7','q_2_9','q_2_11','q_2_13_1','q_3_1_1','q_3_1_2','q_3_1_3','q_3_1_4','q_3_2','q_3_2_3','q_4_1','q_4_1_2','q_4_1_3','q_4_2_1','q_4_2_3','q_4_2_4','q_4_3','q_4_3_1','q_4_3_2','q_4_3_3','q_4_3_4','q_4_3_5','q_4_4','q_4_4_3','q_4_4_6','q_5_1_1','q_5_1_2','q_5_1_3','q_5_2_2','q_5_2_3','q_5_3_4','q_6_1_2','q_6_1_3','q_8_1_2','q_8_2'];
+    const DEFAULT_CAT3 = ['q_2_1','q_2_2','q_2_8','q_6_1_1','q_7_1_1','q_4_2_2','q_5_2_1','q_8_1_1'];
+
+    // Build default category map: qid -> 1|2|3
+    function buildDefaultCategoryMap() {
+      const map = {};
+      DEFAULT_CAT1.forEach(q => map[q] = 1);
+      DEFAULT_CAT3.forEach(q => map[q] = 3);
+      // CAT2 = everything else (will be filled when questions list is available)
+      return map;
+    }
+
+    // Global mutable category map (populated from DB or defaults)
+    let CATEGORY_MAP = buildDefaultCategoryMap();
+
+    function getCategory(qid) {
+      if (CATEGORY_MAP[qid]) return CATEGORY_MAP[qid];
+      return 2; // default if not classified
+    }
+
+    function getCategoryColor(cat) {
+      if (cat === 1) return { bg: 'bg-emerald-50', border: 'border-emerald-200', text: 'text-emerald-700', solid: '#059669' };
+      if (cat === 3) return { bg: 'bg-rose-50', border: 'border-rose-200', text: 'text-rose-700', solid: '#dc2626' };
+      return { bg: 'bg-amber-50', border: 'border-amber-200', text: 'text-amber-700', solid: '#d97706' };
+    }
+
+    const QUESTIONS = {
+      'q_2_1': { ka: 'აქვს კომპანიას ხარისხის მართვის სერტიფიკატი?', en: 'Are there any certifications for the quality management system?' },
+      'q_2_2': { ka: 'აქვს კომპანიას ხარისხის სახელმძღვანელო?', en: 'Is there a quality manual defining production procedures?' },
+      'q_2_2_1': { ka: 'სახელმძღვანელო შეიცავს ხარისხის ინდიკატორებს და სამიზნე მიზნებს?', en: 'Does the manual contain quality indicators and target goals?' },
+      'q_2_3': { ka: 'აქვს კომპანიას მენეჯმენტის გადახედვის პროცესი?', en: 'Does the supplier have a management review process?' },
+      'q_2_4': { ka: 'ტარდება შიდა აუდიტი?', en: 'Are there internal audits?' },
+      'q_2_5': { ka: 'აქვს მომწოდებელს ხარისხის გაუმჯობესების სამოქმედო გეგმა?', en: 'Does the supplier have an action plan for quality improvement?' },
+      'q_2_6': { ka: 'აქვს კომპანიას ორგანიზაციული სტრუქტურა გამოფენილი?', en: 'Does the supplier have an organizational chart displayed?' },
+      'q_2_7': { ka: 'არსებობს უწყვეტი გაუმჯობესების სტრატეგია?', en: 'Does a continuous improvement strategy exist?' },
+      'q_2_8': { ka: 'გამოაქვეყნებს კომპანია წლიურ ESG რეპორტს?', en: 'Does the company publish an annual ESG/Sustainability Report?' },
+      'q_2_9': { ka: 'არის კლიენტთა კმაყოფილების შეფასების პროცედურა?', en: 'Are there customer satisfaction procedures?' },
+      'q_2_10': { ka: 'არსებობს საჩივრებისა და კრიზის მართვის პროცედურა?', en: 'Does a claim and crisis management procedure exist?' },
+      'q_2_11': { ka: 'არის შეკვეთის თვალყურის-დევნების პროცედურა?', en: 'Are there order follow-up procedures?' },
+      'q_2_12': { ka: 'აქვს მომწოდებელს დოკუმენტების მართვის სისტემა?', en: 'Does the supplier have a document management system?' },
+      'q_2_13': { ka: 'არის ტრენინგ-პროგრამები მენეჯმენტისთვის და თანამშრომლებისთვის?', en: 'Are there training programs for management and employees?' },
+      'q_2_13_1': { ka: 'თანამშრომლები საკმარისად კვალიფიციურები არიან?', en: 'Are the employees properly skilled for their role?' },
+      'q_2_13_2': { ka: 'არის მუშათა ტრენინგისა და ცოდნის ამაღლების პროგრამა?', en: 'Are there worker training or knowledge programs?' },
+      'q_2_14': { ka: 'მოწოდებული მასალები მოწმდება შემოსვლისას?', en: 'Are incoming materials inspected upon arrival?' },
+      'q_2_14_1': { ka: 'არის შემოსული მასალების ინსპექციის წერილობითი პროცედურა?', en: 'Are there written inspection procedures for incoming materials?' },
+      'q_2_14_2': { ka: 'მიღებული და უარყოფილი მასალები ცალ-ცალკე ინახება?', en: 'Are accepted vs rejected materials kept segregated?' },
+      'q_2_15': { ka: 'არის წერილობითი პროცედურები ყველა საწარმოო პროცესისთვის?', en: 'Are there written procedures for all manufacturing processes?' },
+      'q_2_15_1': { ka: 'მნიშვნელოვანი მახასიათებლები მონიტორინგდება წარმოების დროს?', en: 'Are important characteristics monitored during production?' },
+      'q_2_15_2': { ka: 'ტარდება საბოლოო ინსპექცია თითოეულ პარტიაზე?', en: 'Is final inspection performed on each lot?' },
+      'q_3_1': { ka: 'აქვს კომპანიას ადამიანის უფლებების დაცვის პოლიტიკა?', en: 'Has the company established human rights policies?' },
+      'q_3_1_1': { ka: 'უზრუნველყოფს უსაფრთხო და ჯანსაღ სამუშაო პირობებს?', en: 'Are safe and healthy working conditions provided?' },
+      'q_3_1_2': { ka: 'უზრუნველყოფს გაერთიანების თავისუფლებას?', en: 'Is freedom of association guaranteed?' },
+      'q_3_1_3': { ka: 'უზრუნველყოფს არადისკრიმინაციულ კადრების პოლიტიკას?', en: 'Is non-discrimination ensured in personnel practices?' },
+      'q_3_1_4': { ka: 'არ იყენებს იძულებით ან ბავშვთა შრომას?', en: 'Is forced or child labour avoided directly and indirectly?' },
+      'q_3_2': { ka: 'ჩაატარა კომპანიამ ადამიანის უფლებების შეფასება იმ ქვეყნებში, სადაც საქმიანობს?', en: 'Has the company performed a human rights assessment in operating countries?' },
+      'q_3_2_1': { ka: 'აქვს კომპანიას მკაფიო პოლიტიკა, რომელიც იცავს როგორც საკუთარი თანამშრომლების, ასევე მიწოდების ჯაჭვის მუშაკთა უფლებებს?', en: 'Does the company have explicit policies protecting workers human rights in employment and supply chain?' },
+      'q_3_2_2': { ka: 'აქვს მონიტორინგის სისტემა?', en: 'Has the company established monitoring/tracking system?' },
+      'q_3_2_3': { ka: 'აქვს პოლიტიკა, რომ უსაფრთხოების ღონისძიებები არ იწვევდეს უფლებების დარღვევას?', en: 'Does security policy avoid contributing to human rights violations?' },
+      'q_4_1': { ka: 'კომპანია პატივს სცემს მუშაკთა უფლებას შექმნან პროფკავშირები?', en: 'Does the company respect workers right to form trade unions?' },
+      'q_4_1_1': { ka: 'აქვს არადისკრიმინაციული პოლიტიკა და პროცედურები?', en: 'Are non-discriminatory policies and procedures in place?' },
+      'q_4_1_2': { ka: 'მუშაკთა წარმომადგენლებს ეძლევათ შესაბამისი საშუალებები?', en: 'Are workers representatives provided appropriate facilities?' },
+      'q_4_1_3': { ka: 'არ ერევა მუშაკთა წარმომადგენლების საქმიანობაში?', en: 'Does the company avoid interfering with worker representatives?' },
+      'q_4_2': { ka: 'კომპანიას აქვს მკაფიო პოლიტიკა იძულებითი შრომის წინააღმდეგ?', en: 'Does the company have clear policy against forced labour?' },
+      'q_4_2_1': { ka: 'ყველა თანამშრომელს ესმის, რა არის იძულებითი შრომა?', en: 'Do all officials understand what forced labour means?' },
+      'q_4_2_2': { ka: 'შრომითი ხელშეკრულებები იწერება მუშაკისთვის გასაგებ ენაზე?', en: 'Are employment contracts written in workers language?' },
+      'q_4_2_3': { ka: 'კომპანია იცის რომელ ქვეყნებში/სექტორებში იძულებითი შრომის რისკი მაღალია?', en: 'Is the company aware of high-risk regions/sectors?' },
+      'q_4_2_4': { ka: 'კომპანია არ ჩამოართმევს მუშაკებს პირადობის დოკუმენტებს?', en: 'Does the company avoid confiscating workers identity documents?' },
+      'q_4_2_5': { ka: 'მონიტორინგდება მიწოდების ჯაჭვი და სუბკონტრაქტორები?', en: 'Are supply chains and subcontractors monitored?' },
+      'q_4_3': { ka: 'კომპანია ანვითარებს ცნობიერებას ბავშვთა შრომის მიზეზებსა და შედეგებზე?', en: 'Is awareness of child labour developed within the company?' },
+      'q_4_3_1': { ka: 'იცავს ეროვნული კანონით დადგენილ მინიმალურ ასაკობრივ ნორმებს?', en: 'Does the company adhere to minimum age provisions?' },
+      'q_4_3_2': { ka: 'ცნობს ბავშვთა შრომის რისკ-ქვეყნებსა და სექტორებს?', en: 'Is the company aware of high-risk regions for child labour?' },
+      'q_4_3_3': { ka: 'იყენებს ასაკის შემოწმების მექანიზმებს დაქირავებისას?', en: 'Are age verification mechanisms used in recruitment?' },
+      'q_4_3_4': { ka: 'აქვს პოლიტიკა 18 წლამდე პირების დაქირავების წინააღმდეგ?', en: 'Does the company have policy against hiring under 18?' },
+      'q_4_3_5': { ka: 'ახდენს გავლენას ქვე-კონტრაქტორებზე ბავშვთა შრომის წინააღმდეგ?', en: 'Does the company influence subcontractors against child labour?' },
+      'q_4_3_6': { ka: 'შემუშავებული აქვს ბავშვთა შრომის გამოვლენის მექანიზმი?', en: 'Has the company developed mechanisms to detect child labour?' },
+      'q_4_4': { ka: 'კვალიფიკაცია, უნარები და გამოცდილება არის დაქირავების და დაწინაურების საფუძველი?', en: 'Are qualifications, skill, experience the basis for recruitment/promotion?' },
+      'q_4_4_1': { ka: 'მაღალი დონის პასუხისმგებელი პირი დანიშნულია თანასწორი დასაქმების საკითხებზე?', en: 'Is high-level responsibility assigned for equal employment?' },
+      'q_4_4_2': { ka: 'ინახება განახლებული ჩანაწერები დაქირავების, ტრენინგის და დაწინაურების შესახებ?', en: 'Are records kept on recruitment, training, promotion?' },
+      'q_4_4_3': { ka: 'ტარდება არაცნობიერი მიკერძოების ტრენინგი?', en: 'Is unconscious bias training conducted?' },
+      'q_4_4_4': { ka: 'აქვს საჩივრების წარდგენის პროცედურა დისკრიმინაციის შემთხვევაში?', en: 'Are grievance procedures developed for discrimination?' },
+      'q_4_4_5': { ka: 'ტარდება არადისკრიმინაციული პოლიტიკის ტრენინგი?', en: 'Is non-discrimination training provided?' },
+      'q_4_4_6': { ka: 'აქვს უნარების განვითარების ხელმისაწვდომობის პროგრამა?', en: 'Are programs in place to promote access to skills training?' },
+      'q_5_1': { ka: 'აქვს კომპანიას ქცევის კოდექსი ჯანმრთელობასა და გარემოზე ზრუნვისთვის?', en: 'Does the company have code of conduct for health/environment care?' },
+      'q_5_1_1': { ka: 'აქვს მენეჯერული კომიტეტი წინდახედული მიდგომის ზედამხედველობისთვის?', en: 'Is there a managerial committee overseeing precautionary application?' },
+      'q_5_1_2': { ka: 'დამყარებულია ორმხრივი კომუნიკაცია დაინტერესებულ მხარეებთან?', en: 'Is two-way communication established with stakeholders?' },
+      'q_5_1_3': { ka: 'იყენებს მრავალმხრივ შეხვედრებს და ფოკუს-ჯგუფებს?', en: 'Does the company use multi-stakeholder meetings and focus groups?' },
+      'q_5_2': { ka: 'აქვს განსაზღვრული მდგრადი განვითარების ხედვა?', en: 'Are sustainable development vision and policies defined?' },
+      'q_5_2_1': { ka: 'შემუშავებულია მდგრადობის სამიზნე მაჩვენებლები?', en: 'Are sustainability targets and indicators developed?' },
+      'q_5_2_2': { ka: 'აქვს მდგრადი წარმოების და მოხმარების პროგრამა?', en: 'Is there sustainable production/consumption programme?' },
+      'q_5_2_3': { ka: 'მუშაობს დიზაინერებთან და მომწოდებლებთან გარემოსდაცვითი მაჩვენებლების გასაუმჯობესებლად?', en: 'Does the company work with designers/suppliers to improve environmental performance?' },
+      'q_5_2_4': { ka: 'ზომავს და აცნობს პროგრესს მდგრადობის პრინციპებზე?', en: 'Does the company measure/communicate sustainability progress?' },
+      'q_5_3': { ka: 'აქვს კომპანიას პოლიტიკა გარემოსდაცვითი ტექნოლოგიების გამოყენებაზე?', en: 'Is there policy on use of environmentally sound technologies?' },
+      'q_5_3_1': { ka: 'აწვდის ინფორმაციას ტექნოლოგიების გარემოსდაცვითი მაჩვენებლების შესახებ?', en: 'Is information made available about environmental performance?' },
+      'q_5_3_2': { ka: 'იყენებს ცხოვრების ციკლის შეფასებას (LCA) ახალი ტექნოლოგიებისთვის?', en: 'Is life cycle assessment used in new technology development?' },
+      'q_5_3_3': { ka: 'ამოწმებს კრიტერიუმებს მომწოდებელთა შესარჩევად?', en: 'Are criteria examined for supplier selection?' },
+      'q_5_3_4': { ka: 'თანამშრომლობს ინდუსტრიის პარტნიორებთან საუკეთესო ტექნოლოგიების უზრუნველსაყოფად?', en: 'Does the company cooperate with industry partners on best technology?' },
+      'q_6_1': { ka: 'აქვს კომპანიას ანტიკორუფციული პოლიტიკა და პროგრამები?', en: 'Does the company have anti-corruption policies and programmes?' },
+      'q_6_1_1': { ka: 'წლიურ ანგარიშებში მოცემულია ანტიკორუფციული მუშაობის შედეგები?', en: 'Is anti-corruption work reported in annual reports?' },
+      'q_6_1_2': { ka: 'კომპანია იზიარებს გამოცდილებას და საუკეთესო პრაქტიკას?', en: 'Does the company share experiences and best practices?' },
+      'q_6_1_3': { ka: 'თანამშრომლობს ინდუსტრიის თანატოლებთან ანტიკორუფციული ძალისხმევის გასაძლიერებლად?', en: 'Does the company join forces with industry peers in anti-corruption?' },
+      'q_7_1': { ka: 'აქვს კომპანიას ჯანდაცვისა და უსაფრთხოების პოლიტიკა?', en: 'Does the company have H&S policy and procedures?' },
+      'q_7_1_1': { ka: 'ხელმისაწვდომია H&S სტატისტიკა (ინციდენტები, ფატალური შემთხვევები)?', en: 'Are H&S statistics available (incidents, fatalities)?' },
+      'q_7_1_2': { ka: 'კომპანია გადასცემს მუშაკებს H&S შედეგებსა და სტატისტიკას?', en: 'Does the company communicate H&S performance to workers?' },
+      'q_7_1_3': { ka: 'არის გეგმები რომლებიც უზრუნველყოფს PPE-ს (პირადი დაცვის საშუალებები)?', en: 'Are there plans/standards committing to PPE for workers?' },
+      'q_8_1': { ka: 'აქვს კომპანიას დეკარბონიზაციის გეგმა?', en: 'Does the company have a decarbonization plan?' },
+      'q_8_1_1': { ka: 'აქვს კომპანიას ნახშირბადის შემცირების სამიზნე მაჩვენებლები?', en: 'Does the company have carbon reduction targets?' },
+      'q_8_1_2': { ka: 'იდენტიფიცირებული აქვს დეკარბონიზაციის სტრატეგიის ძირითადი დაბრკოლებები?', en: 'Has the company identified main obstacles of decarbonization?' },
+      'q_8_2': { ka: 'იდენტიფიცირებული აქვს კლიმატთან ადაპტაციის რისკები და ღონისძიებები?', en: 'Has the company identified climate adaptation risks and measures?' },
+    };
+
+    function getSectionIndex(qid) {
+      for (let i = 0; i < SECTION_PREFIXES.length; i++) {
+        if (qid.startsWith(SECTION_PREFIXES[i])) return i;
+      }
+      return -1;
+    }
+
+    // Helper: escape HTML
+    function escapeHtml(s) {
+      if (!s) return '';
+      return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    }
+
+    // ============================================
+    // DATA LOADING
+    // ============================================
+    async function loadAllCompanies() {
+      const { data, error } = await supabase
+        .from('esg_companies')
+        .select('*')
+        .order('created_at', { ascending: false });
+      if (error) console.error('Load companies error:', error);
+      return data || [];
+    }
+
+    async function loadCompanyAnswers(companyId) {
+      const { data, error } = await supabase
+        .from('esg_answers')
+        .select('*')
+        .eq('company_id', companyId);
+      if (error) console.error('Load answers error:', error);
+      return data || [];
+    }
+
+    async function deleteCompany(companyId) {
+      // Need to delete answers first (FK constraint)
+      const { error: ansErr } = await supabase
+        .from('esg_answers')
+        .delete()
+        .eq('company_id', companyId);
+      if (ansErr) {
+        console.error('Delete answers error:', ansErr);
+        return { error: ansErr };
+      }
+      // Also try admin_answers if any
+      await supabase.from('esg_admin_answers').delete().eq('company_id', companyId);
+      // Need to unlock first if locked, because RLS prevents updating locked companies
+      // Use a workaround: directly delete (RLS may need to allow this)
+      const { error: compErr } = await supabase
+        .from('esg_companies')
+        .delete()
+        .eq('id', companyId);
+      if (compErr) {
+        console.error('Delete company error:', compErr);
+        return { error: compErr };
+      }
+      return { success: true };
+    }
+
+    // Unlock a company so it can be edited again
+    // Also archive current answers to history table (preserves previous version)
+    async function unlockCompany(companyId) {
+      // Step 1: Get current answers
+      const { data: currentAnswers, error: loadErr } = await supabase
+        .from('esg_answers')
+        .select('*')
+        .eq('company_id', companyId);
+      if (loadErr) return { error: loadErr };
+
+      // Step 2: Get submitted_at from company
+      const { data: companyData } = await supabase
+        .from('esg_companies')
+        .select('submitted_at')
+        .eq('id', companyId)
+        .single();
+      const submittedAt = companyData ? companyData.submitted_at : null;
+
+      // Step 3: Delete any existing history for this company (we only keep one version)
+      await supabase
+        .from('esg_answers_history')
+        .delete()
+        .eq('company_id', companyId);
+
+      // Step 4: Insert current answers into history
+      if (currentAnswers && currentAnswers.length > 0) {
+        const historyRows = currentAnswers.map(a => ({
+          company_id: a.company_id,
+          question_id: a.question_id,
+          answer: a.answer,
+          partial_text: a.partial_text,
+          was_auto_suggested: a.was_auto_suggested,
+          submitted_at: submittedAt
+        }));
+        const { error: insErr } = await supabase
+          .from('esg_answers_history')
+          .insert(historyRows);
+        if (insErr) {
+          console.error('History insert error:', insErr);
+          // Continue anyway — unlock is more important than history
+        }
+      }
+
+      // Step 5: Unlock the company
+      const { error } = await supabase
+        .from('esg_companies')
+        .update({ is_locked: false, submitted_at: null })
+        .eq('id', companyId);
+      return { error };
+    }
+
+    // Load history answers for a company (if any)
+    async function loadHistoryAnswers(companyId) {
+      const { data, error } = await supabase
+        .from('esg_answers_history')
+        .select('*')
+        .eq('company_id', companyId);
+      if (error) return { data: null, error };
+      return { data: data || [], error: null };
+    }
+
+    // ============================================
+    // CATEGORY MANAGEMENT (Supabase-backed)
+    // ============================================
+    async function loadCategoriesFromDb() {
+      const { data, error } = await supabase
+        .from('esg_question_categories')
+        .select('*');
+      if (error) {
+        console.error('Load categories error:', error);
+        return null;
+      }
+      if (!data || data.length === 0) return null;
+      const map = {};
+      data.forEach(r => { map[r.question_id] = r.category; });
+      return map;
+    }
+
+    async function saveCategoriesToDb(categoryMap) {
+      // Upsert all entries
+      const rows = Object.entries(categoryMap).map(([qid, cat]) => ({
+        question_id: qid,
+        category: cat,
+        updated_at: new Date().toISOString()
+      }));
+      const { error } = await supabase
+        .from('esg_question_categories')
+        .upsert(rows, { onConflict: 'question_id' });
+      return { error };
+    }
+
+    async function resetCategoriesToDefault() {
+      // Delete all category rows from DB
+      const { error } = await supabase
+        .from('esg_question_categories')
+        .delete()
+        .neq('question_id', '___nonexistent___');
+      if (!error) {
+        CATEGORY_MAP = buildDefaultCategoryMap();
+      }
+      return { error };
+    }
+
+    async function initCategoryMap(allQuestionIds) {
+      const fromDb = await loadCategoriesFromDb();
+      if (fromDb) {
+        CATEGORY_MAP = fromDb;
+      } else {
+        CATEGORY_MAP = buildDefaultCategoryMap();
+      }
+      // Ensure ALL questions have a category (default to 2 if missing)
+      allQuestionIds.forEach(qid => {
+        if (!CATEGORY_MAP[qid]) CATEGORY_MAP[qid] = 2;
+      });
+      return CATEGORY_MAP;
+    }
+
+    // Calculate stats from answers array
+    function calcStats(answers) {
+      const total = answers.length;
+      const yes = answers.filter(a => a.answer === 'yes').length;
+      const no = answers.filter(a => a.answer === 'no').length;
+      const partial = answers.filter(a => a.answer === 'partial').length;
+      const score = total > 0 ? Math.round(((yes + partial * 0.5) / total) * 100) : 0;
+      return { total, yes, no, partial, score };
+    }
+
+    // Calculate per-section stats
+    function calcSectionStats(answers) {
+      const sections = SECTION_PREFIXES.map(() => ({ yes: 0, no: 0, partial: 0, total: 0 }));
+      answers.forEach(a => {
+        const idx = getSectionIndex(a.question_id);
+        if (idx === -1) return;
+        sections[idx].total++;
+        if (a.answer === 'yes') sections[idx].yes++;
+        else if (a.answer === 'no') sections[idx].no++;
+        else if (a.answer === 'partial') sections[idx].partial++;
+      });
+      return sections.map(s => ({
+        ...s,
+        score: s.total > 0 ? Math.round(((s.yes + s.partial * 0.5) / s.total) * 100) : 0
+      }));
+    }
+    // ============================================
+    // UI COMPONENTS
+    // ============================================
+
+    // ----------- LOGIN -----------
+    function LoginScreen({ onLogin, lang, setLang }) {
+      const [pw, setPw] = useState('');
+      const [error, setError] = useState('');
+
+      const submit = () => {
+        if (pw === ADMIN_PASSWORD) {
+          sessionStorage.setItem('esg_admin_auth', '1');
+          onLogin();
+        } else {
+          setError(T[lang].wrongPassword);
+          setPw('');
+        }
+      };
+
+      return React.createElement('div', { className: 'min-h-screen flex items-center justify-center px-4 relative' },
+        // Language switch top right
+        React.createElement('div', { className: 'absolute top-4 right-4' },
+          React.createElement(LangSwitch, { lang, setLang })
+        ),
+        React.createElement('div', { className: 'w-full max-w-sm fade-in' },
+          React.createElement('div', { className: 'text-center mb-8' },
+            React.createElement('img', {
+              src: LOGO_URL, alt: 'ENERGO-PRO',
+              className: 'h-12 w-auto mx-auto mb-5 rounded'
+            }),
+            React.createElement('h1', { className: 'text-xl font-semibold text-stone-900 mb-1' }, T[lang].adminPanel),
+            React.createElement('p', { className: 'text-xs text-stone-500' }, T[lang].loginPrompt)
+          ),
+          React.createElement('div', { className: 'bg-white border border-stone-200 rounded-2xl p-7 shadow-sm' },
+            React.createElement('input', {
+              type: 'password', value: pw, onChange: e => setPw(e.target.value),
+              onKeyDown: e => e.key === 'Enter' && submit(),
+              placeholder: T[lang].password,
+              autoFocus: true,
+              className: 'w-full h-11 px-3.5 text-sm bg-stone-50 border border-stone-200 rounded-lg focus:outline-none focus:bg-white focus:border-blue-700 transition mb-3'
+            }),
+            error ? React.createElement('div', { className: 'text-xs text-rose-600 mb-3' }, error) : null,
+            React.createElement('button', {
+              onClick: submit,
+              className: 'w-full h-11 text-white text-sm font-medium rounded-lg transition shadow-sm hover:shadow',
+              style: { background: 'linear-gradient(135deg, #0E5BA8, #1976D2)' }
+            }, T[lang].login)
+          )
+        )
+      );
+    }
+
+    // ----------- LANGUAGE SWITCH -----------
+    function LangSwitch({ lang, setLang }) {
+      return React.createElement('div', {
+        className: 'inline-flex bg-stone-100 rounded-lg p-0.5 border border-stone-200'
+      },
+        React.createElement('button', {
+          onClick: () => setLang('ka'),
+          className: `px-3 py-1.5 text-xs font-semibold rounded-md transition ${lang === 'ka' ? 'bg-white text-blue-700 shadow-sm' : 'text-stone-500 hover:text-stone-700'}`
+        }, 'ქარ'),
+        React.createElement('button', {
+          onClick: () => setLang('en'),
+          className: `px-3 py-1.5 text-xs font-semibold rounded-md transition ${lang === 'en' ? 'bg-white text-blue-700 shadow-sm' : 'text-stone-500 hover:text-stone-700'}`
+        }, 'EN')
+      );
+    }
+
+    // ----------- HEADER -----------
+    function AdminHeader({ onLogout, currentView, onNavigate, lang, setLang }) {
+      return React.createElement('header', {
+        className: 'bg-white border-b border-stone-200 sticky top-0 z-40 shadow-sm'
+      },
+        React.createElement('div', { className: 'max-w-7xl mx-auto px-6 py-3 flex items-center justify-between gap-4' },
+          React.createElement('div', { className: 'flex items-center gap-4' },
+            React.createElement('img', {
+              src: LOGO_URL, alt: 'ENERGO-PRO',
+              className: 'h-9 w-auto rounded cursor-pointer',
+              onClick: () => onNavigate('list')
+            }),
+            React.createElement('div', { className: 'pl-3 border-l border-stone-200' },
+              React.createElement('div', { className: 'text-[11px] text-stone-400 uppercase tracking-wider font-medium' }, T[lang].adminLabel),
+              React.createElement('div', { className: 'text-sm font-medium text-stone-900' }, T[lang].esgAssessments)
+            )
+          ),
+          React.createElement('div', { className: 'flex items-center gap-3' },
+            React.createElement('button', {
+              onClick: () => onNavigate('categories'),
+              className: `text-xs font-medium px-3 py-1.5 rounded-md transition ${currentView === 'categories' ? 'bg-blue-50 text-blue-700' : 'text-stone-600 hover:text-stone-900 hover:bg-stone-100'}`
+            }, T[lang].catsBtn),
+            React.createElement(LangSwitch, { lang, setLang }),
+            React.createElement('button', {
+              onClick: onLogout,
+              className: 'text-xs text-stone-500 hover:text-stone-900 hover:bg-stone-100 px-3 py-1.5 rounded-md transition'
+            }, T[lang].logout)
+          )
+        )
+      );
+    }
+
+    // ----------- DASHBOARD STATS -----------
+    function DashboardStats({ companies, allAnswersByCompany, lang }) {
+      const total = companies.length;
+      const submitted = companies.filter(c => c.is_locked).length;
+      const inProgress = total - submitted;
+
+      let avgScore = 0;
+      const submittedCompanies = companies.filter(c => c.is_locked);
+      if (submittedCompanies.length > 0) {
+        const scores = submittedCompanies.map(c => {
+          const answers = allAnswersByCompany[c.id] || [];
+          return calcStats(answers).score;
+        });
+        avgScore = Math.round(scores.reduce((a, b) => a + b, 0) / scores.length);
+      }
+
+      const cards = [
+        { label: T[lang].statTotalCompanies, value: total, color: 'blue' },
+        { label: T[lang].statSubmitted, value: submitted, color: 'emerald' },
+        { label: T[lang].statInProgress, value: inProgress, color: 'amber' },
+        { label: T[lang].statAvgScore, value: avgScore + '%', color: 'indigo' }
+      ];
+
+      const colorMap = {
+        blue: 'bg-blue-50 text-blue-700 border-blue-100',
+        emerald: 'bg-emerald-50 text-emerald-700 border-emerald-100',
+        amber: 'bg-amber-50 text-amber-700 border-amber-100',
+        indigo: 'bg-indigo-50 text-indigo-700 border-indigo-100'
+      };
+
+      return React.createElement('div', { className: 'grid grid-cols-2 md:grid-cols-4 gap-3 mb-6' },
+        cards.map((c, i) => React.createElement('div', {
+          key: i,
+          className: `rounded-xl border p-4 ${colorMap[c.color]}`
+        },
+          React.createElement('div', { className: 'text-[11px] uppercase tracking-wider font-medium opacity-70 mb-1' }, c.label),
+          React.createElement('div', { className: 'text-2xl font-semibold' }, c.value)
+        ))
+      );
+    }
+    // ----------- COMPANY LIST -----------
+    function CompanyListScreen({ companies, allAnswersByCompany, onSelectCompany, onRefresh, lang }) {
+      const [search, setSearch] = useState('');
+      const [filter, setFilter] = useState('all'); // all, submitted, in_progress
+      const [confirmDelete, setConfirmDelete] = useState(null); // { id, name }
+      const [deleting, setDeleting] = useState(false);
+      const [confirmUnlock, setConfirmUnlock] = useState(null); // { id, name }
+      const [unlocking, setUnlocking] = useState(false);
+
+      const filtered = useMemo(() => {
+        return companies.filter(c => {
+          if (filter === 'submitted' && !c.is_locked) return false;
+          if (filter === 'in_progress' && c.is_locked) return false;
+          if (search) {
+            const s = search.toLowerCase();
+            return (c.name || '').toLowerCase().includes(s) ||
+                   (c.id || '').toLowerCase().includes(s) ||
+                   (c.contact || '').toLowerCase().includes(s);
+          }
+          return true;
+        });
+      }, [companies, search, filter]);
+
+      const formatDate = (d) => {
+        if (!d) return '—';
+        return new Date(d).toLocaleDateString(lang === 'ka' ? 'ka-GE' : 'en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+      };
+
+      const handleDelete = async () => {
+        if (!confirmDelete) return;
+        setDeleting(true);
+        const result = await deleteCompany(confirmDelete.id);
+        setDeleting(false);
+        if (result.error) {
+          alert(T[lang].deleteFailed + (result.error.message || result.error.code || 'unknown error'));
+        } else {
+          setConfirmDelete(null);
+          onRefresh();
+        }
+      };
+
+      const handleUnlock = async () => {
+        if (!confirmUnlock) return;
+        setUnlocking(true);
+        const { error } = await unlockCompany(confirmUnlock.id);
+        setUnlocking(false);
+        if (error) {
+          alert(T[lang].unlockFailed + (error.message || error.code || 'unknown error'));
+        } else {
+          setConfirmUnlock(null);
+          onRefresh();
+        }
+      };
+
+      return React.createElement('div', { className: 'fade-in' },
+        React.createElement(DashboardStats, { companies, allAnswersByCompany, lang }),
+
+        // Filters
+        React.createElement('div', { className: 'flex flex-wrap items-center gap-3 mb-4' },
+          React.createElement('input', {
+            type: 'text', value: search, onChange: e => setSearch(e.target.value),
+            placeholder: T[lang].searchPlaceholder,
+            className: 'flex-1 min-w-[200px] h-10 px-3.5 text-sm bg-white border border-stone-200 rounded-lg focus:outline-none focus:border-blue-700 transition'
+          }),
+          React.createElement('div', { className: 'inline-flex bg-white rounded-lg p-0.5 border border-stone-200' },
+            ['all', 'submitted', 'in_progress'].map(f => React.createElement('button', {
+              key: f,
+              onClick: () => setFilter(f),
+              className: `px-3 py-1.5 text-xs font-medium rounded-md transition ${filter === f ? 'bg-blue-700 text-white' : 'text-stone-600 hover:text-stone-900'}`
+            }, f === 'all' ? T[lang].filterAll : f === 'submitted' ? T[lang].filterSubmitted : T[lang].filterInProgress))
+          ),
+          React.createElement('button', {
+            onClick: onRefresh,
+            className: 'h-10 px-3 text-xs font-medium text-stone-600 hover:text-stone-900 hover:bg-stone-100 rounded-lg transition'
+          }, T[lang].refresh)
+        ),
+
+        // Table
+        React.createElement('div', { className: 'bg-white border border-stone-200 rounded-xl overflow-hidden shadow-sm' },
+          React.createElement('div', { className: 'overflow-x-auto' },
+            React.createElement('table', { className: 'w-full text-sm' },
+              React.createElement('thead', { className: 'bg-stone-50 border-b border-stone-200' },
+                React.createElement('tr', null,
+                  React.createElement('th', { className: 'text-left px-4 py-3 font-medium text-stone-600 text-xs uppercase tracking-wider' }, T[lang].thCompany),
+                  React.createElement('th', { className: 'text-left px-4 py-3 font-medium text-stone-600 text-xs uppercase tracking-wider' }, T[lang].thId),
+                  React.createElement('th', { className: 'text-left px-4 py-3 font-medium text-stone-600 text-xs uppercase tracking-wider' }, T[lang].thContact),
+                  React.createElement('th', { className: 'text-left px-4 py-3 font-medium text-stone-600 text-xs uppercase tracking-wider' }, T[lang].thStatus),
+                  React.createElement('th', { className: 'text-left px-4 py-3 font-medium text-stone-600 text-xs uppercase tracking-wider' }, T[lang].thDate),
+                  React.createElement('th', { className: 'text-left px-4 py-3 font-medium text-stone-600 text-xs uppercase tracking-wider' }, T[lang].thScore),
+                  React.createElement('th', { className: 'text-right px-4 py-3 font-medium text-stone-600 text-xs uppercase tracking-wider' }, T[lang].thActions)
+                )
+              ),
+              React.createElement('tbody', null,
+                filtered.length === 0 ? React.createElement('tr', null,
+                  React.createElement('td', { colSpan: 7, className: 'px-4 py-12 text-center text-stone-400' }, T[lang].noCompanies)
+                ) : filtered.map(c => {
+                  const answers = allAnswersByCompany[c.id] || [];
+                  const stats = calcStats(answers);
+                  const scoreColor = stats.score >= 70 ? 'text-emerald-700 bg-emerald-50' :
+                                     stats.score >= 40 ? 'text-amber-700 bg-amber-50' :
+                                     'text-rose-700 bg-rose-50';
+                  return React.createElement('tr', {
+                    key: c.id,
+                    className: 'border-b border-stone-100 hover:bg-stone-50 transition'
+                  },
+                    React.createElement('td', { 
+                      className: 'px-4 py-3 font-medium text-stone-900 cursor-pointer',
+                      onClick: () => onSelectCompany(c.id)
+                    }, c.name || '—'),
+                    React.createElement('td', { 
+                      className: 'px-4 py-3 text-stone-600 font-mono text-xs cursor-pointer',
+                      onClick: () => onSelectCompany(c.id)
+                    }, c.id),
+                    React.createElement('td', { 
+                      className: 'px-4 py-3 text-stone-600 cursor-pointer',
+                      onClick: () => onSelectCompany(c.id)
+                    }, c.contact || '—'),
+                    React.createElement('td', { 
+                      className: 'px-4 py-3 cursor-pointer',
+                      onClick: () => onSelectCompany(c.id)
+                    },
+                      c.is_locked
+                        ? React.createElement('span', { className: 'inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium bg-emerald-50 text-emerald-700 border border-emerald-200' }, T[lang].statusSubmitted)
+                        : React.createElement('span', { className: 'inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium bg-amber-50 text-amber-700 border border-amber-200' }, T[lang].statusInProgress)
+                    ),
+                    React.createElement('td', { 
+                      className: 'px-4 py-3 text-stone-600 text-xs cursor-pointer',
+                      onClick: () => onSelectCompany(c.id)
+                    }, formatDate(c.submitted_at)),
+                    React.createElement('td', { 
+                      className: 'px-4 py-3 cursor-pointer',
+                      onClick: () => onSelectCompany(c.id)
+                    },
+                      stats.total > 0
+                        ? React.createElement('span', { className: `inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold ${scoreColor}` }, stats.score + '%')
+                        : React.createElement('span', { className: 'text-stone-400 text-xs' }, '—')
+                    ),
+                    React.createElement('td', { className: 'px-4 py-3 text-right whitespace-nowrap' },
+                      React.createElement('button', {
+                        onClick: e => { e.stopPropagation(); onSelectCompany(c.id); },
+                        className: 'text-blue-700 hover:text-blue-900 text-xs font-medium mr-3'
+                      }, T[lang].actionView),
+                      c.is_locked ? React.createElement('button', {
+                        onClick: e => { e.stopPropagation(); setConfirmUnlock({ id: c.id, name: c.name }); },
+                        className: 'text-amber-600 hover:text-amber-800 text-xs font-medium mr-3'
+                      }, T[lang].unlockBtn) : null,
+                      React.createElement('button', {
+                        onClick: e => { e.stopPropagation(); setConfirmDelete({ id: c.id, name: c.name }); },
+                        className: 'text-rose-600 hover:text-rose-800 text-xs font-medium'
+                      }, T[lang].actionDelete)
+                    )
+                  );
+                })
+              )
+            )
+          )
+        ),
+
+        // Delete confirmation modal
+        confirmDelete ? React.createElement('div', {
+          className: 'fixed inset-0 bg-black/50 flex items-center justify-center px-4 z-50 fade-in',
+          onClick: () => !deleting && setConfirmDelete(null)
+        },
+          React.createElement('div', {
+            className: 'bg-white rounded-xl max-w-md w-full p-6 shadow-2xl',
+            onClick: e => e.stopPropagation()
+          },
+            React.createElement('div', { className: 'flex items-start gap-4 mb-5' },
+              React.createElement('div', {
+                className: 'w-12 h-12 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center text-2xl flex-shrink-0'
+              }, '⚠'),
+              React.createElement('div', null,
+                React.createElement('h3', { className: 'text-base font-semibold text-stone-900 mb-1' }, T[lang].deleteTitle),
+                React.createElement('p', { className: 'text-sm text-stone-600' },
+                  T[lang].deleteConfirm1,
+                  React.createElement('span', { className: 'font-semibold text-stone-900' }, confirmDelete.name || confirmDelete.id),
+                  T[lang].deleteConfirm2
+                )
+              )
+            ),
+            React.createElement('div', { className: 'flex gap-2 justify-end' },
+              React.createElement('button', {
+                onClick: () => setConfirmDelete(null),
+                disabled: deleting,
+                className: 'h-10 px-4 text-sm text-stone-700 border border-stone-200 hover:bg-stone-50 rounded-lg transition disabled:opacity-50'
+              }, T[lang].cancel),
+              React.createElement('button', {
+                onClick: handleDelete,
+                disabled: deleting,
+                className: 'h-10 px-4 text-sm font-medium bg-rose-600 hover:bg-rose-700 text-white rounded-lg transition disabled:opacity-50'
+              }, deleting ? T[lang].deleting : T[lang].confirmDelete)
+            )
+          )
+        ) : null,
+
+        // Unlock confirmation modal
+        confirmUnlock ? React.createElement('div', {
+          className: 'fixed inset-0 bg-black/50 flex items-center justify-center px-4 z-50 fade-in',
+          onClick: () => !unlocking && setConfirmUnlock(null)
+        },
+          React.createElement('div', {
+            className: 'bg-white rounded-xl max-w-md w-full p-6 shadow-2xl',
+            onClick: e => e.stopPropagation()
+          },
+            React.createElement('div', { className: 'flex items-start gap-4 mb-5' },
+              React.createElement('div', {
+                className: 'w-12 h-12 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center text-2xl flex-shrink-0'
+              }, '🔓'),
+              React.createElement('div', null,
+                React.createElement('h3', { className: 'text-base font-semibold text-stone-900 mb-1' }, T[lang].unlockTitle),
+                React.createElement('p', { className: 'text-sm text-stone-600' },
+                  T[lang].unlockMsg,
+                  React.createElement('span', { className: 'font-semibold text-stone-900' }, confirmUnlock.name || confirmUnlock.id),
+                  T[lang].unlockMsg2
+                )
+              )
+            ),
+            React.createElement('div', { className: 'flex gap-2 justify-end' },
+              React.createElement('button', {
+                onClick: () => setConfirmUnlock(null),
+                disabled: unlocking,
+                className: 'h-10 px-4 text-sm text-stone-700 border border-stone-200 hover:bg-stone-50 rounded-lg transition disabled:opacity-50'
+              }, T[lang].cancel),
+              React.createElement('button', {
+                onClick: handleUnlock,
+                disabled: unlocking,
+                className: 'h-10 px-4 text-sm font-medium bg-amber-600 hover:bg-amber-700 text-white rounded-lg transition disabled:opacity-50'
+              }, unlocking ? T[lang].unlocking : T[lang].unlockConfirm)
+            )
+          )
+        ) : null
+      );
+    }
+
+    // ----------- SECTION SCORES BAR CHART -----------
+    function SectionScoreBars({ sectionStats, lang = 'ka' }) {
+      return React.createElement('div', { className: 'space-y-2.5' },
+        sectionStats.map((s, i) => {
+          const color = s.score >= 70 ? '#059669' : s.score >= 40 ? '#d97706' : '#dc2626';
+          const bg = s.score >= 70 ? 'bg-emerald-500' : s.score >= 40 ? 'bg-amber-500' : 'bg-rose-500';
+          return React.createElement('div', { key: i },
+            React.createElement('div', { className: 'flex justify-between items-center mb-1' },
+              React.createElement('span', { className: 'text-[13px] font-medium text-stone-700' }, SECTION_NAMES[lang][i]),
+              React.createElement('span', { className: 'text-[13px] font-semibold', style: { color } }, s.score + '%')
+            ),
+            React.createElement('div', { className: 'h-2 bg-stone-100 rounded-full overflow-hidden' },
+              React.createElement('div', {
+                className: bg + ' h-full transition-all duration-500',
+                style: { width: s.score + '%' }
+              })
+            ),
+            React.createElement('div', { className: 'flex gap-3 mt-1 text-[10px] text-stone-500' },
+              React.createElement('span', { className: 'text-emerald-600' }, '✓ ', s.yes),
+              React.createElement('span', { className: 'text-amber-600' }, '◐ ', s.partial),
+              React.createElement('span', { className: 'text-rose-600' }, '✗ ', s.no)
+            )
+          );
+        })
+      );
+    }
+    // ----------- COMPANY DETAIL SCREEN -----------
+    function CompanyDetailScreen({ companyId, onBack, lang }) {
+      const [company, setCompany] = useState(null);
+      const [answers, setAnswers] = useState([]);
+      const [loading, setLoading] = useState(true);
+      const [pdfLoading, setPdfLoading] = useState(false);
+      const [showEmail, setShowEmail] = useState(false);
+      const [emailCopied, setEmailCopied] = useState(false);
+      const [historyAnswers, setHistoryAnswers] = useState(null); // null = not loaded yet, [] = no history
+      const [historyPdfLoading, setHistoryPdfLoading] = useState(false);
+
+      useEffect(() => {
+        (async () => {
+          setLoading(true);
+          const { data: c } = await supabase.from('esg_companies').select('*').eq('id', companyId).maybeSingle();
+          const { data: a } = await supabase.from('esg_answers').select('*').eq('company_id', companyId);
+          setCompany(c);
+          setAnswers(a || []);
+          // Load history (if any)
+          console.log('[ESG DEBUG] Loading history for company:', companyId);
+          const histResult = await loadHistoryAnswers(companyId);
+          console.log('[ESG DEBUG] History result:', histResult);
+          const hist = histResult && histResult.data ? histResult.data : [];
+          console.log('[ESG DEBUG] History count:', hist.length);
+          setHistoryAnswers(hist);
+          setLoading(false);
+        })();
+      }, [companyId]);
+
+      if (loading) return React.createElement('div', { className: 'text-center py-20 text-stone-400' }, T[lang].loadingItem);
+      if (!company) return React.createElement('div', { className: 'text-center py-20 text-stone-400' }, T[lang].companyNotFound);
+
+      const stats = calcStats(answers);
+      const sectionStats = calcSectionStats(answers);
+      const formatDate = (d) => d ? new Date(d).toLocaleDateString(lang === 'ka' ? 'ka-GE' : 'en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : '—';
+
+      // Group answers by section
+      const answersBySection = SECTION_PREFIXES.map(() => []);
+      answers.forEach(a => {
+        const idx = getSectionIndex(a.question_id);
+        if (idx >= 0) answersBySection[idx].push(a);
+      });
+      // Sort within sections by question id
+      answersBySection.forEach(arr => arr.sort((a, b) => a.question_id.localeCompare(b.question_id)));
+
+      const downloadPdf = async () => {
+        setPdfLoading(true);
+        try {
+          await generateCompanyPDF(company, answers, sectionStats, stats, lang);
+        } catch (e) {
+          console.error(e);
+          alert(T[lang].pdfFailed + (e.message || ''));
+        } finally {
+          setPdfLoading(false);
+        }
+      };
+
+      const downloadHistoryPdf = async () => {
+        if (!historyAnswers || historyAnswers.length === 0) {
+          alert(T[lang].historyNotFound);
+          return;
+        }
+        setHistoryPdfLoading(true);
+        try {
+          const histStats = calcStats(historyAnswers);
+          const histSectionStats = calcSectionStats(historyAnswers);
+          // Build a "previous version" company object — use original submitted_at from history
+          const firstHist = historyAnswers[0];
+          const histCompany = {
+            ...company,
+            submitted_at: firstHist.submitted_at,
+            __isHistory: true
+          };
+          await generateCompanyPDF(histCompany, historyAnswers, histSectionStats, histStats, lang, true);
+        } catch (e) {
+          console.error(e);
+          alert(T[lang].pdfFailed + (e.message || ''));
+        } finally {
+          setHistoryPdfLoading(false);
+        }
+      };
+
+      // Collect items for email:
+      // - All CAT3 yes/partial answers (no limit)
+      // - If CAT3 count < 5, fill from CAT2 yes/partial to reach 5
+      const buildEmailItems = () => {
+        const relevant = answers.filter(a => a.answer === 'yes' || a.answer === 'partial');
+        const cat3 = relevant.filter(a => getCategory(a.question_id) === 3);
+        const cat2 = relevant.filter(a => getCategory(a.question_id) === 2);
+        cat3.sort((a, b) => a.question_id.localeCompare(b.question_id));
+        cat2.sort((a, b) => a.question_id.localeCompare(b.question_id));
+        if (cat3.length >= 5) {
+          return cat3; // all CAT3 items
+        }
+        // CAT3 < 5: fill from CAT2 up to 5 total
+        const needed = 5 - cat3.length;
+        return [...cat3, ...cat2.slice(0, needed)];
+      };
+
+      const emailItems = buildEmailItems();
+
+      const buildEmailText = () => {
+        const t = T[lang];
+        const lines = [];
+        lines.push(t.emailGreeting);
+        lines.push('');
+        lines.push(t.emailP1);
+        lines.push('');
+        lines.push(t.emailP2);
+        lines.push('');
+        lines.push(t.emailP3);
+        lines.push('');
+        lines.push(t.emailP4);
+        lines.push('');
+        emailItems.forEach((a, i) => {
+          const qText = QUESTIONS[a.question_id] ? QUESTIONS[a.question_id][lang] : a.question_id;
+          const ansTxt = a.answer === 'yes' ? t.yesLabel : t.partialLabel;
+          lines.push(`${i + 1}. ${qText} (${ansTxt})`);
+          if (a.partial_text && a.partial_text.trim()) {
+            lines.push(`   — ${t.noteLabel}: ${a.partial_text.trim()}`);
+          }
+        });
+        lines.push('');
+        lines.push(t.emailP5);
+        lines.push('');
+        lines.push(t.emailWarning);
+        lines.push('');
+        lines.push(t.emailDeadline);
+        lines.push('');
+        lines.push(t.emailClosing);
+        lines.push('');
+        lines.push(t.emailRegards);
+        lines.push(t.emailSignName);
+        lines.push(t.emailSignTitle);
+        lines.push(t.emailSignCompany);
+        lines.push(t.emailSignEmail);
+        lines.push(t.emailSignPhone);
+        return lines.join('\n');
+      };
+
+      const emailText = buildEmailText();
+
+      const copyEmail = async () => {
+        try {
+          await navigator.clipboard.writeText(emailText);
+          setEmailCopied(true);
+          setTimeout(() => setEmailCopied(false), 2000);
+        } catch (e) {
+          // Fallback
+          const ta = document.createElement('textarea');
+          ta.value = emailText;
+          document.body.appendChild(ta);
+          ta.select();
+          try { document.execCommand('copy'); setEmailCopied(true); setTimeout(() => setEmailCopied(false), 2000); } catch (e2) {}
+          document.body.removeChild(ta);
+        }
+      };
+
+      return React.createElement('div', { className: 'fade-in' },
+        // Header bar
+        React.createElement('div', { className: 'flex flex-wrap items-center justify-between gap-3 mb-5' },
+          React.createElement('button', {
+            onClick: onBack,
+            className: 'text-sm text-stone-600 hover:text-stone-900 flex items-center gap-1.5'
+          }, '← ', T[lang].backToList),
+          React.createElement('div', { className: 'flex items-center gap-2' },
+            React.createElement('button', {
+              onClick: () => {
+                if (emailItems.length === 0) {
+                  alert(T[lang].emailNoItems);
+                  return;
+                }
+                setShowEmail(true);
+              },
+              className: 'h-10 px-4 text-sm font-medium text-blue-700 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition'
+            }, T[lang].emailBtn),
+            historyAnswers && historyAnswers.length > 0 ? React.createElement('button', {
+              onClick: downloadHistoryPdf,
+              disabled: historyPdfLoading,
+              className: 'h-10 px-4 text-sm font-medium text-amber-700 bg-amber-50 border border-amber-200 rounded-lg hover:bg-amber-100 transition disabled:opacity-50'
+            }, historyPdfLoading ? T[lang].historyLoading : T[lang].historyPdfBtn) : null,
+            React.createElement('button', {
+              onClick: downloadPdf,
+              disabled: pdfLoading,
+              className: 'h-10 px-4 text-sm font-medium text-white rounded-lg shadow-sm hover:shadow disabled:opacity-50',
+              style: { background: 'linear-gradient(135deg, #0E5BA8, #1976D2)' }
+            }, pdfLoading ? T[lang].generating : T[lang].downloadPdf)
+          )
+        ),
+
+        // Company info card
+        React.createElement('div', { className: 'bg-white border border-stone-200 rounded-xl p-6 mb-5 shadow-sm' },
+          React.createElement('div', { className: 'flex items-start justify-between gap-4 flex-wrap' },
+            React.createElement('div', null,
+              React.createElement('h1', { className: 'text-xl font-semibold text-stone-900 mb-1' }, company.name || '—'),
+              React.createElement('div', { className: 'flex flex-wrap gap-x-5 gap-y-1 text-xs text-stone-500' },
+                React.createElement('div', null, React.createElement('span', { className: 'font-medium' }, 'ID: '), React.createElement('span', { className: 'font-mono' }, company.id)),
+                React.createElement('div', null, React.createElement('span', { className: 'font-medium' }, T[lang].contactLabel + ': '), company.contact || '—'),
+                React.createElement('div', null, React.createElement('span', { className: 'font-medium' }, T[lang].dateLabel + ': '), formatDate(company.submitted_at)),
+                React.createElement('div', null, React.createElement('span', { className: 'font-medium' }, T[lang].statusLabel + ': '),
+                  company.is_locked
+                    ? React.createElement('span', { className: 'text-emerald-700 font-medium' }, T[lang].statusSubmitted)
+                    : React.createElement('span', { className: 'text-amber-700 font-medium' }, T[lang].statusInProgress)
+                )
+              )
+            ),
+            React.createElement('div', { className: 'text-right' },
+              React.createElement('div', { className: 'text-[11px] text-stone-400 uppercase tracking-wider font-medium' }, T[lang].totalScore),
+              React.createElement('div', {
+                className: 'text-3xl font-semibold',
+                style: { color: stats.score >= 70 ? '#059669' : stats.score >= 40 ? '#d97706' : '#dc2626' }
+              }, stats.score + '%'),
+              React.createElement('div', { className: 'text-[11px] text-stone-500' }, stats.yes + ' ' + T[lang].yesShort + ' • ' + stats.partial + ' ' + T[lang].partialShort + ' • ' + stats.no + ' ' + T[lang].noShort)
+            )
+          )
+        ),
+
+        // Section scores
+        React.createElement('div', { className: 'grid grid-cols-1 lg:grid-cols-[1fr_2fr] gap-5 mb-5' },
+          React.createElement('div', { className: 'bg-white border border-stone-200 rounded-xl p-5 shadow-sm' },
+            React.createElement('h3', { className: 'text-sm font-semibold text-stone-900 mb-4' }, T[lang].sectionScores),
+            React.createElement(SectionScoreBars, { sectionStats, lang })
+          ),
+          React.createElement('div', { className: 'bg-white border border-stone-200 rounded-xl p-5 shadow-sm' },
+            React.createElement('h3', { className: 'text-sm font-semibold text-stone-900 mb-4' }, T[lang].answerDistribution),
+            React.createElement(AnswerDistribution, { stats, lang })
+          )
+        ),
+
+        // All answers grouped by section
+        React.createElement('div', { className: 'bg-white border border-stone-200 rounded-xl p-5 shadow-sm' },
+          React.createElement('h3', { className: 'text-sm font-semibold text-stone-900 mb-4' }, T[lang].fullAnswers),
+          answersBySection.map((arr, sIdx) => {
+            if (arr.length === 0) return null;
+            return React.createElement('div', { key: sIdx, className: 'mb-6 last:mb-0' },
+              React.createElement('h4', {
+                className: 'text-[13px] font-semibold text-blue-700 mb-2 pb-2 border-b border-stone-200 flex items-center justify-between'
+              },
+                React.createElement('span', null, (sIdx + 1) + '. ' + SECTION_NAMES[lang][sIdx]),
+                React.createElement('span', { className: 'text-xs text-stone-400 font-normal' }, sectionStats[sIdx].score + '%')
+              ),
+              React.createElement('div', { className: 'space-y-1.5' },
+                arr.map(a => {
+                  const qText = QUESTIONS[a.question_id] ? QUESTIONS[a.question_id][lang] : a.question_id;
+                  const ansLabel = a.answer === 'yes' ? '✓ ' + T[lang].yesShort : a.answer === 'no' ? '✗ ' + T[lang].noShort : '◐ ' + T[lang].partialShort;
+                  const ansColor = a.answer === 'yes' ? 'bg-emerald-50 text-emerald-800 border-emerald-200' :
+                                   a.answer === 'no' ? 'bg-rose-50 text-rose-800 border-rose-200' :
+                                   'bg-amber-50 text-amber-800 border-amber-200';
+                  const auto = a.was_auto_suggested ? React.createElement('span', { className: 'text-[10px] text-stone-400 ml-1.5' }, '(' + T[lang].autoFilled + ')') : null;
+                  const isPartial = a.answer === 'partial';
+                  const hasPartialText = a.partial_text && a.partial_text.trim();
+                  return React.createElement('div', {
+                    key: a.question_id,
+                    className: 'py-2.5 px-3 hover:bg-stone-50 rounded border-b border-stone-50 last:border-0'
+                  },
+                    React.createElement('div', { className: 'flex gap-3 items-start' },
+                      React.createElement('div', { className: 'flex-1 min-w-0' },
+                        React.createElement('div', { className: 'text-[13px] text-stone-800 leading-snug mb-1' }, qText),
+                        React.createElement('div', { className: 'text-[10px] text-stone-300 font-mono' }, a.question_id)
+                      ),
+                      React.createElement('span', { className: 'text-[11px] font-semibold px-2 py-1 rounded border whitespace-nowrap flex-shrink-0 mt-0.5 ' + ansColor }, ansLabel),
+                      auto
+                    ),
+                    // Highlighted partial-answer box
+                    isPartial ? React.createElement('div', {
+                      className: 'mt-2 ml-0 p-3 bg-amber-50 border-l-4 border-amber-400 rounded-r-md'
+                    },
+                      React.createElement('div', { className: 'flex items-start gap-2' },
+                        React.createElement('span', { className: 'text-amber-600 text-sm flex-shrink-0' }, '◐'),
+                        React.createElement('div', { className: 'flex-1 min-w-0' },
+                          React.createElement('div', { className: 'text-[10px] font-semibold text-amber-700 uppercase tracking-wider mb-1' }, T[lang].noteLabel),
+                          hasPartialText
+                            ? React.createElement('div', { className: 'text-[13px] text-stone-800 leading-relaxed whitespace-pre-wrap break-words' }, a.partial_text)
+                            : React.createElement('div', { className: 'text-[12px] text-stone-400 italic' }, lang === 'ka' ? 'განმარტება არ არის მითითებული' : 'No explanation provided')
+                        )
+                      )
+                    ) : null
+                  );
+                })
+              )
+            );
+          })
+        ),
+
+        // Email generator modal
+        showEmail ? React.createElement('div', {
+          className: 'fixed inset-0 bg-black/50 flex items-center justify-center px-4 py-6 z-50 overflow-y-auto fade-in',
+          onClick: () => setShowEmail(false)
+        },
+          React.createElement('div', {
+            className: 'bg-white rounded-2xl max-w-2xl w-full my-auto shadow-2xl overflow-hidden',
+            onClick: e => e.stopPropagation()
+          },
+            // Modal header
+            React.createElement('div', {
+              className: 'flex items-center justify-between px-6 py-4 border-b border-stone-100',
+              style: { background: 'linear-gradient(135deg, #0E5BA8, #1976D2)' }
+            },
+              React.createElement('h3', { className: 'text-base font-semibold text-white' }, T[lang].emailModalTitle),
+              React.createElement('button', {
+                onClick: () => setShowEmail(false),
+                className: 'w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 text-white flex items-center justify-center transition'
+              }, '✕')
+            ),
+            // Modal body
+            React.createElement('div', { className: 'p-6 max-h-[calc(100vh-220px)] overflow-y-auto scrollbar-thin' },
+              emailItems.length === 0
+                ? React.createElement('div', { className: 'bg-amber-50 border border-amber-200 rounded-lg p-4 text-sm text-amber-800 mb-4' }, T[lang].emailNoItems)
+                : null,
+              // Subject line
+              React.createElement('div', { className: 'mb-3 pb-3 border-b border-stone-100' },
+                React.createElement('span', { className: 'text-[11px] font-semibold text-stone-400 uppercase tracking-wider' }, T[lang].emailSubjectLabel + ' '),
+                React.createElement('span', { className: 'text-sm font-medium text-stone-900' }, T[lang].emailSubject)
+              ),
+              // Email body
+              React.createElement('div', {
+                className: 'text-[13px] text-stone-800 leading-relaxed whitespace-pre-wrap break-words font-sans bg-stone-50 border border-stone-200 rounded-lg p-4'
+              }, emailText)
+            ),
+            // Modal footer
+            React.createElement('div', { className: 'px-6 py-4 border-t border-stone-100 bg-stone-50 flex justify-end gap-2' },
+              React.createElement('button', {
+                onClick: () => setShowEmail(false),
+                className: 'h-10 px-4 text-sm text-stone-700 border border-stone-200 hover:bg-white rounded-lg transition'
+              }, T[lang].cancel),
+              React.createElement('button', {
+                onClick: copyEmail,
+                className: 'h-10 px-5 text-sm font-medium text-white rounded-lg transition shadow-sm hover:shadow',
+                style: { background: emailCopied ? '#059669' : 'linear-gradient(135deg, #0E5BA8, #1976D2)' }
+              }, emailCopied ? T[lang].emailCopied : ('📋 ' + T[lang].emailCopy))
+            )
+          )
+        ) : null
+      );
+    }
+    function AnswerDistribution({ stats, lang }) {
+      const total = stats.total || 1;
+      const yesPct = (stats.yes / total) * 100;
+      const partialPct = (stats.partial / total) * 100;
+      const noPct = (stats.no / total) * 100;
+
+      return React.createElement('div', null,
+        React.createElement('div', { className: 'h-3 rounded-full overflow-hidden flex bg-stone-100 mb-4' },
+          React.createElement('div', { className: 'bg-emerald-500', style: { width: yesPct + '%' } }),
+          React.createElement('div', { className: 'bg-amber-500', style: { width: partialPct + '%' } }),
+          React.createElement('div', { className: 'bg-rose-500', style: { width: noPct + '%' } })
+        ),
+        React.createElement('div', { className: 'grid grid-cols-3 gap-3' },
+          React.createElement('div', { className: 'bg-emerald-50 border border-emerald-100 rounded-lg p-3 text-center' },
+            React.createElement('div', { className: 'text-[10px] text-emerald-700 uppercase tracking-wider font-medium mb-1' }, T[lang].yesLabel),
+            React.createElement('div', { className: 'text-2xl font-semibold text-emerald-700' }, stats.yes),
+            React.createElement('div', { className: 'text-[10px] text-emerald-600' }, Math.round(yesPct) + '%')
+          ),
+          React.createElement('div', { className: 'bg-amber-50 border border-amber-100 rounded-lg p-3 text-center' },
+            React.createElement('div', { className: 'text-[10px] text-amber-700 uppercase tracking-wider font-medium mb-1' }, T[lang].partialLabel),
+            React.createElement('div', { className: 'text-2xl font-semibold text-amber-700' }, stats.partial),
+            React.createElement('div', { className: 'text-[10px] text-amber-600' }, Math.round(partialPct) + '%')
+          ),
+          React.createElement('div', { className: 'bg-rose-50 border border-rose-100 rounded-lg p-3 text-center' },
+            React.createElement('div', { className: 'text-[10px] text-rose-700 uppercase tracking-wider font-medium mb-1' }, T[lang].noLabel),
+            React.createElement('div', { className: 'text-2xl font-semibold text-rose-700' }, stats.no),
+            React.createElement('div', { className: 'text-[10px] text-rose-600' }, Math.round(noPct) + '%')
+          )
+        )
+      );
+    }
+
+    // ============================================
+    // PDF GENERATION
+    // ============================================
+    async function generateCompanyPDF(company, answers, sectionStats, stats, lang, isHistory) {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({ unit: 'mm', format: 'a4' });
+
+      const container = document.createElement('div');
+      container.style.position = 'fixed';
+      container.style.left = '-10000px';
+      container.style.top = '0';
+      container.style.width = '794px';
+      container.style.padding = '40px 50px';
+      container.style.background = 'white';
+      container.style.fontFamily = "'Noto Sans Georgian', 'Inter', sans-serif";
+      container.style.color = '#1c1917';
+
+      const dateStr = new Date().toLocaleDateString(lang === 'ka' ? 'ka-GE' : 'en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+      const submittedStr = company.submitted_at ? new Date(company.submitted_at).toLocaleDateString(lang === 'ka' ? 'ka-GE' : 'en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : '—';
+      const scoreColor = stats.score >= 70 ? '#059669' : stats.score >= 40 ? '#d97706' : '#dc2626';
+      const historyBadge = isHistory ? ` <span style="font-size: 12px; color: #d97706; background: #FEF3C7; padding: 2px 8px; border-radius: 4px; vertical-align: middle; margin-left: 8px;">${T[lang].historyPdfTitle}</span>` : '';
+
+      // Group answers by section
+      const answersBySection = SECTION_PREFIXES.map(() => []);
+      answers.forEach(a => {
+        const idx = getSectionIndex(a.question_id);
+        if (idx >= 0) answersBySection[idx].push(a);
+      });
+      answersBySection.forEach(arr => arr.sort((a, b) => a.question_id.localeCompare(b.question_id)));
+
+      let html = `
+        <div style="border-bottom: 3px solid #0E5BA8; padding-bottom: 20px; margin-bottom: 24px; display: flex; justify-content: space-between; align-items: flex-start;">
+          <div>
+            <img src="${LOGO_URL}" style="height: 50px; width: auto; margin-bottom: 12px;" />
+            <h1 style="font-size: 22px; font-weight: 600; margin: 0; color: #1c1917;">${T[lang].pdfTitle}${historyBadge}</h1>
+            <p style="font-size: 11px; color: #78716c; margin: 4px 0 0;">${T[lang].pdfSubtitle}</p>
+          </div>
+          <div style="text-align: right;">
+            <div style="font-size: 11px; color: #78716c; font-weight: 500; margin-bottom: 4px;">${T[lang].pdfTotalScore}</div>
+            <div style="font-size: 32px; font-weight: 600; color: ${scoreColor}; line-height: 1;">${stats.score}%</div>
+            <div style="font-size: 10px; color: #78716c; margin-top: 4px;">${T[lang].pdfGenerated}: ${dateStr}</div>
+          </div>
+        </div>
+
+        <div style="background: #F5F8FC; border: 1px solid #E0E7F0; border-radius: 10px; padding: 16px 20px; margin-bottom: 24px;">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px 24px; font-size: 12px;">
+            <div>
+              <div style="color: #78716c; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 500; margin-bottom: 3px;">${T[lang].pdfCompany}</div>
+              <div style="font-weight: 500;">${escapeHtml(company.name || '—')}</div>
+            </div>
+            <div>
+              <div style="color: #78716c; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 500; margin-bottom: 3px;">${T[lang].pdfId}</div>
+              <div style="font-weight: 500;">${escapeHtml(company.id || '')}</div>
+            </div>
+            <div>
+              <div style="color: #78716c; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 500; margin-bottom: 3px;">${T[lang].pdfContact}</div>
+              <div style="font-weight: 500;">${escapeHtml(company.contact || '—')}</div>
+            </div>
+            <div>
+              <div style="color: #78716c; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 500; margin-bottom: 3px;">${T[lang].pdfDate}</div>
+              <div style="font-weight: 500;">${submittedStr}</div>
+            </div>
+          </div>
+        </div>
+
+        <h2 style="font-size: 14px; font-weight: 600; color: #0E5BA8; margin: 0 0 12px; padding-bottom: 6px; border-bottom: 1px solid #E0E7F0;">${T[lang].pdfSectionScoresTitle}</h2>
+        <div style="margin-bottom: 24px;">
+          ${sectionStats.map((s, i) => {
+            const c = s.score >= 70 ? '#059669' : s.score >= 40 ? '#d97706' : '#dc2626';
+            return `<div style="margin-bottom: 8px;">
+              <div style="display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 3px;">
+                <span style="font-weight: 500;">${i+1}. ${escapeHtml(SECTION_NAMES[lang][i])}</span>
+                <span style="font-weight: 600; color: ${c};">${s.score}%</span>
+              </div>
+              <div style="height: 6px; background: #f0f0f0; border-radius: 3px; overflow: hidden;">
+                <div style="height: 100%; width: ${s.score}%; background: ${c};"></div>
+              </div>
+            </div>`;
+          }).join('')}
+        </div>
+      `;
+
+      // Section answers
+      answersBySection.forEach((arr, sIdx) => {
+        if (arr.length === 0) return;
+        html += `<div style="margin-bottom: 20px; page-break-inside: avoid;">
+          <h2 style="font-size: 14px; font-weight: 600; color: #0E5BA8; margin: 0 0 10px; padding-bottom: 6px; border-bottom: 1px solid #E0E7F0;">
+            ${sIdx + 1}. ${escapeHtml(SECTION_NAMES[lang][sIdx])} 
+            <span style="float: right; font-size: 11px; color: #78716c; font-weight: 500;">${sectionStats[sIdx].score}%</span>
+          </h2>`;
+
+        arr.forEach((a, qIdx) => {
+          const qText = QUESTIONS[a.question_id] ? QUESTIONS[a.question_id][lang] : a.question_id;
+          const ansVal = a.answer || '';
+          const ansLabel = ansVal === 'yes' ? '✓ ' + T[lang].yesShort : ansVal === 'no' ? '✗ ' + T[lang].noShort : ansVal === 'partial' ? '◐ ' + T[lang].partialShort : '—';
+          const ansColor = ansVal === 'yes' ? '#059669' : ansVal === 'no' ? '#dc2626' : ansVal === 'partial' ? '#d97706' : '#78716c';
+          const ansBg = ansVal === 'yes' ? '#ECFDF5' : ansVal === 'no' ? '#FEF2F2' : ansVal === 'partial' ? '#FFFBEB' : '#F5F5F4';
+          const auto = a.was_auto_suggested ? ' (' + T[lang].autoFilled + ')' : '';
+
+          html += `<div style="margin-bottom: 6px; padding: 8px 12px; border: 1px solid #E7E5E4; border-radius: 6px; background: white;">
+            <div style="display: flex; gap: 10px; align-items: flex-start;">
+              <div style="font-size: 10px; color: #a8a29e; font-weight: 500; min-width: 22px;">${qIdx + 1}.</div>
+              <div style="flex: 1;">
+                <div style="font-size: 11px; line-height: 1.5; color: #1c1917;">${escapeHtml(qText)}</div>
+              </div>
+              <div style="font-size: 10px; font-weight: 600; color: ${ansColor}; background: ${ansBg}; padding: 3px 8px; border-radius: 4px; white-space: nowrap;">${ansLabel}${auto}</div>
+            </div>
+            ${ansVal === 'partial' ? `<div style="margin-top: 8px; margin-left: 32px; padding: 8px 10px; background: #FFFBEB; border-left: 3px solid #F59E0B; border-radius: 0 4px 4px 0;">
+              <div style="font-size: 9px; font-weight: 600; color: #92400e; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 3px;">${T[lang].noteLabel}</div>
+              <div style="font-size: 10.5px; line-height: 1.5; color: #1c1917; white-space: pre-wrap;">${a.partial_text ? escapeHtml(a.partial_text) : '<span style="color:#a8a29e; font-style: italic;">' + (lang === 'ka' ? 'განმარტება არ არის მითითებული' : 'No explanation provided') + '</span>'}</div>
+            </div>` : ''}
+          </div>`;
+        });
+
+        html += `</div>`;
+      });
+
+      html += `<div style="margin-top: 30px; padding-top: 16px; border-top: 1px solid #E0E7F0; text-align: center; font-size: 10px; color: #a8a29e;">
+        ${T[lang].pdfFooter} • ${dateStr}
+      </div>`;
+
+      container.innerHTML = html;
+      document.body.appendChild(container);
+
+      try {
+        await new Promise(r => setTimeout(r, 800));
+        const canvas = await html2canvas(container, {
+          scale: 2, useCORS: true, allowTaint: true, backgroundColor: '#ffffff',
+          logging: false, windowWidth: 794, imageTimeout: 5000
+        });
+        const imgWidth = 210, pageHeight = 297;
+        const imgHeight = (canvas.height * imgWidth) / canvas.width;
+        let heightLeft = imgHeight, position = 0;
+        const imgData = canvas.toDataURL('image/jpeg', 0.92);
+        doc.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+        while (heightLeft > 0) {
+          position = heightLeft - imgHeight;
+          doc.addPage();
+          doc.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
+          heightLeft -= pageHeight;
+        }
+        const historySuffix = isHistory ? '_PREVIOUS' : '';
+        const filename = `ESG_Admin_${(company.name || 'company').replace(/[^a-zA-Z0-9-_]/g, '_')}${historySuffix}_${new Date().toISOString().split('T')[0]}_${lang}.pdf`;
+        doc.save(filename);
+      } finally {
+        document.body.removeChild(container);
+      }
+    }
+
+    // ============================================
+    // CATEGORIES MANAGEMENT SCREEN
+    // ============================================
+    function CategoriesScreen({ companies, allAnswersByCompany, lang }) {
+      // Local state: copy of CATEGORY_MAP for editing
+      const [localMap, setLocalMap] = useState({ ...CATEGORY_MAP });
+      const [savedMap, setSavedMap] = useState({ ...CATEGORY_MAP });
+      const [saving, setSaving] = useState(false);
+      const [saved, setSaved] = useState(false);
+      const [confirmReset, setConfirmReset] = useState(false);
+      const [resetting, setResetting] = useState(false);
+      const [companiesPopup, setCompaniesPopup] = useState(null); // { qid, answer, list[] }
+      const [draggedQid, setDraggedQid] = useState(null);
+      const [dragOverCat, setDragOverCat] = useState(null);
+
+      const allQids = Object.keys(QUESTIONS).sort();
+
+      // Compute stats per question
+      const questionStats = useMemo(() => {
+        const stats = {};
+        allQids.forEach(qid => {
+          stats[qid] = { yes: [], no: [], partial: [] };
+        });
+        // Only count submitted (locked) companies
+        const submittedCompanies = companies.filter(c => c.is_locked);
+        submittedCompanies.forEach(c => {
+          const ans = allAnswersByCompany[c.id] || [];
+          ans.forEach(a => {
+            if (stats[a.question_id]) {
+              if (a.answer === 'yes') stats[a.question_id].yes.push(c);
+              else if (a.answer === 'no') stats[a.question_id].no.push(c);
+              else if (a.answer === 'partial') stats[a.question_id].partial.push(c);
+            }
+          });
+        });
+        return stats;
+      }, [companies, allAnswersByCompany]);
+
+      // Group questions by current local category
+      const grouped = useMemo(() => {
+        const g = { 1: [], 2: [], 3: [] };
+        allQids.forEach(qid => {
+          const cat = localMap[qid] || 2;
+          g[cat].push(qid);
+        });
+        return g;
+      }, [localMap]);
+
+      const hasChanges = JSON.stringify(localMap) !== JSON.stringify(savedMap);
+
+      const handleDragStart = (qid) => setDraggedQid(qid);
+      const handleDragEnd = () => { setDraggedQid(null); setDragOverCat(null); };
+      const handleDragOver = (e, cat) => {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        setDragOverCat(cat);
+      };
+      const handleDragLeave = (e) => {
+        // only clear if actually leaving (not entering child)
+        if (e.currentTarget.contains(e.relatedTarget)) return;
+        setDragOverCat(null);
+      };
+      const handleDrop = (e, cat) => {
+        e.preventDefault();
+        if (draggedQid && localMap[draggedQid] !== cat) {
+          setLocalMap({ ...localMap, [draggedQid]: cat });
+        }
+        setDraggedQid(null);
+        setDragOverCat(null);
+      };
+
+      const handleSave = async () => {
+        setSaving(true);
+        const { error } = await saveCategoriesToDb(localMap);
+        setSaving(false);
+        if (error) {
+          alert(T[lang].catsSaveFailed + (error.message || error.code || 'unknown'));
+          return;
+        }
+        // Update global CATEGORY_MAP
+        CATEGORY_MAP = { ...localMap };
+        setSavedMap({ ...localMap });
+        setSaved(true);
+        setTimeout(() => setSaved(false), 2500);
+      };
+
+      const handleReset = async () => {
+        setResetting(true);
+        const { error } = await resetCategoriesToDefault();
+        setResetting(false);
+        if (error) {
+          alert(T[lang].catsSaveFailed + (error.message || error.code || 'unknown'));
+          return;
+        }
+        const defaults = buildDefaultCategoryMap();
+        allQids.forEach(qid => { if (!defaults[qid]) defaults[qid] = 2; });
+        CATEGORY_MAP = { ...defaults };
+        setLocalMap({ ...defaults });
+        setSavedMap({ ...defaults });
+        setConfirmReset(false);
+      };
+
+      const renderColumn = (cat) => {
+        const titles = { 1: T[lang].cat1Title, 2: T[lang].cat2Title, 3: T[lang].cat3Title };
+        const descs = { 1: T[lang].cat1Desc, 2: T[lang].cat2Desc, 3: T[lang].cat3Desc };
+        const color = getCategoryColor(cat);
+        const isDropTarget = dragOverCat === cat;
+        const list = grouped[cat];
+        return React.createElement('div', {
+          key: cat,
+          onDragOver: (e) => handleDragOver(e, cat),
+          onDragLeave: handleDragLeave,
+          onDrop: (e) => handleDrop(e, cat),
+          className: `rounded-xl border-2 ${isDropTarget ? 'border-blue-400 bg-blue-50' : color.border + ' ' + color.bg} p-3 transition`,
+          style: { minHeight: '300px' }
+        },
+          // Header
+          React.createElement('div', { className: 'mb-3 px-2' },
+            React.createElement('div', { className: 'flex items-center justify-between mb-1' },
+              React.createElement('h3', { className: `text-sm font-semibold ${color.text}` }, titles[cat]),
+              React.createElement('span', {
+                className: `text-[11px] font-bold rounded-full px-2 py-0.5 bg-white ${color.text} border ${color.border}`
+              }, list.length)
+            ),
+            React.createElement('p', { className: 'text-[11px] text-stone-500' }, descs[cat])
+          ),
+          // Questions list
+          React.createElement('div', { className: 'space-y-1.5' },
+            list.length === 0
+              ? React.createElement('div', { className: 'text-center py-6 text-xs text-stone-400 italic' }, '—')
+              : list.map(qid => {
+                  const qText = QUESTIONS[qid] ? QUESTIONS[qid][lang] : qid;
+                  const s = questionStats[qid] || { yes: [], no: [], partial: [] };
+                  const isDragging = draggedQid === qid;
+                  const sIdx = getSectionIndex(qid);
+                  const sName = sIdx >= 0 ? SECTION_NAMES[lang][sIdx] : '';
+                  return React.createElement('div', {
+                    key: qid,
+                    draggable: true,
+                    onDragStart: () => handleDragStart(qid),
+                    onDragEnd: handleDragEnd,
+                    className: `bg-white border border-stone-200 rounded-lg p-2.5 cursor-move hover:shadow-sm hover:border-blue-300 transition ${isDragging ? 'opacity-40' : ''}`
+                  },
+                    React.createElement('div', { className: 'flex items-start gap-2 mb-1.5' },
+                      React.createElement('span', { className: 'text-stone-300 text-sm flex-shrink-0 mt-0.5' }, '⋮⋮'),
+                      React.createElement('div', { className: 'flex-1 min-w-0' },
+                        React.createElement('div', { className: 'text-[10px] font-bold text-blue-700 uppercase tracking-wide mb-1' }, sName),
+                        React.createElement('div', { className: 'text-[12px] text-stone-800 leading-snug' }, qText),
+                        React.createElement('div', { className: 'text-[9px] text-stone-300 font-mono mt-0.5' }, qid)
+                      )
+                    ),
+                    // Mini stats
+                    React.createElement('div', { className: 'flex gap-1 text-[10px] mt-1.5 ml-5' },
+                      React.createElement('button', {
+                        onClick: (e) => { e.stopPropagation(); if (s.yes.length > 0) setCompaniesPopup({ qid, qText, answer: 'yes', list: s.yes }); },
+                        disabled: s.yes.length === 0,
+                        className: 'flex items-center gap-1 px-1.5 py-0.5 bg-emerald-50 border border-emerald-200 text-emerald-700 rounded hover:bg-emerald-100 transition disabled:opacity-40 disabled:cursor-default'
+                      },
+                        React.createElement('span', { className: 'font-medium' }, '✓'),
+                        React.createElement('span', { className: 'font-semibold' }, s.yes.length)
+                      ),
+                      React.createElement('button', {
+                        onClick: (e) => { e.stopPropagation(); if (s.partial.length > 0) setCompaniesPopup({ qid, qText, answer: 'partial', list: s.partial }); },
+                        disabled: s.partial.length === 0,
+                        className: 'flex items-center gap-1 px-1.5 py-0.5 bg-amber-50 border border-amber-200 text-amber-700 rounded hover:bg-amber-100 transition disabled:opacity-40 disabled:cursor-default'
+                      },
+                        React.createElement('span', { className: 'font-medium' }, '◐'),
+                        React.createElement('span', { className: 'font-semibold' }, s.partial.length)
+                      ),
+                      React.createElement('button', {
+                        onClick: (e) => { e.stopPropagation(); if (s.no.length > 0) setCompaniesPopup({ qid, qText, answer: 'no', list: s.no }); },
+                        disabled: s.no.length === 0,
+                        className: 'flex items-center gap-1 px-1.5 py-0.5 bg-rose-50 border border-rose-200 text-rose-700 rounded hover:bg-rose-100 transition disabled:opacity-40 disabled:cursor-default'
+                      },
+                        React.createElement('span', { className: 'font-medium' }, '✗'),
+                        React.createElement('span', { className: 'font-semibold' }, s.no.length)
+                      )
+                    )
+                  );
+                })
+          )
+        );
+      };
+
+      return React.createElement('div', { className: 'fade-in' },
+        // Header
+        React.createElement('div', { className: 'flex flex-wrap items-start justify-between gap-3 mb-5' },
+          React.createElement('div', null,
+            React.createElement('h1', { className: 'text-xl font-semibold text-stone-900' }, T[lang].catsPageTitle),
+            React.createElement('p', { className: 'text-sm text-stone-500 mt-1 max-w-2xl' }, T[lang].catsPageSubtitle)
+          ),
+          React.createElement('div', { className: 'flex flex-wrap gap-2 items-center' },
+            hasChanges && !saved ? React.createElement('span', {
+              className: 'text-xs px-2 py-1 bg-amber-50 text-amber-700 border border-amber-200 rounded-md'
+            }, '● ' + T[lang].catsHasChanges) : null,
+            React.createElement('button', {
+              onClick: () => setConfirmReset(true),
+              className: 'h-10 px-4 text-sm font-medium text-stone-700 border border-stone-300 hover:bg-stone-50 rounded-lg transition'
+            }, T[lang].catsReset),
+            React.createElement('button', {
+              onClick: handleSave,
+              disabled: !hasChanges || saving,
+              className: 'h-10 px-5 text-sm font-medium text-white rounded-lg shadow-sm hover:shadow disabled:opacity-50 transition',
+              style: { background: saved ? '#059669' : 'linear-gradient(135deg, #0E5BA8, #1976D2)' }
+            }, saving ? '...' : (saved ? T[lang].catsSaved : T[lang].catsSave))
+          )
+        ),
+
+        // Three columns
+        React.createElement('div', { className: 'grid grid-cols-1 md:grid-cols-3 gap-4' },
+          renderColumn(1),
+          renderColumn(2),
+          renderColumn(3)
+        ),
+
+        // Companies popup
+        companiesPopup ? React.createElement('div', {
+          className: 'fixed inset-0 bg-black/50 flex items-center justify-center px-4 py-6 z-50 fade-in',
+          onClick: () => setCompaniesPopup(null)
+        },
+          React.createElement('div', {
+            className: 'bg-white rounded-2xl max-w-lg w-full max-h-[calc(100vh-100px)] shadow-2xl overflow-hidden flex flex-col',
+            onClick: e => e.stopPropagation()
+          },
+            React.createElement('div', {
+              className: 'flex items-center justify-between px-5 py-4 border-b border-stone-100',
+              style: { background: 'linear-gradient(135deg, #0E5BA8, #1976D2)' }
+            },
+              React.createElement('div', null,
+                React.createElement('div', { className: 'text-[11px] uppercase tracking-wider font-semibold text-white/80 mb-0.5' }, T[lang].catCompaniesListTitle),
+                React.createElement('div', { className: 'text-sm font-medium text-white' },
+                  companiesPopup.answer === 'yes' ? '✓ ' + T[lang].yesLabel
+                    : companiesPopup.answer === 'no' ? '✗ ' + T[lang].noLabel
+                    : '◐ ' + T[lang].partialLabel,
+                  ' · ', companiesPopup.list.length
+                )
+              ),
+              React.createElement('button', {
+                onClick: () => setCompaniesPopup(null),
+                className: 'w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 text-white flex items-center justify-center'
+              }, '✕')
+            ),
+            React.createElement('div', { className: 'p-4 border-b border-stone-100 bg-stone-50' },
+              React.createElement('div', { className: 'text-[12px] text-stone-600 leading-snug' }, companiesPopup.qText)
+            ),
+            React.createElement('div', { className: 'overflow-y-auto flex-1 scrollbar-thin' },
+              companiesPopup.list.length === 0
+                ? React.createElement('div', { className: 'text-center py-8 text-stone-400 text-sm' }, T[lang].catCompaniesNoData)
+                : React.createElement('div', { className: 'divide-y divide-stone-100' },
+                    companiesPopup.list.map(c => React.createElement('div', {
+                      key: c.id,
+                      className: 'px-5 py-3 hover:bg-stone-50'
+                    },
+                      React.createElement('div', { className: 'text-sm font-medium text-stone-900' }, c.name || '—'),
+                      React.createElement('div', { className: 'text-[11px] text-stone-400 font-mono mt-0.5' }, c.id, ' · ', c.contact || '—')
+                    ))
+                  )
+            )
+          )
+        ) : null,
+
+        // Reset confirmation modal
+        confirmReset ? React.createElement('div', {
+          className: 'fixed inset-0 bg-black/50 flex items-center justify-center px-4 z-50 fade-in',
+          onClick: () => !resetting && setConfirmReset(false)
+        },
+          React.createElement('div', {
+            className: 'bg-white rounded-xl max-w-md w-full p-6 shadow-2xl',
+            onClick: e => e.stopPropagation()
+          },
+            React.createElement('div', { className: 'flex items-start gap-4 mb-5' },
+              React.createElement('div', {
+                className: 'w-12 h-12 rounded-full bg-stone-100 text-stone-600 flex items-center justify-center text-2xl flex-shrink-0'
+              }, '↺'),
+              React.createElement('div', null,
+                React.createElement('h3', { className: 'text-base font-semibold text-stone-900 mb-1' }, T[lang].catsResetConfirmTitle),
+                React.createElement('p', { className: 'text-sm text-stone-600' }, T[lang].catsResetConfirmMsg)
+              )
+            ),
+            React.createElement('div', { className: 'flex gap-2 justify-end' },
+              React.createElement('button', {
+                onClick: () => setConfirmReset(false),
+                disabled: resetting,
+                className: 'h-10 px-4 text-sm text-stone-700 border border-stone-200 hover:bg-stone-50 rounded-lg transition disabled:opacity-50'
+              }, T[lang].cancel),
+              React.createElement('button', {
+                onClick: handleReset,
+                disabled: resetting,
+                className: 'h-10 px-4 text-sm font-medium bg-stone-700 hover:bg-stone-800 text-white rounded-lg transition disabled:opacity-50'
+              }, resetting ? '...' : T[lang].catsResetConfirmBtn)
+            )
+          )
+        ) : null
+      );
+    }
+
+    // ============================================
+    // ROOT APP
+    // ============================================
+    function App() {
+      const [authed, setAuthed] = useState(sessionStorage.getItem('esg_admin_auth') === '1');
+      const [view, setView] = useState('list'); // 'list' or 'detail'
+      const [selectedId, setSelectedId] = useState(null);
+      const [companies, setCompanies] = useState([]);
+      const [allAnswersByCompany, setAllAnswersByCompany] = useState({});
+      const [loading, setLoading] = useState(false);
+      const [lang, setLang] = useState(() => localStorage.getItem('esg_admin_lang') || 'ka');
+
+      useEffect(() => {
+        localStorage.setItem('esg_admin_lang', lang);
+        document.documentElement.lang = lang;
+      }, [lang]);
+
+      const refresh = async () => {
+        setLoading(true);
+        const list = await loadAllCompanies();
+        setCompanies(list);
+        // Load answers for each in parallel
+        const answersMap = {};
+        await Promise.all(list.map(async c => {
+          const a = await loadCompanyAnswers(c.id);
+          answersMap[c.id] = a;
+        }));
+        setAllAnswersByCompany(answersMap);
+        // Initialize category map from DB (or defaults)
+        await initCategoryMap(Object.keys(QUESTIONS));
+        setLoading(false);
+      };
+
+      useEffect(() => {
+        if (authed) refresh();
+      }, [authed]);
+
+      const onLogout = () => {
+        sessionStorage.removeItem('esg_admin_auth');
+        setAuthed(false);
+      };
+
+      if (!authed) return React.createElement(LoginScreen, { onLogin: () => setAuthed(true), lang, setLang });
+
+      return React.createElement('div', { className: 'min-h-screen' },
+        React.createElement(AdminHeader, {
+          onLogout,
+          currentView: view,
+          onNavigate: (v) => { setView(v); if (v === 'list') refresh(); },
+          lang, setLang
+        }),
+        React.createElement('main', { className: 'max-w-7xl mx-auto px-6 py-6' },
+          loading
+            ? React.createElement('div', { className: 'text-center py-20 text-stone-400 text-sm' }, T[lang].loadingData)
+            : view === 'list'
+              ? React.createElement(CompanyListScreen, {
+                  companies, allAnswersByCompany,
+                  onSelectCompany: (id) => { setSelectedId(id); setView('detail'); },
+                  onRefresh: refresh,
+                  lang
+                })
+              : view === 'categories'
+                ? React.createElement(CategoriesScreen, {
+                    companies, allAnswersByCompany, lang
+                  })
+                : React.createElement(CompanyDetailScreen, {
+                    companyId: selectedId,
+                    onBack: () => setView('list'),
+                    lang
+                  })
+        )
+      );
+    }
+
+    const root = createRoot(document.getElementById('root'));
+    root.render(React.createElement(App));
+  </script>
+</body>
+</html>
