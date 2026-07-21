@@ -592,12 +592,18 @@
     // Unlock a company so it can be edited again
     // Also archive current answers to history table (preserves previous version)
     async function unlockCompany(companyId) {
-      // Step 1: Get current answers
+      // Step 1: Get current contractor answers
       const { data: currentAnswers, error: loadErr } = await supabase
         .from('esg_answers')
         .select('*')
         .eq('company_id', companyId);
       if (loadErr) return { error: loadErr };
+
+      // Step 1b: Get current admin answers (v8)
+      const { data: currentAdmin } = await supabase
+        .from('esg_admin_answers')
+        .select('*')
+        .eq('company_id', companyId);
 
       // Step 2: Get submitted_at from company
       const { data: companyData } = await supabase
@@ -607,13 +613,19 @@
         .single();
       const submittedAt = companyData ? companyData.submitted_at : null;
 
-      // Step 3: Delete any existing history for this company (we only keep one version)
+      // Step 3a: Delete existing contractor history
       await supabase
         .from('esg_answers_history')
         .delete()
         .eq('company_id', companyId);
 
-      // Step 4: Insert current answers into history
+      // Step 3b: Delete existing admin history
+      await supabase
+        .from('esg_admin_answers_history')
+        .delete()
+        .eq('company_id', companyId);
+
+      // Step 4a: Insert current contractor answers into history
       if (currentAnswers && currentAnswers.length > 0) {
         const historyRows = currentAnswers.map(a => ({
           company_id: a.company_id,
@@ -626,11 +638,28 @@
         const { error: insErr } = await supabase
           .from('esg_answers_history')
           .insert(historyRows);
-        if (insErr) {
-          console.error('History insert error:', insErr);
-          // Continue anyway — unlock is more important than history
-        }
+        if (insErr) console.error('History insert error:', insErr);
       }
+
+      // Step 4b: Insert current admin answers into history (v8)
+      if (currentAdmin && currentAdmin.length > 0) {
+        const adminHistoryRows = currentAdmin.map(a => ({
+          company_id: a.company_id,
+          question_id: a.question_id,
+          answer: a.answer,
+          partial_text: a.partial_text
+        }));
+        const { error: adminInsErr } = await supabase
+          .from('esg_admin_answers_history')
+          .insert(adminHistoryRows);
+        if (adminInsErr) console.error('Admin history insert error:', adminInsErr);
+      }
+
+      // Step 4c: Delete current admin answers (will be re-created as defaults when opened)
+      await supabase
+        .from('esg_admin_answers')
+        .delete()
+        .eq('company_id', companyId);
 
       // Step 5: Unlock the company
       const { error } = await supabase
@@ -1381,10 +1410,22 @@
         }
       };
 
-      const downloadPdf = async () => {
+      const downloadContractorPdf = async () => {
         setPdfLoading(true);
         try {
-          await generateCompanyPDF(company, answers, sectionStats, stats, lang);
+          await generateContractorPDF(company, answers, lang, false);
+        } catch (e) {
+          console.error(e);
+          alert(T[lang].pdfFailed + (e.message || ''));
+        } finally {
+          setPdfLoading(false);
+        }
+      };
+
+      const downloadFullPdf = async () => {
+        setPdfLoading(true);
+        try {
+          await generateFullAdminPDF(company, answers, adminAnswers, lang, false);
         } catch (e) {
           console.error(e);
           alert(T[lang].pdfFailed + (e.message || ''));
@@ -1396,27 +1437,27 @@
       const downloadHistoryPdf = async () => {
         setHistoryPdfLoading(true);
         try {
-          // Fetch history fresh from DB (in case state was empty)
-          const result = await loadHistoryAnswers(companyId);
-          console.log('[ESG] History fetch result:', result);
-          const histData = result && result.data ? result.data : [];
-          console.log('[ESG] History records found:', histData.length);
+          // Fetch both contractor and admin history
+          const [histRes, adminHistRes] = await Promise.all([
+            loadHistoryAnswers(companyId),
+            loadAdminHistoryAnswers(companyId)
+          ]);
+          const histData = histRes && histRes.data ? histRes.data : [];
+          const adminHistData = adminHistRes && adminHistRes.data ? adminHistRes.data : [];
 
-          if (histData.length === 0) {
+          if (histData.length === 0 && adminHistData.length === 0) {
             alert(T[lang].historyNotFound);
             setHistoryPdfLoading(false);
             return;
           }
 
-          const histStats = calcStats(histData);
-          const histSectionStats = calcSectionStats(histData);
-          const firstHist = histData[0];
+          const firstHist = histData[0] || adminHistData[0];
           const histCompany = {
             ...company,
-            submitted_at: firstHist.submitted_at,
+            submitted_at: firstHist && firstHist.submitted_at ? firstHist.submitted_at : company.submitted_at,
             __isHistory: true
           };
-          await generateCompanyPDF(histCompany, histData, histSectionStats, histStats, lang, true);
+          await generateFullAdminPDF(histCompany, histData, adminHistData, lang, true);
         } catch (e) {
           console.error('[ESG] History PDF error:', e);
           alert(T[lang].pdfFailed + (e.message || ''));
@@ -1523,13 +1564,18 @@
               onClick: downloadHistoryPdf,
               disabled: historyPdfLoading,
               className: 'h-10 px-4 text-sm font-medium text-amber-700 bg-amber-50 border border-amber-200 rounded-lg hover:bg-amber-100 transition disabled:opacity-50'
-            }, historyPdfLoading ? T[lang].historyLoading : T[lang].historyPdfBtn),
+            }, historyPdfLoading ? T[lang].historyLoading : T[lang].fullHistoryPdfBtn),
             React.createElement('button', {
-              onClick: downloadPdf,
+              onClick: downloadContractorPdf,
+              disabled: pdfLoading,
+              className: 'h-10 px-4 text-sm font-medium text-stone-700 bg-white border border-stone-300 rounded-lg hover:bg-stone-50 transition disabled:opacity-50'
+            }, pdfLoading ? T[lang].generating : T[lang].contractorPdfBtn),
+            React.createElement('button', {
+              onClick: downloadFullPdf,
               disabled: pdfLoading,
               className: 'h-10 px-4 text-sm font-medium text-white rounded-lg shadow-sm hover:shadow disabled:opacity-50',
               style: { background: 'linear-gradient(135deg, #0E5BA8, #1976D2)' }
-            }, pdfLoading ? T[lang].generating : T[lang].downloadPdf)
+            }, pdfLoading ? T[lang].generating : T[lang].fullPdfBtn)
           )
         ),
 
@@ -1563,6 +1609,17 @@
         // v8: Weighted Score Overview
         React.createElement('div', { className: 'bg-white border border-stone-200 rounded-xl p-5 shadow-sm mb-5' },
           React.createElement('h3', { className: 'text-sm font-semibold text-stone-900 mb-4' }, T[lang].scoreOverviewTitle),
+          // Column headers
+          React.createElement('div', {
+            className: 'flex items-center justify-between py-2 px-3 border-b border-stone-200 mb-1'
+          },
+            React.createElement('span', { className: 'text-[10px] font-semibold text-stone-500 uppercase tracking-wider flex-1' }, T[lang].colSection),
+            React.createElement('div', { className: 'flex items-center gap-4' },
+              React.createElement('span', { className: 'text-[10px] font-semibold text-stone-500 uppercase tracking-wider w-16 text-right' }, T[lang].colQuestions),
+              React.createElement('span', { className: 'text-[10px] font-semibold text-stone-500 uppercase tracking-wider w-24 text-right' }, T[lang].colScore),
+              React.createElement('span', { className: 'text-[10px] font-semibold text-stone-500 uppercase tracking-wider w-14 text-right' }, T[lang].colPercent)
+            )
+          ),
           React.createElement('div', { className: 'space-y-1' },
             // Admin section (1) — general/commercial — FIRST
             (() => {
@@ -1827,127 +1884,14 @@
     // ============================================
     // PDF GENERATION
     // ============================================
-    async function generateCompanyPDF(company, answers, sectionStats, stats, lang, isHistory) {
+    // ============================================
+    // PDF GENERATION (v8c) — 2 variants
+    // ============================================
+
+    // Common helper: render container to PDF
+    async function renderContainerToPdf(container, filename) {
       const { jsPDF } = window.jspdf;
       const doc = new jsPDF({ unit: 'mm', format: 'a4' });
-
-      const container = document.createElement('div');
-      container.style.position = 'fixed';
-      container.style.left = '-10000px';
-      container.style.top = '0';
-      container.style.width = '794px';
-      container.style.padding = '40px 50px';
-      container.style.background = 'white';
-      container.style.fontFamily = "'Noto Sans Georgian', 'Inter', sans-serif";
-      container.style.color = '#1c1917';
-
-      const dateStr = new Date().toLocaleDateString(lang === 'ka' ? 'ka-GE' : 'en-US', { year: 'numeric', month: 'long', day: 'numeric' });
-      const submittedStr = company.submitted_at ? new Date(company.submitted_at).toLocaleDateString(lang === 'ka' ? 'ka-GE' : 'en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : '—';
-      const scoreColor = stats.score >= 70 ? '#059669' : stats.score >= 40 ? '#d97706' : '#dc2626';
-      const historyBadge = isHistory ? ` <span style="font-size: 12px; color: #d97706; background: #FEF3C7; padding: 2px 8px; border-radius: 4px; vertical-align: middle; margin-left: 8px;">${T[lang].historyPdfTitle}</span>` : '';
-
-      // Group answers by section
-      const answersBySection = SECTION_PREFIXES.map(() => []);
-      answers.forEach(a => {
-        const idx = getSectionIndex(a.question_id);
-        if (idx >= 0) answersBySection[idx].push(a);
-      });
-      answersBySection.forEach(arr => arr.sort((a, b) => a.question_id.localeCompare(b.question_id)));
-
-      let html = `
-        <div style="border-bottom: 3px solid #0E5BA8; padding-bottom: 20px; margin-bottom: 24px; display: flex; justify-content: space-between; align-items: flex-start;">
-          <div>
-            <img src="${LOGO_URL}" style="height: 50px; width: auto; margin-bottom: 12px;" />
-            <h1 style="font-size: 22px; font-weight: 600; margin: 0; color: #1c1917;">${T[lang].pdfTitle}${historyBadge}</h1>
-            <p style="font-size: 11px; color: #78716c; margin: 4px 0 0;">${T[lang].pdfSubtitle}</p>
-          </div>
-          <div style="text-align: right;">
-            <div style="font-size: 11px; color: #78716c; font-weight: 500; margin-bottom: 4px;">${T[lang].pdfTotalScore}</div>
-            <div style="font-size: 32px; font-weight: 600; color: ${scoreColor}; line-height: 1;">${stats.score}%</div>
-            <div style="font-size: 10px; color: #78716c; margin-top: 4px;">${T[lang].pdfGenerated}: ${dateStr}</div>
-          </div>
-        </div>
-
-        <div style="background: #F5F8FC; border: 1px solid #E0E7F0; border-radius: 10px; padding: 16px 20px; margin-bottom: 24px;">
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px 24px; font-size: 12px;">
-            <div>
-              <div style="color: #78716c; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 500; margin-bottom: 3px;">${T[lang].pdfCompany}</div>
-              <div style="font-weight: 500;">${escapeHtml(company.name || '—')}</div>
-            </div>
-            <div>
-              <div style="color: #78716c; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 500; margin-bottom: 3px;">${T[lang].pdfId}</div>
-              <div style="font-weight: 500;">${escapeHtml(company.id || '')}</div>
-            </div>
-            <div>
-              <div style="color: #78716c; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 500; margin-bottom: 3px;">${T[lang].pdfContact}</div>
-              <div style="font-weight: 500;">${escapeHtml(company.contact || '—')}</div>
-            </div>
-            <div>
-              <div style="color: #78716c; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 500; margin-bottom: 3px;">${T[lang].pdfDate}</div>
-              <div style="font-weight: 500;">${submittedStr}</div>
-            </div>
-          </div>
-        </div>
-
-        <h2 style="font-size: 14px; font-weight: 600; color: #0E5BA8; margin: 0 0 12px; padding-bottom: 6px; border-bottom: 1px solid #E0E7F0;">${T[lang].pdfSectionScoresTitle}</h2>
-        <div style="margin-bottom: 24px;">
-          ${sectionStats.map((s, i) => {
-            const c = s.score >= 70 ? '#059669' : s.score >= 40 ? '#d97706' : '#dc2626';
-            return `<div style="margin-bottom: 8px;">
-              <div style="display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 3px;">
-                <span style="font-weight: 500;">${i+1}. ${escapeHtml(SECTION_NAMES[lang][i])}</span>
-                <span style="font-weight: 600; color: ${c};">${s.score}%</span>
-              </div>
-              <div style="height: 6px; background: #f0f0f0; border-radius: 3px; overflow: hidden;">
-                <div style="height: 100%; width: ${s.score}%; background: ${c};"></div>
-              </div>
-            </div>`;
-          }).join('')}
-        </div>
-      `;
-
-      // Section answers
-      answersBySection.forEach((arr, sIdx) => {
-        if (arr.length === 0) return;
-        html += `<div style="margin-bottom: 20px; page-break-inside: avoid;">
-          <h2 style="font-size: 14px; font-weight: 600; color: #0E5BA8; margin: 0 0 10px; padding-bottom: 6px; border-bottom: 1px solid #E0E7F0;">
-            ${sIdx + 1}. ${escapeHtml(SECTION_NAMES[lang][sIdx])} 
-            <span style="float: right; font-size: 11px; color: #78716c; font-weight: 500;">${sectionStats[sIdx].score}%</span>
-          </h2>`;
-
-        arr.forEach((a, qIdx) => {
-          const qText = QUESTIONS[a.question_id] ? QUESTIONS[a.question_id][lang] : a.question_id;
-          const ansVal = a.answer || '';
-          const ansLabel = ansVal === 'yes' ? '✓ ' + T[lang].yesShort : ansVal === 'no' ? '✗ ' + T[lang].noShort : ansVal === 'partial' ? '◐ ' + T[lang].partialShort : '—';
-          const ansColor = ansVal === 'yes' ? '#059669' : ansVal === 'no' ? '#dc2626' : ansVal === 'partial' ? '#d97706' : '#78716c';
-          const ansBg = ansVal === 'yes' ? '#ECFDF5' : ansVal === 'no' ? '#FEF2F2' : ansVal === 'partial' ? '#FFFBEB' : '#F5F5F4';
-          const auto = a.was_auto_suggested ? ' (' + T[lang].autoFilled + ')' : '';
-
-          html += `<div style="margin-bottom: 6px; padding: 8px 12px; border: 1px solid #E7E5E4; border-radius: 6px; background: white;">
-            <div style="display: flex; gap: 10px; align-items: flex-start;">
-              <div style="font-size: 10px; color: #a8a29e; font-weight: 500; min-width: 22px;">${qIdx + 1}.</div>
-              <div style="flex: 1;">
-                <div style="font-size: 11px; line-height: 1.5; color: #1c1917;">${escapeHtml(qText)}</div>
-              </div>
-              <div style="font-size: 10px; font-weight: 600; color: ${ansColor}; background: ${ansBg}; padding: 3px 8px; border-radius: 4px; white-space: nowrap;">${ansLabel}${auto}</div>
-            </div>
-            ${ansVal === 'partial' ? `<div style="margin-top: 8px; margin-left: 32px; padding: 8px 10px; background: #FFFBEB; border-left: 3px solid #F59E0B; border-radius: 0 4px 4px 0;">
-              <div style="font-size: 9px; font-weight: 600; color: #92400e; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 3px;">${T[lang].noteLabel}</div>
-              <div style="font-size: 10.5px; line-height: 1.5; color: #1c1917; white-space: pre-wrap;">${a.partial_text ? escapeHtml(a.partial_text) : '<span style="color:#a8a29e; font-style: italic;">' + (lang === 'ka' ? 'განმარტება არ არის მითითებული' : 'No explanation provided') + '</span>'}</div>
-            </div>` : ''}
-          </div>`;
-        });
-
-        html += `</div>`;
-      });
-
-      html += `<div style="margin-top: 30px; padding-top: 16px; border-top: 1px solid #E0E7F0; text-align: center; font-size: 10px; color: #a8a29e;">
-        ${T[lang].pdfFooter} • ${dateStr}
-      </div>`;
-
-      container.innerHTML = html;
-      document.body.appendChild(container);
-
       try {
         await new Promise(r => setTimeout(r, 800));
         const canvas = await html2canvas(container, {
@@ -1966,12 +1910,268 @@
           doc.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
           heightLeft -= pageHeight;
         }
-        const historySuffix = isHistory ? '_PREVIOUS' : '';
-        const filename = `ESG_Admin_${(company.name || 'company').replace(/[^a-zA-Z0-9-_]/g, '_')}${historySuffix}_${new Date().toISOString().split('T')[0]}_${lang}.pdf`;
         doc.save(filename);
       } finally {
         document.body.removeChild(container);
       }
+    }
+
+    // PDF #1 — CONTRACTOR VIEW (no scores, no admin section)
+    async function generateContractorPDF(company, answers, lang, isHistory) {
+      const container = document.createElement('div');
+      container.style.position = 'fixed';
+      container.style.left = '-10000px';
+      container.style.top = '0';
+      container.style.width = '794px';
+      container.style.padding = '40px 50px';
+      container.style.background = 'white';
+      container.style.fontFamily = "'Noto Sans Georgian', 'Inter', sans-serif";
+      container.style.color = '#1c1917';
+
+      const dateStr = new Date().toLocaleDateString(lang === 'ka' ? 'ka-GE' : 'en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+      const submittedStr = company.submitted_at ? new Date(company.submitted_at).toLocaleDateString(lang === 'ka' ? 'ka-GE' : 'en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : '—';
+      const historyBadge = isHistory ? ` <span style="font-size: 12px; color: #d97706; background: #FEF3C7; padding: 2px 8px; border-radius: 4px; vertical-align: middle; margin-left: 8px;">${T[lang].historyPdfTitle}</span>` : '';
+
+      // Group answers by section — fill missing with "no"
+      const byQid = {};
+      answers.forEach(a => { byQid[a.question_id] = a; });
+      const answersBySection = SECTION_PREFIXES.map((_, sIdx) => {
+        const secNum = sIdx + 2;
+        const expectedIds = CONTRACTOR_QIDS_BY_SECTION[secNum] || [];
+        return expectedIds.map(qid => byQid[qid] || { question_id: qid, answer: 'no', partial_text: null, was_auto_suggested: false });
+      });
+
+      let html = `
+        <div style="border-bottom: 3px solid #0E5BA8; padding-bottom: 20px; margin-bottom: 24px; display: flex; justify-content: space-between; align-items: flex-start;">
+          <div>
+            <img src="${LOGO_URL}" style="height: 50px; width: auto; margin-bottom: 12px;" />
+            <h1 style="font-size: 22px; font-weight: 600; margin: 0; color: #1c1917;">${T[lang].pdfTitle}${historyBadge}</h1>
+            <p style="font-size: 11px; color: #78716c; margin: 4px 0 0;">${T[lang].pdfSubtitle}</p>
+          </div>
+          <div style="text-align: right;">
+            <div style="font-size: 10px; color: #78716c; margin-top: 4px;">${T[lang].pdfGenerated}: ${dateStr}</div>
+          </div>
+        </div>
+
+        <div style="background: #F5F8FC; border: 1px solid #E0E7F0; border-radius: 10px; padding: 16px 20px; margin-bottom: 24px;">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px 24px; font-size: 12px;">
+            <div><div style="color: #78716c; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 500; margin-bottom: 3px;">${T[lang].pdfCompany}</div><div style="font-weight: 500;">${escapeHtml(company.name || '—')}</div></div>
+            <div><div style="color: #78716c; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 500; margin-bottom: 3px;">${T[lang].pdfId}</div><div style="font-weight: 500;">${escapeHtml(company.id || '')}</div></div>
+            <div><div style="color: #78716c; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 500; margin-bottom: 3px;">${T[lang].pdfContact}</div><div style="font-weight: 500;">${escapeHtml(company.contact || '—')}</div></div>
+            <div><div style="color: #78716c; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 500; margin-bottom: 3px;">${T[lang].pdfDate}</div><div style="font-weight: 500;">${submittedStr}</div></div>
+          </div>
+        </div>
+      `;
+
+      // Section answers (no scores)
+      answersBySection.forEach((arr, sIdx) => {
+        if (arr.length === 0) return;
+        html += `<div style="margin-bottom: 20px; page-break-inside: avoid;">
+          <h2 style="font-size: 14px; font-weight: 600; color: #0E5BA8; margin: 0 0 10px; padding-bottom: 6px; border-bottom: 1px solid #E0E7F0;">
+            ${sIdx + 2}. ${escapeHtml(SECTION_NAMES[lang][sIdx])}
+          </h2>`;
+        arr.forEach((a, qIdx) => {
+          const qText = QUESTIONS[a.question_id] ? QUESTIONS[a.question_id][lang] : a.question_id;
+          const ansVal = a.answer || 'no';
+          const ansLabel = ansVal === 'yes' ? '✓ ' + T[lang].yesShort : ansVal === 'no' ? '✗ ' + T[lang].noShort : '◐ ' + T[lang].partialShort;
+          const ansColor = ansVal === 'yes' ? '#059669' : ansVal === 'no' ? '#dc2626' : '#d97706';
+          const ansBg = ansVal === 'yes' ? '#ECFDF5' : ansVal === 'no' ? '#FEF2F2' : '#FFFBEB';
+          html += `<div style="margin-bottom: 6px; padding: 8px 12px; border: 1px solid #E7E5E4; border-radius: 6px; background: white;">
+            <div style="display: flex; gap: 10px; align-items: flex-start;">
+              <div style="font-size: 10px; color: #a8a29e; font-weight: 500; min-width: 22px;">${qIdx + 1}.</div>
+              <div style="flex: 1;"><div style="font-size: 11px; line-height: 1.5; color: #1c1917;">${escapeHtml(qText)}</div></div>
+              <div style="font-size: 10px; font-weight: 600; color: ${ansColor}; background: ${ansBg}; padding: 3px 8px; border-radius: 4px; white-space: nowrap;">${ansLabel}</div>
+            </div>
+            ${ansVal === 'partial' && a.partial_text ? `<div style="margin-top: 8px; margin-left: 32px; padding: 8px 10px; background: #FFFBEB; border-left: 3px solid #F59E0B; border-radius: 0 4px 4px 0;">
+              <div style="font-size: 9px; font-weight: 600; color: #92400e; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 3px;">${T[lang].noteLabel}</div>
+              <div style="font-size: 10.5px; line-height: 1.5; color: #1c1917; white-space: pre-wrap;">${escapeHtml(a.partial_text)}</div>
+            </div>` : ''}
+          </div>`;
+        });
+        html += `</div>`;
+      });
+
+      html += `<div style="margin-top: 30px; padding-top: 16px; border-top: 1px solid #E0E7F0; text-align: center; font-size: 10px; color: #a8a29e;">${T[lang].pdfFooter} • ${dateStr}</div>`;
+
+      container.innerHTML = html;
+      document.body.appendChild(container);
+      const historySuffix = isHistory ? '_PREVIOUS' : '';
+      const filename = `ESG_Contractor_${(company.name || 'company').replace(/[^a-zA-Z0-9-_]/g, '_')}${historySuffix}_${new Date().toISOString().split('T')[0]}_${lang}.pdf`;
+      await renderContainerToPdf(container, filename);
+    }
+
+    // PDF #2 — FULL ADMIN VIEW (all scores, weighted, admin section)
+    async function generateFullAdminPDF(company, answers, adminAnswers, lang, isHistory) {
+      const container = document.createElement('div');
+      container.style.position = 'fixed';
+      container.style.left = '-10000px';
+      container.style.top = '0';
+      container.style.width = '794px';
+      container.style.padding = '40px 50px';
+      container.style.background = 'white';
+      container.style.fontFamily = "'Noto Sans Georgian', 'Inter', sans-serif";
+      container.style.color = '#1c1917';
+
+      const dateStr = new Date().toLocaleDateString(lang === 'ka' ? 'ka-GE' : 'en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+      const submittedStr = company.submitted_at ? new Date(company.submitted_at).toLocaleDateString(lang === 'ka' ? 'ka-GE' : 'en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : '—';
+      const historyBadge = isHistory ? ` <span style="font-size: 12px; color: #d97706; background: #FEF3C7; padding: 2px 8px; border-radius: 4px; vertical-align: middle; margin-left: 8px;">${T[lang].historyPdfTitle}</span>` : '';
+
+      const weighted = calcWeightedSectionStats(answers, adminAnswers);
+      const overallColor = weighted.overall.score >= 70 ? '#059669' : weighted.overall.score >= 40 ? '#d97706' : '#dc2626';
+
+      // Group contractor answers by section — fill missing with "no"
+      const byQid = {};
+      answers.forEach(a => { byQid[a.question_id] = a; });
+      const answersBySection = SECTION_PREFIXES.map((_, sIdx) => {
+        const secNum = sIdx + 2;
+        const expectedIds = CONTRACTOR_QIDS_BY_SECTION[secNum] || [];
+        return expectedIds.map(qid => byQid[qid] || { question_id: qid, answer: 'no', partial_text: null, was_auto_suggested: false, _missing: true });
+      });
+
+      // Admin answers map
+      const adminByQid = {};
+      (adminAnswers || []).forEach(a => { adminByQid[a.question_id] = a; });
+
+      let html = `
+        <div style="border-bottom: 3px solid #0E5BA8; padding-bottom: 20px; margin-bottom: 24px; display: flex; justify-content: space-between; align-items: flex-start;">
+          <div>
+            <img src="${LOGO_URL}" style="height: 50px; width: auto; margin-bottom: 12px;" />
+            <h1 style="font-size: 22px; font-weight: 600; margin: 0; color: #1c1917;">${T[lang].pdfTitle}${historyBadge}</h1>
+            <p style="font-size: 11px; color: #78716c; margin: 4px 0 0;">${T[lang].pdfSubtitle}</p>
+          </div>
+          <div style="text-align: right;">
+            <div style="font-size: 11px; color: #78716c; font-weight: 500; margin-bottom: 4px;">${T[lang].pdfTotalScore}</div>
+            <div style="font-size: 32px; font-weight: 600; color: ${overallColor}; line-height: 1;">${weighted.overall.score.toFixed(1)}%</div>
+            <div style="font-size: 10px; color: #78716c; margin-top: 4px;">${weighted.overall.weightedSum.toFixed(1)} / 100.0</div>
+            <div style="font-size: 10px; color: #78716c; margin-top: 4px;">${T[lang].pdfGenerated}: ${dateStr}</div>
+          </div>
+        </div>
+
+        <div style="background: #F5F8FC; border: 1px solid #E0E7F0; border-radius: 10px; padding: 16px 20px; margin-bottom: 20px;">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px 24px; font-size: 12px;">
+            <div><div style="color: #78716c; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 500; margin-bottom: 3px;">${T[lang].pdfCompany}</div><div style="font-weight: 500;">${escapeHtml(company.name || '—')}</div></div>
+            <div><div style="color: #78716c; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 500; margin-bottom: 3px;">${T[lang].pdfId}</div><div style="font-weight: 500;">${escapeHtml(company.id || '')}</div></div>
+            <div><div style="color: #78716c; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 500; margin-bottom: 3px;">${T[lang].pdfContact}</div><div style="font-weight: 500;">${escapeHtml(company.contact || '—')}</div></div>
+            <div><div style="color: #78716c; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 500; margin-bottom: 3px;">${T[lang].pdfDate}</div><div style="font-weight: 500;">${submittedStr}</div></div>
+          </div>
+        </div>
+
+        <h2 style="font-size: 14px; font-weight: 600; color: #0E5BA8; margin: 0 0 12px; padding-bottom: 6px; border-bottom: 1px solid #E0E7F0;">${T[lang].scoreOverviewTitle}</h2>
+        <table style="width: 100%; border-collapse: collapse; margin-bottom: 24px; font-size: 11px;">
+          <thead>
+            <tr style="background: #F5F8FC; border-bottom: 2px solid #E0E7F0;">
+              <th style="text-align: left; padding: 8px 10px; font-weight: 600; color: #64748b; font-size: 10px;">${T[lang].colSection}</th>
+              <th style="text-align: right; padding: 8px 10px; font-weight: 600; color: #64748b; font-size: 10px;">${T[lang].colQuestions}</th>
+              <th style="text-align: right; padding: 8px 10px; font-weight: 600; color: #64748b; font-size: 10px;">${T[lang].colScore}</th>
+              <th style="text-align: right; padding: 8px 10px; font-weight: 600; color: #64748b; font-size: 10px;">${T[lang].colPercent}</th>
+            </tr>
+          </thead>
+          <tbody>
+      `;
+
+      // Row helper
+      const rowHtml = (name, s, isAdmin) => {
+        const c = s.score >= 70 ? '#059669' : s.score >= 40 ? '#d97706' : '#dc2626';
+        const bg = isAdmin ? 'background: #EFF6FF;' : '';
+        const border = isAdmin ? 'border-left: 3px solid #3b82f6;' : '';
+        return `<tr style="border-bottom: 1px solid #f1f5f9; ${bg} ${border}">
+          <td style="padding: 8px 10px; font-weight: 500;">${escapeHtml(name)}</td>
+          <td style="padding: 8px 10px; text-align: right; color: #94a3b8; font-size: 10px;">${s.questionCount}</td>
+          <td style="padding: 8px 10px; text-align: right; font-family: monospace;">${s.weightedSum.toFixed(1)} / ${s.maxWeight.toFixed(1)}</td>
+          <td style="padding: 8px 10px; text-align: right; font-weight: 600; color: ${c};">${s.score.toFixed(1)}%</td>
+        </tr>`;
+      };
+      html += rowHtml('1. ' + ADMIN_SECTION_NAME[lang], weighted[1], true);
+      for (let i = 0; i < 7; i++) {
+        html += rowHtml((i+2) + '. ' + SECTION_NAMES[lang][i], weighted[i+2], false);
+      }
+      // Total
+      html += `<tr style="background: #f8fafc; border-top: 2px solid #cbd5e1; font-weight: bold;">
+        <td style="padding: 10px; font-size: 12px;">${T[lang].totalRow}</td>
+        <td style="padding: 10px; text-align: right; color: #64748b; font-size: 10px;">88</td>
+        <td style="padding: 10px; text-align: right; font-family: monospace;">${weighted.overall.weightedSum.toFixed(1)} / 100.0</td>
+        <td style="padding: 10px; text-align: right; color: ${overallColor}; font-size: 13px;">${weighted.overall.score.toFixed(1)}%</td>
+      </tr>`;
+      html += `</tbody></table>`;
+
+      // Detailed sections
+      html += `<h2 style="font-size: 14px; font-weight: 600; color: #0E5BA8; margin: 0 0 12px; padding-bottom: 6px; border-bottom: 1px solid #E0E7F0;">${T[lang].detailedInfoTitle}</h2>`;
+
+      // Admin section first
+      html += `<div style="margin-bottom: 20px; page-break-inside: avoid;">
+        <h3 style="font-size: 13px; font-weight: 600; color: #0E5BA8; margin: 0 0 10px; padding-bottom: 6px; border-bottom: 1px solid #E0E7F0; display: flex; justify-content: space-between;">
+          <span>1. ${escapeHtml(ADMIN_SECTION_NAME[lang])}</span>
+          <span style="font-size: 11px; color: #64748b; font-weight: 500;">${weighted[1].weightedSum.toFixed(1)} / ${weighted[1].maxWeight.toFixed(1)} · ${weighted[1].score.toFixed(1)}%</span>
+        </h3>`;
+      ADMIN_QUESTION_IDS.forEach((qid, qIdx) => {
+        const a = adminByQid[qid] || { answer: 'no' };
+        const qText = ADMIN_QUESTIONS[qid] ? ADMIN_QUESTIONS[qid][lang] : qid;
+        const ansVal = a.answer || 'no';
+        const ansLabel = ansVal === 'yes' ? '✓ ' + T[lang].yesShort : ansVal === 'no' ? '✗ ' + T[lang].noShort : '◐ ' + T[lang].partialShort;
+        const ansColor = ansVal === 'yes' ? '#059669' : ansVal === 'no' ? '#dc2626' : '#d97706';
+        const ansBg = ansVal === 'yes' ? '#ECFDF5' : ansVal === 'no' ? '#FEF2F2' : '#FFFBEB';
+        const winfo = QUESTION_WEIGHTS[qid];
+        const wPct = winfo ? winfo.weight * 100 : 0;
+        const earned = wPct * answerValue(ansVal);
+        html += `<div style="margin-bottom: 6px; padding: 8px 12px; border: 1px solid #E7E5E4; border-radius: 6px; background: white;">
+          <div style="display: flex; gap: 10px; align-items: center;">
+            <div style="font-size: 10px; color: #a8a29e; font-weight: 500; min-width: 22px;">${qIdx + 1}.</div>
+            <div style="flex: 1;"><div style="font-size: 11px; line-height: 1.5;">${escapeHtml(qText)}</div></div>
+            <div style="font-size: 10px; font-weight: 600; color: ${ansColor}; background: ${ansBg}; padding: 3px 8px; border-radius: 4px; white-space: nowrap;">${ansLabel}</div>
+            <div style="font-size: 10px; color: #64748b; font-family: monospace; min-width: 60px; text-align: right;">${earned.toFixed(1)} / ${wPct.toFixed(1)}</div>
+          </div>
+        </div>`;
+      });
+      html += `</div>`;
+
+      // Contractor sections
+      answersBySection.forEach((arr, sIdx) => {
+        if (arr.length === 0) return;
+        const secNum = sIdx + 2;
+        const ws = weighted[secNum];
+        html += `<div style="margin-bottom: 20px; page-break-inside: avoid;">
+          <h3 style="font-size: 13px; font-weight: 600; color: #0E5BA8; margin: 0 0 10px; padding-bottom: 6px; border-bottom: 1px solid #E0E7F0; display: flex; justify-content: space-between;">
+            <span>${sIdx + 2}. ${escapeHtml(SECTION_NAMES[lang][sIdx])}</span>
+            <span style="font-size: 11px; color: #64748b; font-weight: 500;">${ws.weightedSum.toFixed(1)} / ${ws.maxWeight.toFixed(1)} · ${ws.score.toFixed(1)}%</span>
+          </h3>`;
+        arr.forEach((a, qIdx) => {
+          const qText = QUESTIONS[a.question_id] ? QUESTIONS[a.question_id][lang] : a.question_id;
+          const ansVal = a.answer || 'no';
+          const ansLabel = ansVal === 'yes' ? '✓ ' + T[lang].yesShort : ansVal === 'no' ? '✗ ' + T[lang].noShort : '◐ ' + T[lang].partialShort;
+          const ansColor = ansVal === 'yes' ? '#059669' : ansVal === 'no' ? '#dc2626' : '#d97706';
+          const ansBg = ansVal === 'yes' ? '#ECFDF5' : ansVal === 'no' ? '#FEF2F2' : '#FFFBEB';
+          const winfo = QUESTION_WEIGHTS[a.question_id];
+          const wPct = winfo ? winfo.weight * 100 : 0;
+          const earned = wPct * answerValue(ansVal);
+          html += `<div style="margin-bottom: 6px; padding: 8px 12px; border: 1px solid #E7E5E4; border-radius: 6px; background: white;">
+            <div style="display: flex; gap: 10px; align-items: center;">
+              <div style="font-size: 10px; color: #a8a29e; font-weight: 500; min-width: 22px;">${qIdx + 1}.</div>
+              <div style="flex: 1;"><div style="font-size: 11px; line-height: 1.5;">${escapeHtml(qText)}</div></div>
+              <div style="font-size: 10px; font-weight: 600; color: ${ansColor}; background: ${ansBg}; padding: 3px 8px; border-radius: 4px; white-space: nowrap;">${ansLabel}</div>
+              <div style="font-size: 10px; color: #64748b; font-family: monospace; min-width: 70px; text-align: right;">${earned.toFixed(2)} / ${wPct.toFixed(2)}</div>
+            </div>
+            ${ansVal === 'partial' && a.partial_text ? `<div style="margin-top: 8px; margin-left: 32px; padding: 8px 10px; background: #FFFBEB; border-left: 3px solid #F59E0B; border-radius: 0 4px 4px 0;">
+              <div style="font-size: 9px; font-weight: 600; color: #92400e; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 3px;">${T[lang].noteLabel}</div>
+              <div style="font-size: 10.5px; line-height: 1.5; color: #1c1917; white-space: pre-wrap;">${escapeHtml(a.partial_text)}</div>
+            </div>` : ''}
+          </div>`;
+        });
+        html += `</div>`;
+      });
+
+      html += `<div style="margin-top: 30px; padding-top: 16px; border-top: 1px solid #E0E7F0; text-align: center; font-size: 10px; color: #a8a29e;">${T[lang].pdfFooter} • ${dateStr}</div>`;
+
+      container.innerHTML = html;
+      document.body.appendChild(container);
+      const historySuffix = isHistory ? '_PREVIOUS' : '';
+      const filename = `ESG_FullAdmin_${(company.name || 'company').replace(/[^a-zA-Z0-9-_]/g, '_')}${historySuffix}_${new Date().toISOString().split('T')[0]}_${lang}.pdf`;
+      await renderContainerToPdf(container, filename);
+    }
+
+    // Legacy wrapper — used by history PDF button (redirects to full admin)
+    async function generateCompanyPDF(company, answers, sectionStats, stats, lang, isHistory) {
+      // Redirects to full admin PDF with empty admin answers (history-only case)
+      return generateFullAdminPDF(company, answers, [], lang, isHistory);
     }
 
     // ============================================
