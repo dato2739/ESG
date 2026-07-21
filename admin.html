@@ -193,6 +193,8 @@
         catsResetConfirmTitle: 'საწყისზე დაბრუნება',
         catsResetConfirmMsg: 'ნამდვილად გსურთ კატეგორიების სრულად საწყის (default) მდგომარეობაში დაბრუნება? ყველა თქვენი ცვლილება დაიკარგება.',
         catsResetConfirmBtn: 'საწყისზე დაბრუნება',
+        catsResetPasswordLabel: 'ადმინის პაროლი (დასტური)',
+        catsResetPasswordPlaceholder: 'შეიყვანეთ პაროლი დასადასტურებლად',
         catsSaveFailed: 'შენახვა ვერ მოხერხდა: ',
         cat1Title: 'კატეგორია 1 — ვენდობით',
         cat1Desc: 'გადამოწმება არ ღირს',
@@ -379,6 +381,8 @@
         catsResetConfirmTitle: 'Reset to default',
         catsResetConfirmMsg: 'Are you sure you want to reset categories to the original default state? All your changes will be lost.',
         catsResetConfirmBtn: 'Reset to default',
+        catsResetPasswordLabel: 'Admin password (confirmation)',
+        catsResetPasswordPlaceholder: 'Enter password to confirm',
         catsSaveFailed: 'Save failed: ',
         cat1Title: 'Category 1 — Trusted',
         cat1Desc: 'No verification needed',
@@ -1372,6 +1376,74 @@
       );
     }
     // ----------- COMPANY DETAIL SCREEN -----------
+    // ============================================
+    // v9c: TRANSLATABLE TEXT COMPONENT
+    // ============================================
+    // Shows partial_text with optional translation button when lang=en
+    // Uses MyMemory API (free, no key required, ~1000 requests/day)
+    function TranslatableText({ text, lang }) {
+      const [translation, setTranslation] = useState(null);
+      const [loading, setLoading] = useState(false);
+      const [error, setError] = useState('');
+
+      const shouldOfferTranslation = lang === 'en' && text && text.trim();
+
+      const doTranslate = async () => {
+        if (loading || translation) return;
+        setLoading(true);
+        setError('');
+        try {
+          // MyMemory API — auto-detect source language
+          const url = 'https://api.mymemory.translated.net/get?q=' + encodeURIComponent(text.trim()) + '&langpair=ka|en';
+          const res = await fetch(url);
+          const data = await res.json();
+          if (data && data.responseData && data.responseData.translatedText) {
+            setTranslation(data.responseData.translatedText);
+          } else {
+            setError('Translation unavailable');
+          }
+        } catch (e) {
+          console.error('Translation error:', e);
+          setError('Translation failed');
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      const clearTranslation = () => {
+        setTranslation(null);
+        setError('');
+      };
+
+      return React.createElement('div', null,
+        React.createElement('div', {
+          className: 'text-[13px] text-stone-800 leading-relaxed whitespace-pre-wrap break-words'
+        }, text),
+        shouldOfferTranslation ? React.createElement('div', { className: 'mt-2' },
+          !translation && !loading ? React.createElement('button', {
+            onClick: doTranslate,
+            className: 'text-[11px] text-blue-600 hover:text-blue-800 hover:underline'
+          }, '🌐 Translate to English') : null,
+          loading ? React.createElement('div', { className: 'text-[11px] text-stone-400 italic' }, '⏳ Translating…') : null,
+          error ? React.createElement('div', { className: 'text-[11px] text-rose-500' }, '✗ ' + error) : null,
+          translation ? React.createElement('div', { className: 'mt-2 p-2.5 bg-blue-50 border-l-2 border-blue-400 rounded-r' },
+            React.createElement('div', {
+              className: 'text-[9px] font-semibold text-blue-700 uppercase tracking-wider mb-1 flex items-center justify-between'
+            },
+              React.createElement('span', null, '🌐 English translation (auto)'),
+              React.createElement('button', {
+                onClick: clearTranslation,
+                className: 'text-[10px] text-blue-500 hover:text-blue-700 hover:underline normal-case font-normal'
+              }, '✕ hide')
+            ),
+            React.createElement('div', {
+              className: 'text-[12px] text-stone-700 leading-relaxed whitespace-pre-wrap break-words'
+            }, translation)
+          ) : null
+        ) : null
+      );
+    }
+
     function CompanyDetailScreen({ companyId, onBack, lang }) {
       const [company, setCompany] = useState(null);
       const [answers, setAnswers] = useState([]);
@@ -1830,7 +1902,7 @@
                         React.createElement('div', { className: 'flex-1 min-w-0' },
                           React.createElement('div', { className: 'text-[10px] font-semibold text-amber-700 uppercase tracking-wider mb-1' }, T[lang].noteLabel),
                           hasPartialText
-                            ? React.createElement('div', { className: 'text-[13px] text-stone-800 leading-relaxed whitespace-pre-wrap break-words' }, a.partial_text)
+                            ? React.createElement(TranslatableText, { text: a.partial_text, lang })
                             : React.createElement('div', { className: 'text-[12px] text-stone-400 italic' }, lang === 'ka' ? 'განმარტება არ არის მითითებული' : 'No explanation provided')
                         )
                       )
@@ -2670,6 +2742,8 @@
       const [saved, setSaved] = useState(false);
       const [confirmReset, setConfirmReset] = useState(false);
       const [resetting, setResetting] = useState(false);
+      const [resetPassword, setResetPassword] = useState('');
+      const [resetPasswordError, setResetPasswordError] = useState('');
       const [companiesPopup, setCompaniesPopup] = useState(null); // { qid, answer, list[] }
       const [draggedQid, setDraggedQid] = useState(null);
       const [dragOverCat, setDragOverCat] = useState(null);
@@ -2746,6 +2820,12 @@
       };
 
       const handleReset = async () => {
+        // Password check — reset is destructive
+        if (resetPassword !== ADMIN_PASSWORD) {
+          setResetPasswordError(T[lang].wrongPassword);
+          return;
+        }
+        setResetPasswordError('');
         setResetting(true);
         const { error } = await resetCategoriesToDefault();
         setResetting(false);
@@ -2759,6 +2839,14 @@
         setLocalMap({ ...defaults });
         setSavedMap({ ...defaults });
         setConfirmReset(false);
+        setResetPassword('');
+      };
+
+      const closeResetModal = () => {
+        if (resetting) return;
+        setConfirmReset(false);
+        setResetPassword('');
+        setResetPasswordError('');
       };
 
       const renderColumn = (cat) => {
@@ -2923,7 +3011,7 @@
         // Reset confirmation modal
         confirmReset ? React.createElement('div', {
           className: 'fixed inset-0 bg-black/50 flex items-center justify-center px-4 z-50 fade-in',
-          onClick: () => !resetting && setConfirmReset(false)
+          onClick: closeResetModal
         },
           React.createElement('div', {
             className: 'bg-white rounded-xl max-w-md w-full p-6 shadow-2xl',
@@ -2931,23 +3019,42 @@
           },
             React.createElement('div', { className: 'flex items-start gap-4 mb-5' },
               React.createElement('div', {
-                className: 'w-12 h-12 rounded-full bg-stone-100 text-stone-600 flex items-center justify-center text-2xl flex-shrink-0'
-              }, '↺'),
+                className: 'w-12 h-12 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center text-2xl flex-shrink-0'
+              }, '⚠️'),
               React.createElement('div', null,
                 React.createElement('h3', { className: 'text-base font-semibold text-stone-900 mb-1' }, T[lang].catsResetConfirmTitle),
                 React.createElement('p', { className: 'text-sm text-stone-600' }, T[lang].catsResetConfirmMsg)
               )
             ),
+            // Password input
+            React.createElement('div', { className: 'mb-4' },
+              React.createElement('label', {
+                className: 'block text-[11px] font-semibold text-stone-500 uppercase tracking-wider mb-1.5'
+              }, T[lang].catsResetPasswordLabel),
+              React.createElement('input', {
+                type: 'password',
+                value: resetPassword,
+                onChange: e => { setResetPassword(e.target.value); setResetPasswordError(''); },
+                onKeyDown: e => { if (e.key === 'Enter' && !resetting) handleReset(); },
+                disabled: resetting,
+                autoFocus: true,
+                placeholder: T[lang].catsResetPasswordPlaceholder,
+                className: 'w-full h-10 px-3 text-sm border border-stone-300 rounded-lg focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 disabled:opacity-50'
+              }),
+              resetPasswordError ? React.createElement('div', {
+                className: 'mt-1.5 text-[12px] text-rose-600'
+              }, '✗ ' + resetPasswordError) : null
+            ),
             React.createElement('div', { className: 'flex gap-2 justify-end' },
               React.createElement('button', {
-                onClick: () => setConfirmReset(false),
+                onClick: closeResetModal,
                 disabled: resetting,
                 className: 'h-10 px-4 text-sm text-stone-700 border border-stone-200 hover:bg-stone-50 rounded-lg transition disabled:opacity-50'
               }, T[lang].cancel),
               React.createElement('button', {
                 onClick: handleReset,
-                disabled: resetting,
-                className: 'h-10 px-4 text-sm font-medium bg-stone-700 hover:bg-stone-800 text-white rounded-lg transition disabled:opacity-50'
+                disabled: resetting || !resetPassword,
+                className: 'h-10 px-4 text-sm font-medium bg-rose-600 hover:bg-rose-700 text-white rounded-lg transition disabled:opacity-50'
               }, resetting ? '...' : T[lang].catsResetConfirmBtn)
             )
           )
