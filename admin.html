@@ -236,7 +236,29 @@
         answerYes: 'დიახ',
         answerPartial: 'ნაწილობრივ',
         answerNo: 'არა',
-        saved: 'შენახულია'
+        saved: 'შენახულია',
+        // v9: Analysis section on Categories page
+        analysisTitle: 'ანალიზი და მეილის გენერაცია',
+        analysisSubtitle: 'ფილტრით შეარჩიე კომპანიები კატეგორიისა და პასუხის მიხედვით',
+        filterCategory: 'კატეგორია',
+        filterAnswer: 'პასუხი',
+        filterAll: 'ყველა',
+        filterCat1: '🟢 Cat 1 (ვენდობით)',
+        filterCat2: '🟡 Cat 2 (გასაუბრება)',
+        filterCat3: '🔴 Cat 3 (დოკუმენტი)',
+        filterAnsYes: '✓ დიახ',
+        filterAnsPartial: '◐ ნაწილობრივ',
+        filterAnsNo: '✗ არა',
+        analysisNoResults: 'ფილტრის შედეგები არ იძებნება',
+        analysisCompanyCount: 'კომპანია',
+        analysisMatchCount: 'შესატყვისი',
+        genEmailBtn: '📧 მეილის გენერაცია',
+        genCat1EmailBtn: '📧 გადახედვის მოთხოვნა',
+        genCat3EmailBtn: '📧 დოკუმენტის მოთხოვნა',
+        genGenericEmailBtn: '📧 შერეული მოთხოვნა',
+        analysisTableCompany: 'კომპანია',
+        analysisTableMatches: 'შესატყვისი კითხვები',
+        analysisTableActions: 'მოქმედება'
       },
       en: {
         // Login
@@ -400,7 +422,29 @@
         answerYes: 'Yes',
         answerPartial: 'Partial',
         answerNo: 'No',
-        saved: 'Saved'
+        saved: 'Saved',
+        // v9: Analysis section on Categories page
+        analysisTitle: 'Analysis & Email Generation',
+        analysisSubtitle: 'Filter companies by category and answer to generate targeted emails',
+        filterCategory: 'Category',
+        filterAnswer: 'Answer',
+        filterAll: 'All',
+        filterCat1: '🟢 Cat 1 (Trusted)',
+        filterCat2: '🟡 Cat 2 (Interview)',
+        filterCat3: '🔴 Cat 3 (Document)',
+        filterAnsYes: '✓ Yes',
+        filterAnsPartial: '◐ Partial',
+        filterAnsNo: '✗ No',
+        analysisNoResults: 'No results match the filter',
+        analysisCompanyCount: 'companies',
+        analysisMatchCount: 'matches',
+        genEmailBtn: '📧 Generate email',
+        genCat1EmailBtn: '📧 Review request',
+        genCat3EmailBtn: '📧 Document request',
+        genGenericEmailBtn: '📧 Mixed request',
+        analysisTableCompany: 'Company',
+        analysisTableMatches: 'Matching questions',
+        analysisTableActions: 'Actions'
       }
     };
 
@@ -2175,6 +2219,447 @@
     }
 
     // ============================================
+    // v9: EMAIL TEMPLATES FOR CATEGORIES ANALYSIS
+    // ============================================
+
+    // Cat 1 template — friendly review request (for "no" answers on trusted questions)
+    function buildCat1ReviewEmail(company, matchingAnswers, lang) {
+      const contactName = company.contact_name || (lang === 'ka' ? 'უფლებამოსილო პირო' : 'Authorized representative');
+      const companyName = company.name || '—';
+
+      if (lang === 'ka') {
+        const lines = [];
+        lines.push(`თემა: ESG შეფასების პასუხების გადახედვის მოთხოვნა — ${companyName}`);
+        lines.push('');
+        lines.push(`გამარჯობათ, ${contactName},`);
+        lines.push('');
+        lines.push('გმადლობთ ESG შეფასების ფორმის შევსებისთვის — ჩვენთვის მნიშვნელოვანია თანამშრომლობა თქვენს კომპანიასთან.');
+        lines.push('');
+        lines.push('პასუხების გადახედვისას გამოვლინდა რამდენიმე კითხვა, სადაც "არა" პასუხი დაფიქსირდა. შესაძლოა ეს რეალობას ასახავს, თუმცა ხშირად ერთი შეხედვით რთული კითხვა ცოტა უფრო მარტივია, ვიდრე ჩანს — შესაძლოა თქვენს კომპანიაში შესაბამისი პრაქტიკა უკვე არსებობს, უბრალოდ სხვა სახელით ან ფორმატით.');
+        lines.push('');
+        lines.push('გთხოვთ, გადახედეთ ქვემოთ ჩამოთვლილ საკითხებს — თუ რომელიმეზე შეძლებთ "დიახ" ან "ნაწილობრივ" პასუხის დაფიქსირებას, ეს დადებითად აისახება თქვენს ESG შეფასებაზე.');
+        lines.push('');
+        lines.push('გადასახედი კითხვები:');
+        lines.push('');
+        matchingAnswers.forEach((a, i) => {
+          const qText = QUESTIONS[a.question_id] ? QUESTIONS[a.question_id][lang] : a.question_id;
+          lines.push(`  ${i + 1}. ${qText}`);
+        });
+        lines.push('');
+        lines.push('ნებისმიერ კითხვაზე ან განმარტებაზე მოხარული ვიქნებით დაგეხმაროთ. გთხოვთ, პასუხი მოგვწეროთ 5 სამუშაო დღეში.');
+        lines.push('');
+        lines.push('პატივისცემით,');
+        lines.push('თეონა კველიძე');
+        lines.push('ENERGO-PRO Georgia JSC');
+        lines.push('teona.qvelidze@energo-pro.ge · 577350090');
+        return lines.join('\n');
+      } else {
+        const lines = [];
+        lines.push(`Subject: ESG Assessment Review Request — ${companyName}`);
+        lines.push('');
+        lines.push(`Dear ${contactName},`);
+        lines.push('');
+        lines.push('Thank you for completing the ESG assessment form — cooperation with your company is important to us.');
+        lines.push('');
+        lines.push('When reviewing your responses, we identified several questions where "No" was recorded. This may reflect actual practice, but it is often the case that seemingly complex questions are simpler than they appear — the relevant practice may already exist in your company, just under a different name or format.');
+        lines.push('');
+        lines.push('We kindly ask you to review the items below — if you can update any of them to "Yes" or "Partial", this will positively affect your ESG score.');
+        lines.push('');
+        lines.push('Questions to review:');
+        lines.push('');
+        matchingAnswers.forEach((a, i) => {
+          const qText = QUESTIONS[a.question_id] ? QUESTIONS[a.question_id][lang] : a.question_id;
+          lines.push(`  ${i + 1}. ${qText}`);
+        });
+        lines.push('');
+        lines.push('We are happy to help with any questions or clarifications. Please respond within 5 working days.');
+        lines.push('');
+        lines.push('Sincerely,');
+        lines.push('Teona Kvelidze');
+        lines.push('ENERGO-PRO Georgia JSC');
+        lines.push('teona.qvelidze@energo-pro.ge · 577350090');
+        return lines.join('\n');
+      }
+    }
+
+    // Cat 3 template — document request (for "yes"/"partial" answers on documented questions)
+    function buildCat3DocumentEmail(company, matchingAnswers, lang) {
+      const contactName = company.contact_name || (lang === 'ka' ? 'უფლებამოსილო პირო' : 'Authorized representative');
+      const companyName = company.name || '—';
+
+      // Document type suggestion by question ID
+      const docSuggestion = (qid, lang) => {
+        const q = QUESTIONS[qid] ? QUESTIONS[qid][lang].toLowerCase() : '';
+        if (lang === 'ka') {
+          if (q.includes('სერტიფიკატ') || q.includes('iso')) return 'შესაბამისი სერტიფიკატის ასლი';
+          if (q.includes('პოლიტიკ')) return 'დამტკიცებული პოლიტიკის დოკუმენტი';
+          if (q.includes('სახელმძღვანელო') || q.includes('manual')) return 'შესაბამისი სახელმძღვანელო';
+          if (q.includes('სტატისტიკ')) return 'ბოლო 12 თვის სტატისტიკური ანგარიში';
+          if (q.includes('რეპორტ') || q.includes('report')) return 'შესაბამისი ანგარიშის ასლი';
+          return 'შესაბამისი დამადასტურებელი დოკუმენტი';
+        } else {
+          if (q.includes('certif') || q.includes('iso')) return 'Copy of the relevant certificate';
+          if (q.includes('polic')) return 'Approved policy document';
+          if (q.includes('manual')) return 'Relevant manual';
+          if (q.includes('statistic')) return 'Statistical report of the last 12 months';
+          if (q.includes('report')) return 'Copy of the relevant report';
+          return 'Relevant supporting document';
+        }
+      };
+
+      if (lang === 'ka') {
+        const lines = [];
+        lines.push(`თემა: ESG შეფასების დამადასტურებელი დოკუმენტაცია — ${companyName}`);
+        lines.push('');
+        lines.push(`გამარჯობათ, ${contactName},`);
+        lines.push('');
+        lines.push('გმადლობთ ESG შეფასების ფორმის შევსებისთვის.');
+        lines.push('');
+        lines.push('თქვენ პასუხობთ, რომ თქვენს კომპანიაში მოქმედებს რიგი მნიშვნელოვანი პრაქტიკები — ეს ჩვენთვის ძალიან პოზიტიური სიგნალია და გვინდა, რომ თქვენს კომპანიაზე სრული ნდობით შევძლოთ თანამშრომლობა.');
+        lines.push('');
+        lines.push('ამის მისაღწევად, გვჭირდება მოკლე დამადასტურებელი დოკუმენტაცია ცალკე საკითხზე. თუ თქვენ შეძლებთ ამ დოკუმენტების წარმოდგენას, ჩვენ დარწმუნებით შევძლებთ თქვენს ინფორმაციაზე დაყრდნობით მიუახლოებული თანამშრომლობის დაწყებას.');
+        lines.push('');
+        lines.push('მოთხოვნილი დოკუმენტაცია:');
+        lines.push('');
+        matchingAnswers.forEach((a, i) => {
+          const qText = QUESTIONS[a.question_id] ? QUESTIONS[a.question_id][lang] : a.question_id;
+          const ansTxt = a.answer === 'yes' ? 'დიახ' : 'ნაწილობრივ';
+          lines.push(`  ${i + 1}. ${qText}`);
+          lines.push(`     თქვენი პასუხი: ${ansTxt}`);
+          lines.push(`     დამადასტურებელი დოკუმენტი: ${docSuggestion(a.question_id, lang)}`);
+          if (a.partial_text && a.partial_text.trim()) {
+            lines.push(`     თქვენი კომენტარი: ${a.partial_text.trim()}`);
+          }
+          lines.push('');
+        });
+        lines.push('გთხოვთ, დამადასტურებელი დოკუმენტები მოგვაწოდოთ 10 სამუშაო დღეში ელფოსტის მისამართზე: teona.qvelidze@energo-pro.ge.');
+        lines.push('');
+        lines.push('პატივისცემით,');
+        lines.push('თეონა კველიძე');
+        lines.push('ENERGO-PRO Georgia JSC');
+        lines.push('teona.qvelidze@energo-pro.ge · 577350090');
+        return lines.join('\n');
+      } else {
+        const lines = [];
+        lines.push(`Subject: ESG Assessment Supporting Documentation — ${companyName}`);
+        lines.push('');
+        lines.push(`Dear ${contactName},`);
+        lines.push('');
+        lines.push('Thank you for completing the ESG assessment form.');
+        lines.push('');
+        lines.push('Your responses indicate that a range of important practices are in place at your company — this is a very positive signal for us, and we would like to be able to fully trust your company for cooperation.');
+        lines.push('');
+        lines.push('To reach this point, we need brief supporting documentation on specific items. If you can provide these documents, we will confidently be able to start closer cooperation based on your information.');
+        lines.push('');
+        lines.push('Requested documentation:');
+        lines.push('');
+        matchingAnswers.forEach((a, i) => {
+          const qText = QUESTIONS[a.question_id] ? QUESTIONS[a.question_id][lang] : a.question_id;
+          const ansTxt = a.answer === 'yes' ? 'Yes' : 'Partial';
+          lines.push(`  ${i + 1}. ${qText}`);
+          lines.push(`     Your answer: ${ansTxt}`);
+          lines.push(`     Supporting document: ${docSuggestion(a.question_id, lang)}`);
+          if (a.partial_text && a.partial_text.trim()) {
+            lines.push(`     Your comment: ${a.partial_text.trim()}`);
+          }
+          lines.push('');
+        });
+        lines.push('Please provide the supporting documents within 10 working days to: teona.qvelidze@energo-pro.ge.');
+        lines.push('');
+        lines.push('Sincerely,');
+        lines.push('Teona Kvelidze');
+        lines.push('ENERGO-PRO Georgia JSC');
+        lines.push('teona.qvelidze@energo-pro.ge · 577350090');
+        return lines.join('\n');
+      }
+    }
+
+    // Generic email builder — used when mixed category/answer selected
+    function buildGenericEmail(company, matchingAnswers, lang) {
+      const contactName = company.contact_name || (lang === 'ka' ? 'უფლებამოსილო პირო' : 'Authorized representative');
+      const companyName = company.name || '—';
+
+      if (lang === 'ka') {
+        const lines = [];
+        lines.push(`თემა: ESG შეფასების დაზუსტება — ${companyName}`);
+        lines.push('');
+        lines.push(`გამარჯობათ, ${contactName},`);
+        lines.push('');
+        lines.push('გმადლობთ ESG შეფასების ფორმის შევსებისთვის.');
+        lines.push('');
+        lines.push('გვსურს ქვემოთ ჩამოთვლილ საკითხებზე დამატებითი ინფორმაცია მივიღოთ. თითოეულ კითხვასთან მითითებულია თქვენი პასუხი და ჩვენი მოთხოვნა.');
+        lines.push('');
+        matchingAnswers.forEach((a, i) => {
+          const qText = QUESTIONS[a.question_id] ? QUESTIONS[a.question_id][lang] : a.question_id;
+          const ansTxt = a.answer === 'yes' ? 'დიახ' : a.answer === 'partial' ? 'ნაწილობრივ' : 'არა';
+          lines.push(`  ${i + 1}. ${qText}`);
+          lines.push(`     თქვენი პასუხი: ${ansTxt}`);
+        });
+        lines.push('');
+        lines.push('გთხოვთ, პასუხი მოგვწეროთ 5 სამუშაო დღეში.');
+        lines.push('');
+        lines.push('პატივისცემით,');
+        lines.push('თეონა კველიძე');
+        lines.push('ENERGO-PRO Georgia JSC');
+        lines.push('teona.qvelidze@energo-pro.ge · 577350090');
+        return lines.join('\n');
+      } else {
+        const lines = [];
+        lines.push(`Subject: ESG Assessment Clarification — ${companyName}`);
+        lines.push('');
+        lines.push(`Dear ${contactName},`);
+        lines.push('');
+        lines.push('Thank you for completing the ESG assessment form.');
+        lines.push('');
+        lines.push('We would like to receive additional information on the items listed below. Each question shows your response and our request.');
+        lines.push('');
+        matchingAnswers.forEach((a, i) => {
+          const qText = QUESTIONS[a.question_id] ? QUESTIONS[a.question_id][lang] : a.question_id;
+          const ansTxt = a.answer === 'yes' ? 'Yes' : a.answer === 'partial' ? 'Partial' : 'No';
+          lines.push(`  ${i + 1}. ${qText}`);
+          lines.push(`     Your answer: ${ansTxt}`);
+        });
+        lines.push('');
+        lines.push('Please respond within 5 working days.');
+        lines.push('');
+        lines.push('Sincerely,');
+        lines.push('Teona Kvelidze');
+        lines.push('ENERGO-PRO Georgia JSC');
+        lines.push('teona.qvelidze@energo-pro.ge · 577350090');
+        return lines.join('\n');
+      }
+    }
+
+    // ============================================
+    // v9: ANALYSIS SECTION (on Categories page)
+    // ============================================
+    function AnalysisSection({ companies, allAnswersByCompany, lang }) {
+      const [filterCat, setFilterCat] = useState('all'); // 'all' | '1' | '2' | '3'
+      const [filterAns, setFilterAns] = useState('all'); // 'all' | 'yes' | 'partial' | 'no'
+      const [showEmailFor, setShowEmailFor] = useState(null); // { company, matchingAnswers, template }
+      const [emailCopied, setEmailCopied] = useState(false);
+
+      // Compute matching companies with their matching answers
+      const results = useMemo(() => {
+        const submittedCompanies = companies.filter(c => c.is_locked);
+        const out = [];
+        submittedCompanies.forEach(c => {
+          const answers = allAnswersByCompany[c.id] || [];
+          const matches = answers.filter(a => {
+            // Category filter
+            if (filterCat !== 'all') {
+              const cat = getCategory(a.question_id);
+              if (cat !== parseInt(filterCat)) return false;
+            }
+            // Answer filter
+            if (filterAns !== 'all') {
+              if (a.answer !== filterAns) return false;
+            }
+            return true;
+          });
+          if (matches.length > 0) {
+            matches.sort((a, b) => a.question_id.localeCompare(b.question_id));
+            out.push({ company: c, matches });
+          }
+        });
+        // Sort by match count descending
+        out.sort((a, b) => b.matches.length - a.matches.length);
+        return out;
+      }, [companies, allAnswersByCompany, filterCat, filterAns]);
+
+      // Determine which email template to use
+      const pickEmailBuilder = (matches) => {
+        // If ALL matches are Cat 3 (regardless of answer) → Cat 3 template
+        const allCat3 = matches.every(m => getCategory(m.question_id) === 3);
+        // If ALL matches are Cat 1 with "no" answer → Cat 1 review template
+        const allCat1No = matches.every(m => getCategory(m.question_id) === 1 && m.answer === 'no');
+        if (allCat1No) return { fn: buildCat1ReviewEmail, label: T[lang].genCat1EmailBtn };
+        if (allCat3) return { fn: buildCat3DocumentEmail, label: T[lang].genCat3EmailBtn };
+        return { fn: buildGenericEmail, label: T[lang].genGenericEmailBtn };
+      };
+
+      const openEmail = (companyEntry) => {
+        const { company, matches } = companyEntry;
+        const builder = pickEmailBuilder(matches);
+        const emailText = builder.fn(company, matches, lang);
+        setShowEmailFor({ company, matches, emailText, label: builder.label });
+        setEmailCopied(false);
+      };
+
+      const closeEmail = () => {
+        setShowEmailFor(null);
+        setEmailCopied(false);
+      };
+
+      const copyEmail = () => {
+        if (!showEmailFor) return;
+        navigator.clipboard.writeText(showEmailFor.emailText).then(() => {
+          setEmailCopied(true);
+          setTimeout(() => setEmailCopied(false), 2000);
+        });
+      };
+
+      const totalMatches = results.reduce((sum, r) => sum + r.matches.length, 0);
+
+      return React.createElement('div', { className: 'bg-white border border-stone-200 rounded-xl p-6 shadow-sm mb-6' },
+        // Title
+        React.createElement('div', { className: 'mb-5' },
+          React.createElement('h3', { className: 'text-base font-semibold text-stone-900 mb-1' }, T[lang].analysisTitle),
+          React.createElement('p', { className: 'text-sm text-stone-500' }, T[lang].analysisSubtitle)
+        ),
+
+        // Filters
+        React.createElement('div', { className: 'flex flex-wrap gap-4 mb-5 pb-5 border-b border-stone-200' },
+          React.createElement('div', null,
+            React.createElement('label', { className: 'block text-[11px] font-semibold text-stone-500 uppercase tracking-wider mb-1.5' }, T[lang].filterCategory),
+            React.createElement('div', { className: 'flex gap-1' },
+              [
+                { v: 'all', label: T[lang].filterAll, color: 'stone' },
+                { v: '1', label: T[lang].filterCat1, color: 'emerald' },
+                { v: '2', label: T[lang].filterCat2, color: 'amber' },
+                { v: '3', label: T[lang].filterCat3, color: 'rose' }
+              ].map(opt => React.createElement('button', {
+                key: opt.v,
+                onClick: () => setFilterCat(opt.v),
+                className: 'h-9 px-3 text-[12px] font-medium rounded border transition ' + (
+                  filterCat === opt.v
+                    ? (opt.color === 'stone' ? 'bg-stone-800 text-white border-stone-800' :
+                       opt.color === 'emerald' ? 'bg-emerald-600 text-white border-emerald-600' :
+                       opt.color === 'amber' ? 'bg-amber-600 text-white border-amber-600' :
+                       'bg-rose-600 text-white border-rose-600')
+                    : 'bg-white text-stone-700 border-stone-300 hover:bg-stone-50'
+                )
+              }, opt.label))
+            )
+          ),
+          React.createElement('div', null,
+            React.createElement('label', { className: 'block text-[11px] font-semibold text-stone-500 uppercase tracking-wider mb-1.5' }, T[lang].filterAnswer),
+            React.createElement('div', { className: 'flex gap-1' },
+              [
+                { v: 'all', label: T[lang].filterAll, cls: 'bg-stone-800 text-white border-stone-800' },
+                { v: 'yes', label: T[lang].filterAnsYes, cls: 'bg-emerald-100 text-emerald-800 border-emerald-300' },
+                { v: 'partial', label: T[lang].filterAnsPartial, cls: 'bg-amber-100 text-amber-800 border-amber-300' },
+                { v: 'no', label: T[lang].filterAnsNo, cls: 'bg-rose-100 text-rose-800 border-rose-300' }
+              ].map(opt => React.createElement('button', {
+                key: opt.v,
+                onClick: () => setFilterAns(opt.v),
+                className: 'h-9 px-3 text-[12px] font-medium rounded border transition ' + (
+                  filterAns === opt.v ? opt.cls : 'bg-white text-stone-700 border-stone-300 hover:bg-stone-50'
+                )
+              }, opt.label))
+            )
+          )
+        ),
+
+        // Stats
+        React.createElement('div', { className: 'flex gap-4 mb-4 text-[13px] text-stone-600' },
+          React.createElement('div', null,
+            React.createElement('span', { className: 'font-semibold text-stone-900' }, results.length),
+            React.createElement('span', { className: 'ml-1' }, T[lang].analysisCompanyCount)
+          ),
+          React.createElement('div', null,
+            React.createElement('span', { className: 'font-semibold text-stone-900' }, totalMatches),
+            React.createElement('span', { className: 'ml-1' }, T[lang].analysisMatchCount)
+          )
+        ),
+
+        // Table
+        results.length === 0
+          ? React.createElement('div', { className: 'text-center py-12 text-stone-400 text-sm' }, T[lang].analysisNoResults)
+          : React.createElement('div', { className: 'border border-stone-200 rounded-lg overflow-hidden' },
+              React.createElement('table', { className: 'w-full text-sm' },
+                React.createElement('thead', { className: 'bg-stone-50 border-b border-stone-200' },
+                  React.createElement('tr', null,
+                    React.createElement('th', { className: 'text-left px-4 py-3 text-[11px] font-semibold text-stone-500 uppercase tracking-wider' }, T[lang].analysisTableCompany),
+                    React.createElement('th', { className: 'text-left px-4 py-3 text-[11px] font-semibold text-stone-500 uppercase tracking-wider' }, T[lang].analysisTableMatches),
+                    React.createElement('th', { className: 'text-right px-4 py-3 text-[11px] font-semibold text-stone-500 uppercase tracking-wider' }, T[lang].analysisTableActions)
+                  )
+                ),
+                React.createElement('tbody', null,
+                  results.map(entry => {
+                    const { company, matches } = entry;
+                    const builder = pickEmailBuilder(matches);
+                    return React.createElement('tr', {
+                      key: company.id,
+                      className: 'border-b border-stone-100 hover:bg-stone-50 transition'
+                    },
+                      React.createElement('td', { className: 'px-4 py-3 align-top' },
+                        React.createElement('div', { className: 'font-medium text-stone-900' }, company.name || '—'),
+                        React.createElement('div', { className: 'text-[11px] text-stone-400 mt-0.5' }, company.id)
+                      ),
+                      React.createElement('td', { className: 'px-4 py-3 align-top' },
+                        React.createElement('div', { className: 'text-[12px] text-stone-600 mb-1' }, matches.length + ' ' + (lang === 'ka' ? 'კითხვა' : 'question(s)')),
+                        React.createElement('div', { className: 'space-y-0.5' },
+                          matches.slice(0, 3).map(m => {
+                            const qText = QUESTIONS[m.question_id] ? QUESTIONS[m.question_id][lang] : m.question_id;
+                            const cat = getCategory(m.question_id);
+                            const catColor = cat === 1 ? '#059669' : cat === 3 ? '#dc2626' : '#d97706';
+                            const ansIcon = m.answer === 'yes' ? '✓' : m.answer === 'no' ? '✗' : '◐';
+                            return React.createElement('div', { key: m.question_id, className: 'text-[11px] text-stone-600' },
+                              React.createElement('span', { style: { color: catColor, fontWeight: 600 } }, ansIcon + ' '),
+                              qText.length > 70 ? qText.substring(0, 70) + '…' : qText
+                            );
+                          }),
+                          matches.length > 3 ? React.createElement('div', { className: 'text-[11px] text-stone-400 italic' },
+                            (lang === 'ka' ? '...და კიდევ ' : '...and ') + (matches.length - 3) + (lang === 'ka' ? ' კითხვა' : ' more')
+                          ) : null
+                        )
+                      ),
+                      React.createElement('td', { className: 'px-4 py-3 text-right align-top whitespace-nowrap' },
+                        React.createElement('button', {
+                          onClick: () => openEmail(entry),
+                          className: 'h-9 px-3 text-[12px] font-medium text-blue-700 bg-blue-50 border border-blue-200 rounded hover:bg-blue-100 transition'
+                        }, builder.label)
+                      )
+                    );
+                  })
+                )
+              )
+            ),
+
+        // Email modal
+        showEmailFor ? React.createElement('div', {
+          className: 'fixed inset-0 bg-black/50 flex items-center justify-center px-4 py-6 z-50 overflow-y-auto fade-in',
+          onClick: closeEmail
+        },
+          React.createElement('div', {
+            className: 'bg-white rounded-2xl max-w-2xl w-full my-auto shadow-2xl overflow-hidden',
+            onClick: e => e.stopPropagation()
+          },
+            React.createElement('div', {
+              className: 'flex items-center justify-between px-6 py-4 border-b border-stone-100',
+              style: { background: 'linear-gradient(135deg, #0E5BA8, #1976D2)' }
+            },
+              React.createElement('h3', { className: 'text-base font-semibold text-white' }, showEmailFor.company.name || '—'),
+              React.createElement('button', {
+                onClick: closeEmail,
+                className: 'w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 text-white flex items-center justify-center transition'
+              }, '✕')
+            ),
+            React.createElement('div', { className: 'p-6' },
+              React.createElement('textarea', {
+                className: 'w-full h-96 p-4 text-[13px] font-mono border border-stone-200 rounded-lg bg-stone-50 resize-none',
+                value: showEmailFor.emailText,
+                readOnly: true
+              }),
+              React.createElement('div', { className: 'flex gap-2 justify-end mt-4' },
+                React.createElement('button', {
+                  onClick: closeEmail,
+                  className: 'h-10 px-4 text-sm text-stone-700 border border-stone-200 hover:bg-stone-50 rounded-lg transition'
+                }, T[lang].cancel),
+                React.createElement('button', {
+                  onClick: copyEmail,
+                  className: 'h-10 px-4 text-sm font-medium text-white rounded-lg shadow-sm hover:shadow',
+                  style: { background: emailCopied ? '#059669' : 'linear-gradient(135deg, #0E5BA8, #1976D2)' }
+                }, emailCopied ? '✓ ' + (lang === 'ka' ? 'დაკოპირდა' : 'Copied') : (lang === 'ka' ? '📋 დაკოპირება' : '📋 Copy'))
+              )
+            )
+          )
+        ) : null
+      );
+    }
+
+    // ============================================
     // CATEGORIES MANAGEMENT SCREEN
     // ============================================
     function CategoriesScreen({ companies, allAnswersByCompany, lang }) {
@@ -2466,7 +2951,10 @@
               }, resetting ? '...' : T[lang].catsResetConfirmBtn)
             )
           )
-        ) : null
+        ) : null,
+
+        // v9: Analysis section
+        React.createElement(AnalysisSection, { companies, allAnswersByCompany, lang })
       );
     }
 
