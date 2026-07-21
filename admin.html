@@ -398,6 +398,19 @@
 
     const SECTION_PREFIXES = ['q_2_', 'q_3_', 'q_4_', 'q_5_', 'q_6_', 'q_7_', 'q_8_'];
 
+    // v8b: Full list of contractor question IDs per section (from index.html)
+    // Used to show ALL questions in admin detail view (even if answer missing in DB)
+    const CONTRACTOR_QIDS_BY_SECTION = {
+      2: ['q_2_1','q_2_2','q_2_2_1','q_2_3','q_2_4','q_2_5','q_2_6','q_2_7','q_2_8','q_2_9','q_2_10','q_2_11','q_2_12','q_2_13','q_2_13_1','q_2_13_2','q_2_14','q_2_14_1','q_2_14_2','q_2_15','q_2_15_1','q_2_15_2'],
+      3: ['q_3_1','q_3_1_1','q_3_1_2','q_3_1_3','q_3_1_4','q_3_2','q_3_2_1','q_3_2_2','q_3_2_3'],
+      4: ['q_4_1','q_4_1_1','q_4_1_2','q_4_1_3','q_4_2','q_4_2_1','q_4_2_2','q_4_2_3','q_4_2_4','q_4_2_5','q_4_3','q_4_3_1','q_4_3_2','q_4_3_3','q_4_3_4','q_4_3_5','q_4_3_6','q_4_4','q_4_4_1','q_4_4_2','q_4_4_3','q_4_4_4','q_4_4_5','q_4_4_6'],
+      5: ['q_5_1','q_5_1_1','q_5_1_2','q_5_1_3','q_5_2','q_5_2_1','q_5_2_2','q_5_2_3','q_5_2_4','q_5_3','q_5_3_1','q_5_3_2','q_5_3_3','q_5_3_4'],
+      6: ['q_6_1','q_6_1_1','q_6_1_2','q_6_1_3'],
+      7: ['q_7_1','q_7_1_1','q_7_1_2','q_7_1_3'],
+      8: ['q_8_1','q_8_1_1','q_8_1_2','q_8_2']
+    };
+    const CONTRACTOR_SECTION_COUNTS = [22, 9, 24, 14, 4, 4, 4]; // for display
+
     // Default categories (initial state)
     const DEFAULT_CAT1 = ['q_2_2_1','q_2_3','q_2_6','q_2_7','q_2_9','q_2_11','q_2_13_1','q_3_1_1','q_3_1_2','q_3_1_3','q_3_1_4','q_3_2','q_3_2_3','q_4_1','q_4_1_2','q_4_1_3','q_4_2_1','q_4_2_3','q_4_2_4','q_4_3','q_4_3_1','q_4_3_2','q_4_3_3','q_4_3_4','q_4_3_5','q_4_4','q_4_4_3','q_4_4_6','q_5_1_1','q_5_1_2','q_5_1_3','q_5_2_2','q_5_2_3','q_5_3_4','q_6_1_2','q_6_1_3','q_8_1_2','q_8_2'];
     const DEFAULT_CAT3 = ['q_2_1','q_2_2','q_2_8','q_6_1_1','q_7_1_1','q_4_2_2','q_5_2_1','q_8_1_1'];
@@ -815,36 +828,51 @@
     }
 
     // Calculate per-section weighted stats (for all 8 sections: 1=admin, 2-8=contractor)
+    // v8b: iterate over ALL expected question IDs (from CONTRACTOR_QIDS_BY_SECTION), 
+    // treating missing DB entries as "no"
     function calcWeightedSectionStats(contractorAnswers, adminAnswers) {
       const stats = {};
+      const byQid = {};
+      (contractorAnswers || []).forEach(a => { byQid[a.question_id] = a.answer; });
       // Contractor sections (2-8)
       for (let sec = 2; sec <= 8; sec++) {
-        const secAnswers = contractorAnswers.filter(a => {
-          const parts = a.question_id.split('_');
-          return parts.length >= 2 && parseInt(parts[1]) === sec;
-        });
+        const expectedIds = (typeof CONTRACTOR_QIDS_BY_SECTION !== 'undefined' && CONTRACTOR_QIDS_BY_SECTION[sec]) 
+          ? CONTRACTOR_QIDS_BY_SECTION[sec] 
+          : (contractorAnswers || []).filter(a => {
+              const p = a.question_id.split('_');
+              return p.length >= 2 && parseInt(p[1]) === sec;
+            }).map(a => a.question_id);
         let sum = 0;
-        secAnswers.forEach(a => {
-          const info = QUESTION_WEIGHTS[a.question_id];
-          if (info) sum += info.weight * answerValue(a.answer);
+        expectedIds.forEach(qid => {
+          const info = QUESTION_WEIGHTS[qid];
+          if (!info) return;
+          const ans = byQid[qid] || 'no'; // missing = no
+          sum += info.weight * answerValue(ans);
         });
         const maxW = SECTION_MAX_WEIGHTS[sec];
         stats[sec] = {
           weightedSum: Math.round(sum * 1000) / 10,
           maxWeight: maxW * 100,
-          score: maxW > 0 ? Math.round((sum / maxW) * 1000) / 10 : 0
+          score: maxW > 0 ? Math.round((sum / maxW) * 1000) / 10 : 0,
+          questionCount: expectedIds.length
         };
       }
       // Admin section (1)
       let adminSum = 0;
-      (adminAnswers || []).forEach(a => {
-        const info = QUESTION_WEIGHTS[a.question_id];
-        if (info) adminSum += info.weight * answerValue(a.answer);
+      const adminByQid = {};
+      (adminAnswers || []).forEach(a => { adminByQid[a.question_id] = a.answer; });
+      const adminExpected = (typeof ADMIN_QUESTION_IDS !== 'undefined') ? ADMIN_QUESTION_IDS : [];
+      adminExpected.forEach(qid => {
+        const info = QUESTION_WEIGHTS[qid];
+        if (!info) return;
+        const ans = adminByQid[qid] || 'no';
+        adminSum += info.weight * answerValue(ans);
       });
       stats[1] = {
         weightedSum: Math.round(adminSum * 1000) / 10,
         maxWeight: SECTION_MAX_WEIGHTS[1] * 100,
-        score: SECTION_MAX_WEIGHTS[1] > 0 ? Math.round((adminSum / SECTION_MAX_WEIGHTS[1]) * 1000) / 10 : 0
+        score: SECTION_MAX_WEIGHTS[1] > 0 ? Math.round((adminSum / SECTION_MAX_WEIGHTS[1]) * 1000) / 10 : 0,
+        questionCount: adminExpected.length
       };
       // Overall score = sum of all weighted contributions × 100
       let overallSum = 0;
@@ -1299,14 +1327,23 @@
       const weightedStats = calcWeightedSectionStats(answers, adminAnswers); // v8
       const formatDate = (d) => d ? new Date(d).toLocaleDateString(lang === 'ka' ? 'ka-GE' : 'en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : '—';
 
-      // Group answers by section
-      const answersBySection = SECTION_PREFIXES.map(() => []);
-      answers.forEach(a => {
-        const idx = getSectionIndex(a.question_id);
-        if (idx >= 0) answersBySection[idx].push(a);
+      // Group answers by section — v8b: ensure ALL expected questions are present
+      const answersBySection = SECTION_PREFIXES.map((_, sIdx) => {
+        const secNum = sIdx + 2;
+        const expectedIds = CONTRACTOR_QIDS_BY_SECTION[secNum] || [];
+        const existingByQid = {};
+        answers.forEach(a => {
+          if (getSectionIndex(a.question_id) === sIdx) existingByQid[a.question_id] = a;
+        });
+        // Return in canonical order; fill missing with default "no"
+        return expectedIds.map(qid => existingByQid[qid] || {
+          question_id: qid,
+          answer: 'no',
+          partial_text: null,
+          was_auto_suggested: false,
+          _missing: true
+        });
       });
-      // Sort within sections by question id
-      answersBySection.forEach(arr => arr.sort((a, b) => a.question_id.localeCompare(b.question_id)));
 
       // v8: Handler for changing admin answer
       const handleAdminAnswerChange = async (qid, newAnswer) => {
@@ -1524,7 +1561,8 @@
               },
                 React.createElement('span', { className: 'text-[13px] font-medium text-stone-800 flex-1' }, '1. ' + ADMIN_SECTION_NAME[lang]),
                 React.createElement('div', { className: 'flex items-center gap-4' },
-                  React.createElement('span', { className: 'text-[13px] text-stone-600 tabular-nums' }, s.weightedSum.toFixed(1) + ' / ' + s.maxWeight.toFixed(1)),
+                  React.createElement('span', { className: 'text-[11px] text-stone-400 tabular-nums w-16 text-right' }, s.questionCount + ' ' + (lang === 'ka' ? 'კითხვა' : 'q.')),
+                  React.createElement('span', { className: 'text-[13px] text-stone-600 tabular-nums w-24 text-right' }, s.weightedSum.toFixed(1) + ' / ' + s.maxWeight.toFixed(1)),
                   React.createElement('span', { className: 'text-[13px] font-semibold tabular-nums w-14 text-right', style: { color } }, s.score.toFixed(1) + '%')
                 )
               );
@@ -1540,7 +1578,8 @@
               },
                 React.createElement('span', { className: 'text-[13px] font-medium text-stone-800 flex-1' }, (i + 2) + '. ' + name),
                 React.createElement('div', { className: 'flex items-center gap-4' },
-                  React.createElement('span', { className: 'text-[13px] text-stone-600 tabular-nums' }, s.weightedSum.toFixed(1) + ' / ' + s.maxWeight.toFixed(1)),
+                  React.createElement('span', { className: 'text-[11px] text-stone-400 tabular-nums w-16 text-right' }, s.questionCount + ' ' + (lang === 'ka' ? 'კითხვა' : 'q.')),
+                  React.createElement('span', { className: 'text-[13px] text-stone-600 tabular-nums w-24 text-right' }, s.weightedSum.toFixed(1) + ' / ' + s.maxWeight.toFixed(1)),
                   React.createElement('span', { className: 'text-[13px] font-semibold tabular-nums w-14 text-right', style: { color } }, s.score.toFixed(1) + '%')
                 )
               );
@@ -1550,7 +1589,8 @@
               React.createElement('div', { className: 'flex items-center justify-between py-2 px-3' },
                 React.createElement('span', { className: 'text-[14px] font-bold text-stone-900 flex-1' }, T[lang].totalRow),
                 React.createElement('div', { className: 'flex items-center gap-4' },
-                  React.createElement('span', { className: 'text-[13px] text-stone-700 tabular-nums font-semibold' }, weightedStats.overall.weightedSum.toFixed(1) + ' / 100.0'),
+                  React.createElement('span', { className: 'text-[11px] text-stone-500 tabular-nums w-16 text-right font-semibold' }, '88 ' + (lang === 'ka' ? 'კითხვა' : 'q.')),
+                  React.createElement('span', { className: 'text-[13px] text-stone-700 tabular-nums w-24 text-right font-semibold' }, weightedStats.overall.weightedSum.toFixed(1) + ' / 100.0'),
                   React.createElement('span', {
                     className: 'text-[15px] font-bold tabular-nums w-14 text-right',
                     style: { color: weightedStats.overall.score >= 70 ? '#059669' : weightedStats.overall.score >= 40 ? '#d97706' : '#dc2626' }
