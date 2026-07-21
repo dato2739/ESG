@@ -53,6 +53,23 @@
       en: ['Quality', 'Human Rights', 'Labour', 'Environment', 'Anti-Corruption', 'Health & Safety', 'Climate Change']
     };
 
+    // Admin section (general/commercial) — v8
+    const ADMIN_SECTION_NAME = {
+      ka: 'ზოგადი / კომერციული',
+      en: 'General / Commercial'
+    };
+
+    // Admin questions (7) — general/commercial (q_1_*)
+    const ADMIN_QUESTIONS = {
+      'q_1_1': { ka: 'ფასის დონე', en: 'Price level' },
+      'q_1_2': { ka: 'რეაგირების დრო', en: 'Response time' },
+      'q_1_3': { ka: 'წარმოების / მიწოდების დრო', en: 'Manufacturing / delivery time' },
+      'q_1_4': { ka: 'წარმოების სიმძლავრეები', en: 'Manufacturing capacities' },
+      'q_1_5': { ka: 'პასუხების ზოგადი ხარისხი', en: 'General quality of the responses' },
+      'q_1_6': { ka: 'თანამშრომლობის მზაობა', en: 'Willingness to cooperate' },
+      'q_1_7': { ka: 'მოქნილობა და მხარდაჭერა', en: 'Flexibility and support' }
+    };
+
     // ============================================
     // TRANSLATIONS
     // ============================================
@@ -200,7 +217,22 @@
         historyPdfBtn: '📄 წინა ვერსიის PDF',
         historyLoading: 'წინა ვერსიის ჩამოტვირთვა...',
         historyNotFound: 'წინა ვერსია არ მოიძებნა',
-        historyPdfTitle: '(წინა ვერსია)'
+        historyPdfTitle: '(წინა ვერსია)',
+        // Weighted scoring (v8)
+        scoreOverviewTitle: 'შეფასება (ჯამური)',
+        detailedInfoTitle: 'დეტალური ინფორმაცია',
+        totalRow: 'ჯამი',
+        maxScore: 'მაქს.',
+        adminSectionTitle: 'ზოგადი / კომერციული (ადმინი)',
+        adminSectionSubtitle: '7 კითხვას ავსებს ადმინი — შეაფასეთ ეს კომპანია',
+        contractorPdfBtn: '📄 კონტრაქტორის PDF',
+        fullPdfBtn: '📊 სრული PDF (ადმინი)',
+        contractorHistoryPdfBtn: '📄 კონტრ. წინა ვერსია',
+        fullHistoryPdfBtn: '📊 სრული წინა ვერსია',
+        answerYes: 'დიახ',
+        answerPartial: 'ნაწილობრივ',
+        answerNo: 'არა',
+        saved: 'შენახულია'
       },
       en: {
         // Login
@@ -345,7 +377,22 @@
         historyPdfBtn: '📄 Previous version PDF',
         historyLoading: 'Loading previous version...',
         historyNotFound: 'No previous version found',
-        historyPdfTitle: '(Previous version)'
+        historyPdfTitle: '(Previous version)',
+        // Weighted scoring (v8)
+        scoreOverviewTitle: 'Assessment (summary)',
+        detailedInfoTitle: 'Detailed information',
+        totalRow: 'Total',
+        maxScore: 'max.',
+        adminSectionTitle: 'General / Commercial (Admin)',
+        adminSectionSubtitle: '7 questions filled by admin — rate this company',
+        contractorPdfBtn: '📄 Contractor PDF',
+        fullPdfBtn: '📊 Full PDF (Admin)',
+        contractorHistoryPdfBtn: '📄 Contr. previous version',
+        fullHistoryPdfBtn: '📊 Full previous version',
+        answerYes: 'Yes',
+        answerPartial: 'Partial',
+        answerNo: 'No',
+        saved: 'Saved'
       }
     };
 
@@ -583,6 +630,59 @@
     }
 
     // ============================================
+    // ADMIN ANSWERS (v8) — general/commercial section
+    // ============================================
+    const ADMIN_QUESTION_IDS = ['q_1_1', 'q_1_2', 'q_1_3', 'q_1_4', 'q_1_5', 'q_1_6', 'q_1_7'];
+
+    async function loadAdminAnswers(companyId) {
+      const { data, error } = await supabase
+        .from('esg_admin_answers')
+        .select('*')
+        .eq('company_id', companyId);
+      if (error) return { data: null, error };
+      return { data: data || [], error: null };
+    }
+
+    async function loadAdminHistoryAnswers(companyId) {
+      const { data, error } = await supabase
+        .from('esg_admin_answers_history')
+        .select('*')
+        .eq('company_id', companyId);
+      if (error) return { data: null, error };
+      return { data: data || [], error: null };
+    }
+
+    // Ensure default admin answers exist (all "no") — called when opening a company's detail view
+    async function ensureAdminDefaults(companyId) {
+      const { data: existing } = await loadAdminAnswers(companyId);
+      const existingIds = new Set((existing || []).map(a => a.question_id));
+      const missing = ADMIN_QUESTION_IDS.filter(qid => !existingIds.has(qid));
+      if (missing.length === 0) return existing || [];
+      const rows = missing.map(qid => ({
+        company_id: companyId,
+        question_id: qid,
+        answer: 'no'
+      }));
+      const { error } = await supabase.from('esg_admin_answers').insert(rows);
+      if (error) console.error('Admin defaults insert error:', error);
+      // Reload
+      const { data: fresh } = await loadAdminAnswers(companyId);
+      return fresh || [];
+    }
+
+    async function saveAdminAnswer(companyId, questionId, answer) {
+      const { error } = await supabase
+        .from('esg_admin_answers')
+        .upsert({
+          company_id: companyId,
+          question_id: questionId,
+          answer,
+          updated_at: new Date().toISOString()
+        }, { onConflict: 'company_id,question_id' });
+      return { error };
+    }
+
+    // ============================================
     // CATEGORY MANAGEMENT (Supabase-backed)
     // ============================================
     async function loadCategoriesFromDb() {
@@ -663,6 +763,100 @@
         ...s,
         score: s.total > 0 ? Math.round(((s.yes + s.partial * 0.5) / s.total) * 100) : 0
       }));
+    }
+
+    // ============================================
+    // WEIGHTED SCORING (v8) — based on Excel weights
+    // ============================================
+    let QUESTION_WEIGHTS = {}; // { qid: weight } — loaded from DB
+
+    async function loadWeights() {
+      const { data, error } = await supabase
+        .from('esg_question_weights')
+        .select('*');
+      if (error || !data) return {};
+      const map = {};
+      data.forEach(w => { map[w.question_id] = { weight: parseFloat(w.weight), isAdmin: w.is_admin }; });
+      QUESTION_WEIGHTS = map;
+      return map;
+    }
+
+    function answerValue(ans) {
+      if (ans === 'yes') return 1.0;
+      if (ans === 'partial') return 0.5;
+      return 0.0; // 'no' or missing
+    }
+
+    // Section max weights (must match Excel sums)
+    const SECTION_MAX_WEIGHTS = {
+      1: 0.13, // general/commercial (admin)
+      2: 0.27, // Quality
+      3: 0.12, // Human Rights
+      4: 0.12, // Labour
+      5: 0.12, // Environment
+      6: 0.08, // Anti-Corruption
+      7: 0.08, // H&S
+      8: 0.08  // Climate
+    };
+
+    // Compute weighted score for a set of answers
+    // Returns: { score: 0..100, weightedSum: 0..maxWeight, maxWeight: 0..1 }
+    function calcWeightedScore(answers) {
+      let sum = 0;
+      let maxW = 0;
+      answers.forEach(a => {
+        const info = QUESTION_WEIGHTS[a.question_id];
+        if (!info) return;
+        sum += info.weight * answerValue(a.answer);
+        maxW += info.weight;
+      });
+      const score = maxW > 0 ? Math.round((sum / maxW) * 1000) / 10 : 0;
+      return { score, weightedSum: Math.round(sum * 1000) / 10, maxWeight: Math.round(maxW * 1000) / 10 };
+    }
+
+    // Calculate per-section weighted stats (for all 8 sections: 1=admin, 2-8=contractor)
+    function calcWeightedSectionStats(contractorAnswers, adminAnswers) {
+      const stats = {};
+      // Contractor sections (2-8)
+      for (let sec = 2; sec <= 8; sec++) {
+        const secAnswers = contractorAnswers.filter(a => {
+          const parts = a.question_id.split('_');
+          return parts.length >= 2 && parseInt(parts[1]) === sec;
+        });
+        let sum = 0;
+        secAnswers.forEach(a => {
+          const info = QUESTION_WEIGHTS[a.question_id];
+          if (info) sum += info.weight * answerValue(a.answer);
+        });
+        const maxW = SECTION_MAX_WEIGHTS[sec];
+        stats[sec] = {
+          weightedSum: Math.round(sum * 1000) / 10,
+          maxWeight: maxW * 100,
+          score: maxW > 0 ? Math.round((sum / maxW) * 1000) / 10 : 0
+        };
+      }
+      // Admin section (1)
+      let adminSum = 0;
+      (adminAnswers || []).forEach(a => {
+        const info = QUESTION_WEIGHTS[a.question_id];
+        if (info) adminSum += info.weight * answerValue(a.answer);
+      });
+      stats[1] = {
+        weightedSum: Math.round(adminSum * 1000) / 10,
+        maxWeight: SECTION_MAX_WEIGHTS[1] * 100,
+        score: SECTION_MAX_WEIGHTS[1] > 0 ? Math.round((adminSum / SECTION_MAX_WEIGHTS[1]) * 1000) / 10 : 0
+      };
+      // Overall score = sum of all weighted contributions × 100
+      let overallSum = 0;
+      for (let sec = 1; sec <= 8; sec++) {
+        overallSum += stats[sec].weightedSum;
+      }
+      stats.overall = {
+        weightedSum: Math.round(overallSum * 10) / 10,
+        maxWeight: 100,
+        score: Math.round(overallSum * 10) / 10
+      };
+      return stats;
     }
     // ============================================
     // UI COMPONENTS
@@ -1074,6 +1268,8 @@
       const [emailCopied, setEmailCopied] = useState(false);
       const [historyAnswers, setHistoryAnswers] = useState(null); // null = not loaded yet, [] = no history
       const [historyPdfLoading, setHistoryPdfLoading] = useState(false);
+      const [adminAnswers, setAdminAnswers] = useState([]); // v8: admin general/commercial answers
+      const [savingAdmin, setSavingAdmin] = useState({}); // { qid: true } while saving
 
       useEffect(() => {
         (async () => {
@@ -1082,12 +1278,14 @@
           const { data: a } = await supabase.from('esg_answers').select('*').eq('company_id', companyId);
           setCompany(c);
           setAnswers(a || []);
+          // Load weights (v8)
+          await loadWeights();
+          // Load admin answers (create defaults if needed)
+          const adminData = await ensureAdminDefaults(companyId);
+          setAdminAnswers(adminData);
           // Load history (if any)
-          console.log('[ESG DEBUG] Loading history for company:', companyId);
           const histResult = await loadHistoryAnswers(companyId);
-          console.log('[ESG DEBUG] History result:', histResult);
           const hist = histResult && histResult.data ? histResult.data : [];
-          console.log('[ESG DEBUG] History count:', hist.length);
           setHistoryAnswers(hist);
           setLoading(false);
         })();
@@ -1098,6 +1296,7 @@
 
       const stats = calcStats(answers);
       const sectionStats = calcSectionStats(answers);
+      const weightedStats = calcWeightedSectionStats(answers, adminAnswers); // v8
       const formatDate = (d) => d ? new Date(d).toLocaleDateString(lang === 'ka' ? 'ka-GE' : 'en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : '—';
 
       // Group answers by section
@@ -1108,6 +1307,30 @@
       });
       // Sort within sections by question id
       answersBySection.forEach(arr => arr.sort((a, b) => a.question_id.localeCompare(b.question_id)));
+
+      // v8: Handler for changing admin answer
+      const handleAdminAnswerChange = async (qid, newAnswer) => {
+        setSavingAdmin(prev => ({ ...prev, [qid]: true }));
+        // Optimistic update
+        setAdminAnswers(prev => {
+          const idx = prev.findIndex(a => a.question_id === qid);
+          if (idx >= 0) {
+            const copy = [...prev];
+            copy[idx] = { ...copy[idx], answer: newAnswer };
+            return copy;
+          }
+          return [...prev, { company_id: companyId, question_id: qid, answer: newAnswer }];
+        });
+        const { error } = await saveAdminAnswer(companyId, qid, newAnswer);
+        setSavingAdmin(prev => {
+          const copy = { ...prev };
+          delete copy[qid];
+          return copy;
+        });
+        if (error) {
+          console.error('Admin answer save error:', error);
+        }
+      };
 
       const downloadPdf = async () => {
         setPdfLoading(true);
@@ -1281,36 +1504,142 @@
               React.createElement('div', { className: 'text-[11px] text-stone-400 uppercase tracking-wider font-medium' }, T[lang].totalScore),
               React.createElement('div', {
                 className: 'text-3xl font-semibold',
-                style: { color: stats.score >= 70 ? '#059669' : stats.score >= 40 ? '#d97706' : '#dc2626' }
-              }, stats.score + '%'),
-              React.createElement('div', { className: 'text-[11px] text-stone-500' }, stats.yes + ' ' + T[lang].yesShort + ' • ' + stats.partial + ' ' + T[lang].partialShort + ' • ' + stats.no + ' ' + T[lang].noShort)
+                style: { color: weightedStats.overall.score >= 70 ? '#059669' : weightedStats.overall.score >= 40 ? '#d97706' : '#dc2626' }
+              }, weightedStats.overall.score.toFixed(1) + '%'),
+              React.createElement('div', { className: 'text-[11px] text-stone-500' }, weightedStats.overall.weightedSum.toFixed(1) + ' / 100.0')
             )
           )
         ),
 
-        // Section scores
-        React.createElement('div', { className: 'grid grid-cols-1 lg:grid-cols-[1fr_2fr] gap-5 mb-5' },
-          React.createElement('div', { className: 'bg-white border border-stone-200 rounded-xl p-5 shadow-sm' },
-            React.createElement('h3', { className: 'text-sm font-semibold text-stone-900 mb-4' }, T[lang].sectionScores),
-            React.createElement(SectionScoreBars, { sectionStats, lang })
-          ),
-          React.createElement('div', { className: 'bg-white border border-stone-200 rounded-xl p-5 shadow-sm' },
-            React.createElement('h3', { className: 'text-sm font-semibold text-stone-900 mb-4' }, T[lang].answerDistribution),
-            React.createElement(AnswerDistribution, { stats, lang })
+        // v8: Weighted Score Overview
+        React.createElement('div', { className: 'bg-white border border-stone-200 rounded-xl p-5 shadow-sm mb-5' },
+          React.createElement('h3', { className: 'text-sm font-semibold text-stone-900 mb-4' }, T[lang].scoreOverviewTitle),
+          React.createElement('div', { className: 'space-y-1' },
+            // Admin section (1) — general/commercial — FIRST
+            (() => {
+              const s = weightedStats[1];
+              const color = s.score >= 70 ? '#059669' : s.score >= 40 ? '#d97706' : '#dc2626';
+              return React.createElement('div', {
+                className: 'flex items-center justify-between py-2.5 px-3 rounded hover:bg-stone-50 border-l-4 border-blue-400 bg-blue-50/30'
+              },
+                React.createElement('span', { className: 'text-[13px] font-medium text-stone-800 flex-1' }, '1. ' + ADMIN_SECTION_NAME[lang]),
+                React.createElement('div', { className: 'flex items-center gap-4' },
+                  React.createElement('span', { className: 'text-[13px] text-stone-600 tabular-nums' }, s.weightedSum.toFixed(1) + ' / ' + s.maxWeight.toFixed(1)),
+                  React.createElement('span', { className: 'text-[13px] font-semibold tabular-nums w-14 text-right', style: { color } }, s.score.toFixed(1) + '%')
+                )
+              );
+            })(),
+            // Contractor sections (2-8)
+            SECTION_NAMES[lang].map((name, i) => {
+              const secNum = i + 2;
+              const s = weightedStats[secNum];
+              const color = s.score >= 70 ? '#059669' : s.score >= 40 ? '#d97706' : '#dc2626';
+              return React.createElement('div', {
+                key: secNum,
+                className: 'flex items-center justify-between py-2.5 px-3 rounded hover:bg-stone-50'
+              },
+                React.createElement('span', { className: 'text-[13px] font-medium text-stone-800 flex-1' }, (i + 2) + '. ' + name),
+                React.createElement('div', { className: 'flex items-center gap-4' },
+                  React.createElement('span', { className: 'text-[13px] text-stone-600 tabular-nums' }, s.weightedSum.toFixed(1) + ' / ' + s.maxWeight.toFixed(1)),
+                  React.createElement('span', { className: 'text-[13px] font-semibold tabular-nums w-14 text-right', style: { color } }, s.score.toFixed(1) + '%')
+                )
+              );
+            }),
+            // Total row
+            React.createElement('div', { className: 'border-t-2 border-stone-300 mt-2 pt-3' },
+              React.createElement('div', { className: 'flex items-center justify-between py-2 px-3' },
+                React.createElement('span', { className: 'text-[14px] font-bold text-stone-900 flex-1' }, T[lang].totalRow),
+                React.createElement('div', { className: 'flex items-center gap-4' },
+                  React.createElement('span', { className: 'text-[13px] text-stone-700 tabular-nums font-semibold' }, weightedStats.overall.weightedSum.toFixed(1) + ' / 100.0'),
+                  React.createElement('span', {
+                    className: 'text-[15px] font-bold tabular-nums w-14 text-right',
+                    style: { color: weightedStats.overall.score >= 70 ? '#059669' : weightedStats.overall.score >= 40 ? '#d97706' : '#dc2626' }
+                  }, weightedStats.overall.score.toFixed(1) + '%')
+                )
+              )
+            )
           )
         ),
 
-        // All answers grouped by section
+        // v8: Detailed information (Full answers with weighted scores + admin section)
         React.createElement('div', { className: 'bg-white border border-stone-200 rounded-xl p-5 shadow-sm' },
-          React.createElement('h3', { className: 'text-sm font-semibold text-stone-900 mb-4' }, T[lang].fullAnswers),
+          React.createElement('h3', { className: 'text-sm font-semibold text-stone-900 mb-4' }, T[lang].detailedInfoTitle),
+
+          // Admin section — FIRST
+          React.createElement('div', { className: 'mb-6' },
+            React.createElement('h4', {
+              className: 'text-[13px] font-semibold text-blue-700 mb-1 flex items-center justify-between'
+            },
+              React.createElement('span', null, '1. ' + ADMIN_SECTION_NAME[lang]),
+              React.createElement('span', { className: 'text-xs text-stone-500 font-normal tabular-nums' },
+                weightedStats[1].weightedSum.toFixed(1) + ' / ' + weightedStats[1].maxWeight.toFixed(1) + '  ·  ' + weightedStats[1].score.toFixed(1) + '%'
+              )
+            ),
+            React.createElement('p', { className: 'text-[11px] text-stone-500 mb-2 pb-2 border-b border-stone-200' }, T[lang].adminSectionSubtitle),
+            React.createElement('div', { className: 'space-y-1.5' },
+              ADMIN_QUESTION_IDS.map(qid => {
+                const ans = adminAnswers.find(a => a.question_id === qid);
+                const currentAnswer = ans ? ans.answer : 'no';
+                const qText = ADMIN_QUESTIONS[qid] ? ADMIN_QUESTIONS[qid][lang] : qid;
+                const winfo = QUESTION_WEIGHTS[qid];
+                const wPct = winfo ? winfo.weight * 100 : 0;
+                const earned = wPct * answerValue(currentAnswer);
+                const isSaving = savingAdmin[qid];
+
+                const btnBase = 'h-7 px-2.5 text-[11px] font-medium rounded border transition';
+                const btnActive = {
+                  yes: 'bg-emerald-100 text-emerald-800 border-emerald-300',
+                  partial: 'bg-amber-100 text-amber-800 border-amber-300',
+                  no: 'bg-rose-100 text-rose-800 border-rose-300'
+                };
+                const btnInactive = 'bg-stone-50 text-stone-500 border-stone-200 hover:bg-stone-100';
+
+                return React.createElement('div', {
+                  key: qid,
+                  className: 'py-2.5 px-3 rounded border-b border-stone-50 last:border-0 flex gap-3 items-center'
+                },
+                  React.createElement('div', { className: 'flex-1 min-w-0' },
+                    React.createElement('div', { className: 'text-[13px] text-stone-800 leading-snug' }, qText),
+                    React.createElement('div', { className: 'text-[10px] text-stone-400 mt-0.5' }, qid)
+                  ),
+                  React.createElement('div', { className: 'flex gap-1 flex-shrink-0' },
+                    React.createElement('button', {
+                      onClick: () => handleAdminAnswerChange(qid, 'yes'),
+                      disabled: isSaving,
+                      className: btnBase + ' ' + (currentAnswer === 'yes' ? btnActive.yes : btnInactive)
+                    }, T[lang].answerYes),
+                    React.createElement('button', {
+                      onClick: () => handleAdminAnswerChange(qid, 'partial'),
+                      disabled: isSaving,
+                      className: btnBase + ' ' + (currentAnswer === 'partial' ? btnActive.partial : btnInactive)
+                    }, T[lang].answerPartial),
+                    React.createElement('button', {
+                      onClick: () => handleAdminAnswerChange(qid, 'no'),
+                      disabled: isSaving,
+                      className: btnBase + ' ' + (currentAnswer === 'no' ? btnActive.no : btnInactive)
+                    }, T[lang].answerNo)
+                  ),
+                  React.createElement('span', {
+                    className: 'text-[11px] text-stone-600 tabular-nums w-20 text-right flex-shrink-0'
+                  }, earned.toFixed(1) + ' / ' + wPct.toFixed(1))
+                );
+              })
+            )
+          ),
+
+          // Contractor sections
           answersBySection.map((arr, sIdx) => {
             if (arr.length === 0) return null;
+            const secNum = sIdx + 2;
+            const ws = weightedStats[secNum];
             return React.createElement('div', { key: sIdx, className: 'mb-6 last:mb-0' },
               React.createElement('h4', {
                 className: 'text-[13px] font-semibold text-blue-700 mb-2 pb-2 border-b border-stone-200 flex items-center justify-between'
               },
-                React.createElement('span', null, (sIdx + 1) + '. ' + SECTION_NAMES[lang][sIdx]),
-                React.createElement('span', { className: 'text-xs text-stone-400 font-normal' }, sectionStats[sIdx].score + '%')
+                React.createElement('span', null, (sIdx + 2) + '. ' + SECTION_NAMES[lang][sIdx]),
+                React.createElement('span', { className: 'text-xs text-stone-500 font-normal tabular-nums' },
+                  ws.weightedSum.toFixed(1) + ' / ' + ws.maxWeight.toFixed(1) + '  ·  ' + ws.score.toFixed(1) + '%'
+                )
               ),
               React.createElement('div', { className: 'space-y-1.5' },
                 arr.map(a => {
@@ -1322,6 +1651,9 @@
                   const auto = a.was_auto_suggested ? React.createElement('span', { className: 'text-[10px] text-stone-400 ml-1.5' }, '(' + T[lang].autoFilled + ')') : null;
                   const isPartial = a.answer === 'partial';
                   const hasPartialText = a.partial_text && a.partial_text.trim();
+                  const winfo = QUESTION_WEIGHTS[a.question_id];
+                  const wPct = winfo ? winfo.weight * 100 : 0;
+                  const earned = wPct * answerValue(a.answer);
                   return React.createElement('div', {
                     key: a.question_id,
                     className: 'py-2.5 px-3 hover:bg-stone-50 rounded border-b border-stone-50 last:border-0'
@@ -1332,9 +1664,11 @@
                         React.createElement('div', { className: 'text-[10px] text-stone-300 font-mono' }, a.question_id)
                       ),
                       React.createElement('span', { className: 'text-[11px] font-semibold px-2 py-1 rounded border whitespace-nowrap flex-shrink-0 mt-0.5 ' + ansColor }, ansLabel),
+                      React.createElement('span', {
+                        className: 'text-[11px] text-stone-600 tabular-nums w-20 text-right flex-shrink-0 mt-1'
+                      }, earned.toFixed(2) + ' / ' + wPct.toFixed(2)),
                       auto
                     ),
-                    // Highlighted partial-answer box
                     isPartial ? React.createElement('div', {
                       className: 'mt-2 ml-0 p-3 bg-amber-50 border-l-4 border-amber-400 rounded-r-md'
                     },
