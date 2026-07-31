@@ -184,6 +184,8 @@
         emailSignPhone: '577 35 00 90',
         // Categories management page
         catsBtn: '📊 კატეგორიების მართვა',
+        analysisTabBtn: '📧 ანალიზი და მეილი',
+        priorityTabBtn: '🎯 პრიორიტეტული სიები',
         catsPageTitle: 'კითხვების კატეგორიების მართვა',
         catsPageSubtitle: 'გადაიტანეთ კითხვები კატეგორიებს შორის (drag-and-drop). ცვლილებები აისახება მთელ აპში.',
         catsSave: '💾 ცვლილებების შენახვა',
@@ -388,6 +390,8 @@
         emailSignPhone: '577 35 00 90',
         // Categories management page
         catsBtn: '📊 Categories management',
+        analysisTabBtn: '📧 Analysis & Email',
+        priorityTabBtn: '🎯 Priority lists',
         catsPageTitle: 'Question categories management',
         catsPageSubtitle: 'Drag and drop questions between categories. Changes apply across the app.',
         catsSave: '💾 Save changes',
@@ -1093,6 +1097,14 @@
               onClick: () => onNavigate('categories'),
               className: `text-xs font-medium px-3 py-1.5 rounded-md transition ${currentView === 'categories' ? 'bg-blue-50 text-blue-700' : 'text-stone-600 hover:text-stone-900 hover:bg-stone-100'}`
             }, T[lang].catsBtn),
+            React.createElement('button', {
+              onClick: () => onNavigate('analysis'),
+              className: `text-xs font-medium px-3 py-1.5 rounded-md transition ${currentView === 'analysis' ? 'bg-blue-50 text-blue-700' : 'text-stone-600 hover:text-stone-900 hover:bg-stone-100'}`
+            }, T[lang].analysisTabBtn),
+            React.createElement('button', {
+              onClick: () => onNavigate('priority'),
+              className: `text-xs font-medium px-3 py-1.5 rounded-md transition ${currentView === 'priority' ? 'bg-blue-50 text-blue-700' : 'text-stone-600 hover:text-stone-900 hover:bg-stone-100'}`
+            }, T[lang].priorityTabBtn),
             React.createElement(LangSwitch, { lang, setLang }),
             React.createElement('button', {
               onClick: onLogout,
@@ -3456,12 +3468,24 @@
               }, resetting ? '...' : T[lang].catsResetConfirmBtn)
             )
           )
-        ) : null,
+        ) : null
+      );
+    }
 
-        // v9: Analysis section
-        React.createElement(AnalysisSection, { companies, allAnswersByCompany, lang }),
+    // ============================================
+    // v10b: ANALYSIS SCREEN (wrapper for AnalysisSection)
+    // ============================================
+    function AnalysisScreen({ companies, allAnswersByCompany, allAdminAnswersByCompany, lang }) {
+      return React.createElement('div', { className: 'fade-in' },
+        React.createElement(AnalysisSection, { companies, allAnswersByCompany, lang })
+      );
+    }
 
-        // v10: Priority lists (3 tables)
+    // ============================================
+    // v10b: PRIORITY SCREEN (wrapper for PrioritySection)
+    // ============================================
+    function PriorityScreen({ companies, allAnswersByCompany, allAdminAnswersByCompany, lang }) {
+      return React.createElement('div', { className: 'fade-in' },
         React.createElement(PrioritySection, { companies, allAnswersByCompany, allAdminAnswersByCompany, lang })
       );
     }
@@ -3538,11 +3562,19 @@
                 ? React.createElement(CategoriesScreen, {
                     companies, allAnswersByCompany, allAdminAnswersByCompany, lang
                   })
-                : React.createElement(CompanyDetailScreen, {
-                    companyId: selectedId,
-                    onBack: () => setView('list'),
-                    lang
-                  })
+                : view === 'analysis'
+                  ? React.createElement(AnalysisScreen, {
+                      companies, allAnswersByCompany, allAdminAnswersByCompany, lang
+                    })
+                  : view === 'priority'
+                    ? React.createElement(PriorityScreen, {
+                        companies, allAnswersByCompany, allAdminAnswersByCompany, lang
+                      })
+                    : React.createElement(CompanyDetailScreen, {
+                        companyId: selectedId,
+                        onBack: () => setView('list'),
+                        lang
+                      })
         )
       );
     }
