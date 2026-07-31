@@ -278,7 +278,22 @@
         priorityColWeight: 'წონა',
         priorityColCount: 'რაოდენობა',
         priorityNoResults: 'შედეგები არ იძებნება',
-        priorityGenEmail: '📧 მეილის გენერაცია'
+        priorityGenEmail: '📧 მეილის გენერაცია',
+        // v10c: sub-tabs
+        priorityTabGreen: '🟢 მწვანე',
+        priorityTabYellow: '🟡 ყვითელი',
+        priorityTabRed: '🔴 წითელი',
+        priorityYellowTitle: '🟡 Cat 2 კითხვები — "დიახ" ან "ნაწილობრივ" პასუხები',
+        priorityYellowSub: 'ინტერვიუს ღირს — შერჩევით შემოწმდება',
+        // Category breakdown block (on company detail)
+        catBreakdownTitle: 'პასუხების განაწილება კატეგორიების მიხედვით',
+        catBreakdownSub: 'დააჭირეთ უჯრედს კითხვების სანახავად',
+        catBreakdownCat1: '🟢 Cat 1 — ვენდობით',
+        catBreakdownCat2: '🟡 Cat 2 — გასაუბრება',
+        catBreakdownCat3: '🔴 Cat 3 — დოკუმენტი',
+        catBreakdownYes: '✓ დიახ',
+        catBreakdownPartial: '◐ ნაწილობრივ',
+        catBreakdownNo: '✗ არა'
       },
       en: {
         // Login
@@ -484,7 +499,22 @@
         priorityColWeight: 'Weight',
         priorityColCount: 'Count',
         priorityNoResults: 'No results',
-        priorityGenEmail: '📧 Generate email'
+        priorityGenEmail: '📧 Generate email',
+        // v10c: sub-tabs
+        priorityTabGreen: '🟢 Green',
+        priorityTabYellow: '🟡 Yellow',
+        priorityTabRed: '🔴 Red',
+        priorityYellowTitle: '🟡 Cat 2 questions — "Yes" or "Partial" answers',
+        priorityYellowSub: 'Worth interviewing — verify selectively',
+        // Category breakdown block (on company detail)
+        catBreakdownTitle: 'Answer distribution by category',
+        catBreakdownSub: 'Click a cell to see questions',
+        catBreakdownCat1: '🟢 Cat 1 — Trusted',
+        catBreakdownCat2: '🟡 Cat 2 — Interview',
+        catBreakdownCat3: '🔴 Cat 3 — Document',
+        catBreakdownYes: '✓ Yes',
+        catBreakdownPartial: '◐ Partial',
+        catBreakdownNo: '✗ No'
       }
     };
 
@@ -1488,6 +1518,136 @@
       );
     }
 
+    // ============================================
+    // v10c: CATEGORY × ANSWER BREAKDOWN MATRIX
+    // ============================================
+    // Shows 3×3 matrix: categories (1/2/3) × answers (yes/partial/no)
+    // Click a cell to expand list of matching questions
+    function CategoryBreakdown({ answers, adminAnswers, lang }) {
+      const [expandedCell, setExpandedCell] = useState(null); // 'cat-ans' e.g. '1-yes'
+
+      // Build matrix data: for each (cat, answer) combo, list matching questions from answers
+      const matrix = useMemo(() => {
+        const grid = {}; // key: 'cat-ans' → [answers...]
+        // Only contractor answers matter for cat matrix (admin has its own section)
+        answers.forEach(a => {
+          const cat = getCategory(a.question_id);
+          if (!cat) return;
+          const key = cat + '-' + a.answer;
+          if (!grid[key]) grid[key] = [];
+          grid[key].push(a);
+        });
+        return grid;
+      }, [answers]);
+
+      // Sort each list by question ID
+      Object.values(matrix).forEach(arr => arr.sort((a, b) => a.question_id.localeCompare(b.question_id)));
+
+      const catColors = {
+        1: { bg: 'bg-emerald-50', border: 'border-emerald-200', text: 'text-emerald-700', label: T[lang].catBreakdownCat1 },
+        2: { bg: 'bg-amber-50', border: 'border-amber-200', text: 'text-amber-700', label: T[lang].catBreakdownCat2 },
+        3: { bg: 'bg-rose-50', border: 'border-rose-200', text: 'text-rose-700', label: T[lang].catBreakdownCat3 }
+      };
+      const ansColors = {
+        yes: { text: '#059669', bg: 'bg-emerald-100', label: T[lang].catBreakdownYes },
+        partial: { text: '#d97706', bg: 'bg-amber-100', label: T[lang].catBreakdownPartial },
+        no: { text: '#dc2626', bg: 'bg-rose-100', label: T[lang].catBreakdownNo }
+      };
+
+      const toggleCell = (key) => {
+        setExpandedCell(expandedCell === key ? null : key);
+      };
+
+      return React.createElement('div', { className: 'bg-white border border-stone-200 rounded-xl p-5 shadow-sm mb-5' },
+        React.createElement('div', { className: 'mb-4' },
+          React.createElement('h3', { className: 'text-sm font-semibold text-stone-900 mb-1' }, T[lang].catBreakdownTitle),
+          React.createElement('p', { className: 'text-[11px] text-stone-500' }, T[lang].catBreakdownSub)
+        ),
+        // 3×3 Matrix
+        React.createElement('div', {
+          className: 'grid gap-2 mb-3',
+          style: { gridTemplateColumns: '1.4fr 1fr 1fr 1fr' }
+        },
+          // Header row
+          React.createElement('div', null),
+          React.createElement('div', { className: 'text-center text-[11px] font-semibold text-stone-500 uppercase tracking-wider py-1' }, T[lang].catBreakdownYes),
+          React.createElement('div', { className: 'text-center text-[11px] font-semibold text-stone-500 uppercase tracking-wider py-1' }, T[lang].catBreakdownPartial),
+          React.createElement('div', { className: 'text-center text-[11px] font-semibold text-stone-500 uppercase tracking-wider py-1' }, T[lang].catBreakdownNo),
+          // Rows: cat 1, 2, 3
+          ...[1, 2, 3].flatMap(cat => [
+            React.createElement('div', {
+              key: 'label-' + cat,
+              className: 'text-[12px] font-semibold ' + catColors[cat].text + ' flex items-center px-2'
+            }, catColors[cat].label),
+            ...['yes', 'partial', 'no'].map(ans => {
+              const key = cat + '-' + ans;
+              const items = matrix[key] || [];
+              const isExpanded = expandedCell === key;
+              const hasItems = items.length > 0;
+              return React.createElement('button', {
+                key,
+                onClick: () => hasItems && toggleCell(key),
+                disabled: !hasItems,
+                className: 'text-center py-3 border rounded-lg transition ' + (
+                  isExpanded
+                    ? catColors[cat].bg + ' ' + catColors[cat].border + ' ring-2 ring-offset-1 ring-blue-300'
+                    : hasItems
+                      ? catColors[cat].bg + ' ' + catColors[cat].border + ' hover:brightness-95 cursor-pointer'
+                      : 'bg-stone-50 border-stone-200 opacity-50 cursor-default'
+                )
+              },
+                React.createElement('div', {
+                  className: 'text-[18px] font-semibold tabular-nums',
+                  style: { color: hasItems ? ansColors[ans].text : '#a8a29e' }
+                }, items.length)
+              );
+            })
+          ])
+        ),
+
+        // Expanded questions
+        expandedCell ? (() => {
+          const items = matrix[expandedCell] || [];
+          const [cat, ans] = expandedCell.split('-');
+          return React.createElement('div', {
+            className: 'mt-3 pt-3 border-t border-stone-200'
+          },
+            React.createElement('div', {
+              className: 'text-[11px] font-semibold text-stone-600 mb-2 flex items-center gap-2'
+            },
+              React.createElement('span', { className: catColors[cat].text }, catColors[cat].label),
+              React.createElement('span', { className: 'text-stone-400' }, '×'),
+              React.createElement('span', { style: { color: ansColors[ans].text } }, ansColors[ans].label),
+              React.createElement('span', { className: 'text-stone-400 ml-auto' }, items.length + ' ' + (lang === 'ka' ? 'კითხვა' : 'q.'))
+            ),
+            React.createElement('div', {
+              className: 'space-y-1 max-h-64 overflow-y-auto pr-2'
+            },
+              items.map(a => {
+                const qText = QUESTIONS[a.question_id] ? QUESTIONS[a.question_id][lang] : a.question_id;
+                const winfo = QUESTION_WEIGHTS[a.question_id];
+                const wPct = winfo ? winfo.weight * 100 : 0;
+                return React.createElement('div', {
+                  key: a.question_id,
+                  className: 'flex items-start gap-2 py-1.5 px-2 hover:bg-stone-50 rounded'
+                },
+                  React.createElement('span', {
+                    className: 'text-[10px] text-stone-400 font-mono min-w-[54px] flex-shrink-0 pt-0.5'
+                  }, a.question_id),
+                  React.createElement('span', {
+                    className: 'text-[10px] text-stone-500 tabular-nums min-w-[42px] flex-shrink-0 pt-0.5'
+                  }, wPct.toFixed(2) + '%'),
+                  React.createElement('span', {
+                    className: 'text-[12px] text-stone-800 leading-snug flex-1'
+                  }, qText)
+                );
+              })
+            )
+          );
+        })() : null
+      );
+    }
+
     function CompanyDetailScreen({ companyId, onBack, lang }) {
       const [company, setCompany] = useState(null);
       const [answers, setAnswers] = useState([]);
@@ -1829,6 +1989,9 @@
             )
           )
         ),
+
+        // v10c: Category × Answer breakdown matrix
+        React.createElement(CategoryBreakdown, { answers, adminAnswers, lang }),
 
         // v8: Detailed information (Full answers with weighted scores + admin section)
         React.createElement('div', { className: 'bg-white border border-stone-200 rounded-xl p-5 shadow-sm' },
@@ -2781,15 +2944,18 @@
     function PrioritySection({ companies, allAnswersByCompany, allAdminAnswersByCompany, lang }) {
       const [showEmailFor, setShowEmailFor] = useState(null);
       const [emailCopied, setEmailCopied] = useState(false);
+      const [subTab, setSubTab] = useState('green'); // 'green' | 'yellow' | 'red'
 
-      // Compute all three tables in one useMemo (avoid recomputation)
+      // Compute all tables in one useMemo (avoid recomputation)
       const data = useMemo(() => {
         const submittedCompanies = companies.filter(c => c.is_locked);
 
-        // Table 1: Low-score (<30%) companies + Cat 1 "no" answers
+        // Table 1 (GREEN): Low-score (<30%) companies + Cat 1 "no" answers
         const table1 = [];
-        // Table 2: High-score (>60%) companies + Cat 3 "yes" answers
+        // Table 2 (RED): High-score (>60%) companies + Cat 3 "yes" answers
         const table2 = [];
+        // Table Y (YELLOW): all companies + Cat 2 "yes"/"partial" answers
+        const tableYellow = [];
 
         submittedCompanies.forEach(c => {
           const answers = allAnswersByCompany[c.id] || [];
@@ -2857,7 +3023,25 @@
         // Sort questions by qid
         const table3 = Object.values(table3Map).sort((a, b) => a.qid.localeCompare(b.qid));
 
-        return { table1, table2, table3 };
+        // Table Yellow: all companies + Cat 2 "yes"/"partial"
+        submittedCompanies.forEach(c => {
+          const answers = allAnswersByCompany[c.id] || [];
+          const adminAns = (allAdminAnswersByCompany || {})[c.id] || [];
+          const wStats = calcWeightedSectionStats(answers, adminAns);
+          const score = wStats.overall.score;
+          const cat2Answers = answers.filter(a => {
+            const cat = getCategory(a.question_id);
+            return cat === 2 && (a.answer === 'yes' || a.answer === 'partial');
+          });
+          if (cat2Answers.length > 0) {
+            cat2Answers.sort((a, b) => a.question_id.localeCompare(b.question_id));
+            tableYellow.push({ company: c, score, matches: cat2Answers });
+          }
+        });
+        // Sort yellow by match count descending
+        tableYellow.sort((a, b) => b.matches.length - a.matches.length);
+
+        return { table1, table2, table3, tableYellow };
       }, [companies, allAnswersByCompany, allAdminAnswersByCompany]);
 
       // Email generation: pick template based on table type
@@ -2906,18 +3090,52 @@
       const totalMatches1 = data.table1.reduce((s, r) => s + r.matches.length, 0);
       const totalMatches2 = data.table2.reduce((s, r) => s + r.matches.length, 0);
       const totalMatches3 = data.table3.reduce((s, r) => s + r.companies.length, 0);
+      const totalMatchesYellow = data.tableYellow.reduce((s, r) => s + r.matches.length, 0);
 
-      return React.createElement('div', { className: 'space-y-6 mt-6' },
+      // Sub-tab button
+      const subTabBtn = (key, label, color, count) => React.createElement('button', {
+        key,
+        onClick: () => setSubTab(key),
+        className: 'px-4 py-2 text-sm font-medium border-b-2 transition ' + (
+          subTab === key
+            ? (color === 'green' ? 'border-emerald-500 text-emerald-700' :
+               color === 'yellow' ? 'border-amber-500 text-amber-700' :
+               'border-rose-500 text-rose-700')
+            : 'border-transparent text-stone-500 hover:text-stone-900'
+        )
+      },
+        React.createElement('span', null, label),
+        React.createElement('span', {
+          className: 'ml-2 inline-flex items-center justify-center min-w-[22px] h-[18px] text-[10px] font-semibold rounded-full ' + (
+            subTab === key
+              ? (color === 'green' ? 'bg-emerald-100 text-emerald-700' :
+                 color === 'yellow' ? 'bg-amber-100 text-amber-700' :
+                 'bg-rose-100 text-rose-700')
+              : 'bg-stone-100 text-stone-500'
+          )
+        }, count)
+      );
+
+      return React.createElement('div', { className: 'space-y-6' },
         // Header
         React.createElement('div', null,
           React.createElement('h2', { className: 'text-xl font-semibold text-stone-900 mb-1' }, T[lang].priorityTitle),
           React.createElement('p', { className: 'text-sm text-stone-500' }, T[lang].prioritySubtitle)
         ),
 
+        // Sub-tabs
+        React.createElement('div', {
+          className: 'flex items-center gap-2 border-b border-stone-200'
+        },
+          subTabBtn('green', T[lang].priorityTabGreen, 'green', data.table1.length),
+          subTabBtn('yellow', T[lang].priorityTabYellow, 'yellow', data.tableYellow.length),
+          subTabBtn('red', T[lang].priorityTabRed, 'red', data.table2.length + data.table3.length)
+        ),
+
         // ═══════════════════════════════════════════════
-        // TABLE 1: Low-score + Cat 1 "no"
+        // GREEN SUBTAB — TABLE 1: Low-score + Cat 1 "no"
         // ═══════════════════════════════════════════════
-        React.createElement('div', { className: 'bg-white border border-stone-200 rounded-xl overflow-hidden shadow-sm' },
+        subTab === 'green' ? React.createElement('div', { className: 'bg-white border border-stone-200 rounded-xl overflow-hidden shadow-sm' },
           React.createElement('div', { className: 'p-5 border-b border-stone-200 bg-emerald-50/50' },
             React.createElement('h3', { className: 'text-base font-semibold text-stone-900 mb-1' }, T[lang].priorityTable1Title),
             React.createElement('p', { className: 'text-[12px] text-stone-600' }, T[lang].priorityTable1Sub),
@@ -2970,12 +3188,70 @@
                   );
                 })
               )
-        ),
+        ) : null,
 
         // ═══════════════════════════════════════════════
-        // TABLE 2: High-score + Cat 3 "yes"
+        // YELLOW SUBTAB — Cat 2 "yes"/"partial"
         // ═══════════════════════════════════════════════
-        React.createElement('div', { className: 'bg-white border border-stone-200 rounded-xl overflow-hidden shadow-sm' },
+        subTab === 'yellow' ? React.createElement('div', { className: 'bg-white border border-stone-200 rounded-xl overflow-hidden shadow-sm' },
+          React.createElement('div', { className: 'p-5 border-b border-stone-200 bg-amber-50/50' },
+            React.createElement('h3', { className: 'text-base font-semibold text-stone-900 mb-1' }, T[lang].priorityYellowTitle),
+            React.createElement('p', { className: 'text-[12px] text-stone-600' }, T[lang].priorityYellowSub),
+            React.createElement('div', { className: 'text-[12px] text-stone-500 mt-2' },
+              React.createElement('strong', { className: 'text-stone-800' }, data.tableYellow.length),
+              React.createElement('span', null, ' ' + T[lang].analysisCompanyCount + ' · '),
+              React.createElement('strong', { className: 'text-stone-800' }, totalMatchesYellow),
+              React.createElement('span', null, ' ' + T[lang].analysisMatchCount)
+            )
+          ),
+          data.tableYellow.length === 0
+            ? React.createElement('div', { className: 'text-center py-12 text-stone-400 text-sm' }, T[lang].priorityNoResults)
+            : React.createElement('div', null,
+                React.createElement('div', {
+                  className: 'grid gap-4 px-5 py-3 border-b border-stone-200 bg-stone-50 text-[10px] font-semibold text-stone-500 uppercase tracking-wider',
+                  style: { gridTemplateColumns: '2fr 80px 3fr 120px' }
+                },
+                  React.createElement('div', null, T[lang].analysisTableCompany),
+                  React.createElement('div', { className: 'text-right' }, T[lang].priorityColScore),
+                  React.createElement('div', null, T[lang].priorityColQuestion),
+                  React.createElement('div', { className: 'text-right' }, T[lang].analysisTableActions)
+                ),
+                data.tableYellow.map(entry => {
+                  const scoreColor = entry.score >= 70 ? '#059669' : entry.score >= 40 ? '#d97706' : '#dc2626';
+                  return React.createElement('div', {
+                    key: entry.company.id,
+                    className: 'grid gap-4 px-5 py-4 border-b border-stone-100 hover:bg-stone-50 transition',
+                    style: { gridTemplateColumns: '2fr 80px 3fr 120px' }
+                  },
+                    React.createElement('div', null,
+                      React.createElement('div', { className: 'font-medium text-stone-900 text-[13px]' }, entry.company.name || '—'),
+                      React.createElement('div', { className: 'text-[10px] text-stone-400 mt-0.5' }, entry.company.id)
+                    ),
+                    React.createElement('div', { className: 'text-right' },
+                      React.createElement('span', {
+                        className: 'text-[13px] font-semibold tabular-nums',
+                        style: { color: scoreColor }
+                      }, entry.score.toFixed(1) + '%')
+                    ),
+                    React.createElement('div', null,
+                      React.createElement('div', { className: 'text-[11px] text-stone-500 mb-1' }, entry.matches.length + ' ' + (lang === 'ka' ? 'კითხვა' : 'q.')),
+                      entry.matches.map(m => renderQuestionInline(m))
+                    ),
+                    React.createElement('div', { className: 'text-right' },
+                      React.createElement('button', {
+                        onClick: () => openEmail(entry.company, entry.matches, 'generic'),
+                        className: 'h-8 px-3 text-[11px] font-medium text-amber-700 bg-amber-50 border border-amber-200 rounded hover:bg-amber-100 transition'
+                      }, T[lang].priorityGenEmail)
+                    )
+                  );
+                })
+              )
+        ) : null,
+
+        // ═══════════════════════════════════════════════
+        // RED SUBTAB — TABLE 2: High-score + Cat 3 "yes"
+        // ═══════════════════════════════════════════════
+        subTab === 'red' ? React.createElement('div', { className: 'bg-white border border-stone-200 rounded-xl overflow-hidden shadow-sm' },
           React.createElement('div', { className: 'p-5 border-b border-stone-200 bg-rose-50/50' },
             React.createElement('h3', { className: 'text-base font-semibold text-stone-900 mb-1' }, T[lang].priorityTable2Title),
             React.createElement('p', { className: 'text-[12px] text-stone-600' }, T[lang].priorityTable2Sub),
@@ -3028,12 +3304,12 @@
                   );
                 })
               )
-        ),
+        ) : null,
 
         // ═══════════════════════════════════════════════
-        // TABLE 3: Cat 3 questions × companies with "yes"
+        // TABLE 3: Cat 3 questions × companies with "yes" (RED subtab, second part)
         // ═══════════════════════════════════════════════
-        React.createElement('div', { className: 'bg-white border border-stone-200 rounded-xl overflow-hidden shadow-sm' },
+        subTab === 'red' ? React.createElement('div', { className: 'bg-white border border-stone-200 rounded-xl overflow-hidden shadow-sm' },
           React.createElement('div', { className: 'p-5 border-b border-stone-200 bg-blue-50/50' },
             React.createElement('h3', { className: 'text-base font-semibold text-stone-900 mb-1' }, T[lang].priorityTable3Title),
             React.createElement('p', { className: 'text-[12px] text-stone-600' }, T[lang].priorityTable3Sub),
@@ -3097,7 +3373,7 @@
                   );
                 })
               )
-        ),
+        ) : null,
 
         // Email modal (shared)
         showEmailFor ? React.createElement('div', {
