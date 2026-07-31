@@ -260,7 +260,23 @@
         genGenericEmailBtn: '📧 შერეული მოთხოვნა',
         analysisTableCompany: 'კომპანია',
         analysisTableMatches: 'შესატყვისი კითხვები',
-        analysisTableActions: 'მოქმედება'
+        analysisTableActions: 'მოქმედება',
+        // v10: Priority tables
+        priorityTitle: 'პრიორიტეტული სიები',
+        prioritySubtitle: 'სამიზნე კომპანიები კონკრეტული სამუშაოსთვის',
+        priorityTable1Title: '🟢 დაბალქულიანი კომპანიები + "არა" პასუხები (Cat 1)',
+        priorityTable1Sub: 'ქულა < 30% — შესაძლოა უფრო კარგები არიან, ვიდრე ფიქრობენ. გადამოწმება ღირს.',
+        priorityTable2Title: '🔴 მაღალქულიანი კომპანიები + "დიახ" პასუხები (Cat 3)',
+        priorityTable2Sub: 'ქულა > 60% — შესაძლოა თავდაჯერებული პასუხებია. დოკუმენტების მოთხოვნა ღირს.',
+        priorityTable3Title: '📋 Cat 3 კითხვები × კომპანიები ("დიახ" პასუხები)',
+        priorityTable3Sub: 'რომელი კომპანიები აცხადებენ "დიახ"-ს წითელ (დოკუმენტური) კითხვებზე',
+        priorityColScore: 'ქულა',
+        priorityColQuestion: 'კითხვა',
+        priorityColCompanies: 'კომპანიები',
+        priorityColWeight: 'წონა',
+        priorityColCount: 'რაოდენობა',
+        priorityNoResults: 'შედეგები არ იძებნება',
+        priorityGenEmail: '📧 მეილის გენერაცია'
       },
       en: {
         // Login
@@ -448,7 +464,23 @@
         genGenericEmailBtn: '📧 Mixed request',
         analysisTableCompany: 'Company',
         analysisTableMatches: 'Matching questions',
-        analysisTableActions: 'Actions'
+        analysisTableActions: 'Actions',
+        // v10: Priority tables
+        priorityTitle: 'Priority Lists',
+        prioritySubtitle: 'Target companies for specific outreach',
+        priorityTable1Title: '🟢 Low-score companies + "No" answers (Cat 1)',
+        priorityTable1Sub: 'Score < 30% — they may be better than they think. Worth reviewing.',
+        priorityTable2Title: '🔴 High-score companies + "Yes" answers (Cat 3)',
+        priorityTable2Sub: 'Score > 60% — may be overconfident answers. Worth requesting documentation.',
+        priorityTable3Title: '📋 Cat 3 questions × companies ("Yes" answers)',
+        priorityTable3Sub: 'Which companies claim "Yes" on red (documentation) questions',
+        priorityColScore: 'Score',
+        priorityColQuestion: 'Question',
+        priorityColCompanies: 'Companies',
+        priorityColWeight: 'Weight',
+        priorityColCount: 'Count',
+        priorityNoResults: 'No results',
+        priorityGenEmail: '📧 Generate email'
       }
     };
 
@@ -2732,9 +2764,375 @@
     }
 
     // ============================================
+    // v10: PRIORITY LISTS SECTION (three targeted tables)
+    // ============================================
+    function PrioritySection({ companies, allAnswersByCompany, allAdminAnswersByCompany, lang }) {
+      const [showEmailFor, setShowEmailFor] = useState(null);
+      const [emailCopied, setEmailCopied] = useState(false);
+
+      // Compute all three tables in one useMemo (avoid recomputation)
+      const data = useMemo(() => {
+        const submittedCompanies = companies.filter(c => c.is_locked);
+
+        // Table 1: Low-score (<30%) companies + Cat 1 "no" answers
+        const table1 = [];
+        // Table 2: High-score (>60%) companies + Cat 3 "yes" answers
+        const table2 = [];
+
+        submittedCompanies.forEach(c => {
+          const answers = allAnswersByCompany[c.id] || [];
+          const adminAns = (allAdminAnswersByCompany || {})[c.id] || [];
+          const wStats = calcWeightedSectionStats(answers, adminAns);
+          const score = wStats.overall.score;
+
+          // Table 1: score < 30% + Cat 1 "no"
+          if (score < 30) {
+            const cat1NoAnswers = answers.filter(a => {
+              const cat = getCategory(a.question_id);
+              return cat === 1 && a.answer === 'no';
+            });
+            if (cat1NoAnswers.length > 0) {
+              cat1NoAnswers.sort((a, b) => a.question_id.localeCompare(b.question_id));
+              table1.push({ company: c, score, matches: cat1NoAnswers });
+            }
+          }
+
+          // Table 2: score > 60% + Cat 3 "yes"
+          if (score > 60) {
+            const cat3YesAnswers = answers.filter(a => {
+              const cat = getCategory(a.question_id);
+              return cat === 3 && a.answer === 'yes';
+            });
+            if (cat3YesAnswers.length > 0) {
+              cat3YesAnswers.sort((a, b) => a.question_id.localeCompare(b.question_id));
+              table2.push({ company: c, score, matches: cat3YesAnswers });
+            }
+          }
+        });
+
+        // Sort table 1 by score ascending (lowest first)
+        table1.sort((a, b) => a.score - b.score);
+        // Sort table 2 by score descending (highest first)
+        table2.sort((a, b) => b.score - a.score);
+
+        // Table 3: Cat 3 questions × companies with "yes" — grouped by question
+        const table3Map = {}; // qid → { question, weight, companies: [{name, id, score}] }
+        submittedCompanies.forEach(c => {
+          const answers = allAnswersByCompany[c.id] || [];
+          const adminAns = (allAdminAnswersByCompany || {})[c.id] || [];
+          const wStats = calcWeightedSectionStats(answers, adminAns);
+          const score = wStats.overall.score;
+          answers.forEach(a => {
+            if (getCategory(a.question_id) === 3 && a.answer === 'yes') {
+              if (!table3Map[a.question_id]) {
+                const winfo = QUESTION_WEIGHTS[a.question_id];
+                table3Map[a.question_id] = {
+                  qid: a.question_id,
+                  weight: winfo ? winfo.weight * 100 : 0,
+                  companies: []
+                };
+              }
+              table3Map[a.question_id].companies.push({
+                id: c.id,
+                name: c.name || '—',
+                score
+              });
+            }
+          });
+        });
+        // Sort each group's companies by score descending
+        Object.values(table3Map).forEach(g => g.companies.sort((a, b) => b.score - a.score));
+        // Sort questions by qid
+        const table3 = Object.values(table3Map).sort((a, b) => a.qid.localeCompare(b.qid));
+
+        return { table1, table2, table3 };
+      }, [companies, allAnswersByCompany, allAdminAnswersByCompany]);
+
+      // Email generation: pick template based on table type
+      const openEmail = (company, matches, tableType) => {
+        let emailText;
+        if (tableType === 'cat1_no') {
+          emailText = buildCat1ReviewEmail(company, matches, lang);
+        } else if (tableType === 'cat3_yes') {
+          emailText = buildCat3DocumentEmail(company, matches, lang);
+        } else {
+          emailText = buildGenericEmail(company, matches, lang);
+        }
+        setShowEmailFor({ company, matches, emailText });
+        setEmailCopied(false);
+      };
+
+      const copyEmail = () => {
+        if (!showEmailFor) return;
+        navigator.clipboard.writeText(showEmailFor.emailText).then(() => {
+          setEmailCopied(true);
+          setTimeout(() => setEmailCopied(false), 2000);
+        });
+      };
+
+      // Question row (used inside company row)
+      const renderQuestionInline = (a) => {
+        const qText = QUESTIONS[a.question_id] ? QUESTIONS[a.question_id][lang] : a.question_id;
+        const winfo = QUESTION_WEIGHTS[a.question_id];
+        const wPct = winfo ? winfo.weight * 100 : 0;
+        return React.createElement('div', {
+          key: a.question_id,
+          className: 'flex items-start gap-2 py-1'
+        },
+          React.createElement('span', {
+            className: 'text-[10px] text-stone-400 font-mono min-w-[52px] flex-shrink-0 pt-0.5'
+          }, a.question_id),
+          React.createElement('span', {
+            className: 'text-[11px] text-stone-500 tabular-nums min-w-[42px] flex-shrink-0 pt-0.5'
+          }, wPct.toFixed(2) + '%'),
+          React.createElement('span', {
+            className: 'text-[12px] text-stone-800 leading-snug flex-1'
+          }, qText)
+        );
+      };
+
+      const totalMatches1 = data.table1.reduce((s, r) => s + r.matches.length, 0);
+      const totalMatches2 = data.table2.reduce((s, r) => s + r.matches.length, 0);
+      const totalMatches3 = data.table3.reduce((s, r) => s + r.companies.length, 0);
+
+      return React.createElement('div', { className: 'space-y-6 mt-6' },
+        // Header
+        React.createElement('div', null,
+          React.createElement('h2', { className: 'text-xl font-semibold text-stone-900 mb-1' }, T[lang].priorityTitle),
+          React.createElement('p', { className: 'text-sm text-stone-500' }, T[lang].prioritySubtitle)
+        ),
+
+        // ═══════════════════════════════════════════════
+        // TABLE 1: Low-score + Cat 1 "no"
+        // ═══════════════════════════════════════════════
+        React.createElement('div', { className: 'bg-white border border-stone-200 rounded-xl overflow-hidden shadow-sm' },
+          React.createElement('div', { className: 'p-5 border-b border-stone-200 bg-emerald-50/50' },
+            React.createElement('h3', { className: 'text-base font-semibold text-stone-900 mb-1' }, T[lang].priorityTable1Title),
+            React.createElement('p', { className: 'text-[12px] text-stone-600' }, T[lang].priorityTable1Sub),
+            React.createElement('div', { className: 'text-[12px] text-stone-500 mt-2' },
+              React.createElement('strong', { className: 'text-stone-800' }, data.table1.length),
+              React.createElement('span', null, ' ' + T[lang].analysisCompanyCount + ' · '),
+              React.createElement('strong', { className: 'text-stone-800' }, totalMatches1),
+              React.createElement('span', null, ' ' + T[lang].analysisMatchCount)
+            )
+          ),
+          data.table1.length === 0
+            ? React.createElement('div', { className: 'text-center py-12 text-stone-400 text-sm' }, T[lang].priorityNoResults)
+            : React.createElement('div', null,
+                React.createElement('div', {
+                  className: 'grid gap-4 px-5 py-3 border-b border-stone-200 bg-stone-50 text-[10px] font-semibold text-stone-500 uppercase tracking-wider',
+                  style: { gridTemplateColumns: '2fr 80px 3fr 120px' }
+                },
+                  React.createElement('div', null, T[lang].analysisTableCompany),
+                  React.createElement('div', { className: 'text-right' }, T[lang].priorityColScore),
+                  React.createElement('div', null, T[lang].priorityColQuestion),
+                  React.createElement('div', { className: 'text-right' }, T[lang].analysisTableActions)
+                ),
+                data.table1.map(entry => {
+                  const scoreColor = entry.score >= 70 ? '#059669' : entry.score >= 40 ? '#d97706' : '#dc2626';
+                  return React.createElement('div', {
+                    key: entry.company.id,
+                    className: 'grid gap-4 px-5 py-4 border-b border-stone-100 hover:bg-stone-50 transition',
+                    style: { gridTemplateColumns: '2fr 80px 3fr 120px' }
+                  },
+                    React.createElement('div', null,
+                      React.createElement('div', { className: 'font-medium text-stone-900 text-[13px]' }, entry.company.name || '—'),
+                      React.createElement('div', { className: 'text-[10px] text-stone-400 mt-0.5' }, entry.company.id)
+                    ),
+                    React.createElement('div', { className: 'text-right' },
+                      React.createElement('span', {
+                        className: 'text-[13px] font-semibold tabular-nums',
+                        style: { color: scoreColor }
+                      }, entry.score.toFixed(1) + '%')
+                    ),
+                    React.createElement('div', null,
+                      React.createElement('div', { className: 'text-[11px] text-stone-500 mb-1' }, entry.matches.length + ' ' + (lang === 'ka' ? 'კითხვა' : 'q.')),
+                      entry.matches.map(m => renderQuestionInline(m))
+                    ),
+                    React.createElement('div', { className: 'text-right' },
+                      React.createElement('button', {
+                        onClick: () => openEmail(entry.company, entry.matches, 'cat1_no'),
+                        className: 'h-8 px-3 text-[11px] font-medium text-emerald-700 bg-emerald-50 border border-emerald-200 rounded hover:bg-emerald-100 transition'
+                      }, T[lang].priorityGenEmail)
+                    )
+                  );
+                })
+              )
+        ),
+
+        // ═══════════════════════════════════════════════
+        // TABLE 2: High-score + Cat 3 "yes"
+        // ═══════════════════════════════════════════════
+        React.createElement('div', { className: 'bg-white border border-stone-200 rounded-xl overflow-hidden shadow-sm' },
+          React.createElement('div', { className: 'p-5 border-b border-stone-200 bg-rose-50/50' },
+            React.createElement('h3', { className: 'text-base font-semibold text-stone-900 mb-1' }, T[lang].priorityTable2Title),
+            React.createElement('p', { className: 'text-[12px] text-stone-600' }, T[lang].priorityTable2Sub),
+            React.createElement('div', { className: 'text-[12px] text-stone-500 mt-2' },
+              React.createElement('strong', { className: 'text-stone-800' }, data.table2.length),
+              React.createElement('span', null, ' ' + T[lang].analysisCompanyCount + ' · '),
+              React.createElement('strong', { className: 'text-stone-800' }, totalMatches2),
+              React.createElement('span', null, ' ' + T[lang].analysisMatchCount)
+            )
+          ),
+          data.table2.length === 0
+            ? React.createElement('div', { className: 'text-center py-12 text-stone-400 text-sm' }, T[lang].priorityNoResults)
+            : React.createElement('div', null,
+                React.createElement('div', {
+                  className: 'grid gap-4 px-5 py-3 border-b border-stone-200 bg-stone-50 text-[10px] font-semibold text-stone-500 uppercase tracking-wider',
+                  style: { gridTemplateColumns: '2fr 80px 3fr 120px' }
+                },
+                  React.createElement('div', null, T[lang].analysisTableCompany),
+                  React.createElement('div', { className: 'text-right' }, T[lang].priorityColScore),
+                  React.createElement('div', null, T[lang].priorityColQuestion),
+                  React.createElement('div', { className: 'text-right' }, T[lang].analysisTableActions)
+                ),
+                data.table2.map(entry => {
+                  const scoreColor = entry.score >= 70 ? '#059669' : entry.score >= 40 ? '#d97706' : '#dc2626';
+                  return React.createElement('div', {
+                    key: entry.company.id,
+                    className: 'grid gap-4 px-5 py-4 border-b border-stone-100 hover:bg-stone-50 transition',
+                    style: { gridTemplateColumns: '2fr 80px 3fr 120px' }
+                  },
+                    React.createElement('div', null,
+                      React.createElement('div', { className: 'font-medium text-stone-900 text-[13px]' }, entry.company.name || '—'),
+                      React.createElement('div', { className: 'text-[10px] text-stone-400 mt-0.5' }, entry.company.id)
+                    ),
+                    React.createElement('div', { className: 'text-right' },
+                      React.createElement('span', {
+                        className: 'text-[13px] font-semibold tabular-nums',
+                        style: { color: scoreColor }
+                      }, entry.score.toFixed(1) + '%')
+                    ),
+                    React.createElement('div', null,
+                      React.createElement('div', { className: 'text-[11px] text-stone-500 mb-1' }, entry.matches.length + ' ' + (lang === 'ka' ? 'კითხვა' : 'q.')),
+                      entry.matches.map(m => renderQuestionInline(m))
+                    ),
+                    React.createElement('div', { className: 'text-right' },
+                      React.createElement('button', {
+                        onClick: () => openEmail(entry.company, entry.matches, 'cat3_yes'),
+                        className: 'h-8 px-3 text-[11px] font-medium text-rose-700 bg-rose-50 border border-rose-200 rounded hover:bg-rose-100 transition'
+                      }, T[lang].priorityGenEmail)
+                    )
+                  );
+                })
+              )
+        ),
+
+        // ═══════════════════════════════════════════════
+        // TABLE 3: Cat 3 questions × companies with "yes"
+        // ═══════════════════════════════════════════════
+        React.createElement('div', { className: 'bg-white border border-stone-200 rounded-xl overflow-hidden shadow-sm' },
+          React.createElement('div', { className: 'p-5 border-b border-stone-200 bg-blue-50/50' },
+            React.createElement('h3', { className: 'text-base font-semibold text-stone-900 mb-1' }, T[lang].priorityTable3Title),
+            React.createElement('p', { className: 'text-[12px] text-stone-600' }, T[lang].priorityTable3Sub),
+            React.createElement('div', { className: 'text-[12px] text-stone-500 mt-2' },
+              React.createElement('strong', { className: 'text-stone-800' }, data.table3.length),
+              React.createElement('span', null, ' ' + (lang === 'ka' ? 'კითხვა' : 'questions') + ' · '),
+              React.createElement('strong', { className: 'text-stone-800' }, totalMatches3),
+              React.createElement('span', null, ' "დიახ" ' + (lang === 'ka' ? 'პასუხი' : 'answers'))
+            )
+          ),
+          data.table3.length === 0
+            ? React.createElement('div', { className: 'text-center py-12 text-stone-400 text-sm' }, T[lang].priorityNoResults)
+            : React.createElement('div', null,
+                React.createElement('div', {
+                  className: 'grid gap-4 px-5 py-3 border-b border-stone-200 bg-stone-50 text-[10px] font-semibold text-stone-500 uppercase tracking-wider',
+                  style: { gridTemplateColumns: '60px 60px 3fr 4fr' }
+                },
+                  React.createElement('div', null, 'ID'),
+                  React.createElement('div', { className: 'text-right' }, T[lang].priorityColWeight),
+                  React.createElement('div', null, T[lang].priorityColQuestion),
+                  React.createElement('div', null, T[lang].priorityColCompanies + ' (' + T[lang].priorityColCount + ')')
+                ),
+                data.table3.map(g => {
+                  const qText = QUESTIONS[g.qid] ? QUESTIONS[g.qid][lang] : g.qid;
+                  return React.createElement('div', {
+                    key: g.qid,
+                    className: 'grid gap-4 px-5 py-4 border-b border-stone-100 hover:bg-stone-50 transition',
+                    style: { gridTemplateColumns: '60px 60px 3fr 4fr' }
+                  },
+                    React.createElement('div', {
+                      className: 'text-[10px] text-stone-400 font-mono pt-1'
+                    }, g.qid),
+                    React.createElement('div', { className: 'text-right' },
+                      React.createElement('span', {
+                        className: 'text-[12px] font-semibold text-blue-700 tabular-nums'
+                      }, g.weight.toFixed(2) + '%')
+                    ),
+                    React.createElement('div', {
+                      className: 'text-[12px] text-stone-800 leading-snug'
+                    }, qText),
+                    React.createElement('div', null,
+                      React.createElement('div', { className: 'text-[11px] text-stone-500 mb-1' },
+                        g.companies.length + ' ' + T[lang].analysisCompanyCount
+                      ),
+                      React.createElement('div', { className: 'space-y-0.5' },
+                        g.companies.map(comp => {
+                          const scoreColor = comp.score >= 70 ? '#059669' : comp.score >= 40 ? '#d97706' : '#dc2626';
+                          return React.createElement('div', {
+                            key: comp.id,
+                            className: 'text-[11px] flex items-center justify-between'
+                          },
+                            React.createElement('span', { className: 'text-stone-700 truncate' }, comp.name),
+                            React.createElement('span', {
+                              className: 'text-[10px] font-semibold tabular-nums flex-shrink-0 ml-2',
+                              style: { color: scoreColor }
+                            }, comp.score.toFixed(1) + '%')
+                          );
+                        })
+                      )
+                    )
+                  );
+                })
+              )
+        ),
+
+        // Email modal (shared)
+        showEmailFor ? React.createElement('div', {
+          className: 'fixed inset-0 bg-black/50 flex items-center justify-center px-4 py-6 z-50 overflow-y-auto fade-in',
+          onClick: () => setShowEmailFor(null)
+        },
+          React.createElement('div', {
+            className: 'bg-white rounded-2xl max-w-2xl w-full my-auto shadow-2xl overflow-hidden',
+            onClick: e => e.stopPropagation()
+          },
+            React.createElement('div', {
+              className: 'flex items-center justify-between px-6 py-4 border-b border-stone-100',
+              style: { background: 'linear-gradient(135deg, #0E5BA8, #1976D2)' }
+            },
+              React.createElement('h3', { className: 'text-base font-semibold text-white' }, showEmailFor.company.name || '—'),
+              React.createElement('button', {
+                onClick: () => setShowEmailFor(null),
+                className: 'w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 text-white flex items-center justify-center transition'
+              }, '✕')
+            ),
+            React.createElement('div', { className: 'p-6' },
+              React.createElement('textarea', {
+                className: 'w-full h-96 p-4 text-[13px] font-mono border border-stone-200 rounded-lg bg-stone-50 resize-none',
+                value: showEmailFor.emailText,
+                readOnly: true
+              }),
+              React.createElement('div', { className: 'flex gap-2 justify-end mt-4' },
+                React.createElement('button', {
+                  onClick: () => setShowEmailFor(null),
+                  className: 'h-10 px-4 text-sm text-stone-700 border border-stone-200 hover:bg-stone-50 rounded-lg transition'
+                }, T[lang].cancel),
+                React.createElement('button', {
+                  onClick: copyEmail,
+                  className: 'h-10 px-4 text-sm font-medium text-white rounded-lg shadow-sm hover:shadow',
+                  style: { background: emailCopied ? '#059669' : 'linear-gradient(135deg, #0E5BA8, #1976D2)' }
+                }, emailCopied ? '✓ ' + (lang === 'ka' ? 'დაკოპირდა' : 'Copied') : (lang === 'ka' ? '📋 დაკოპირება' : '📋 Copy'))
+              )
+            )
+          )
+        ) : null
+      );
+    }
+
+    // ============================================
     // CATEGORIES MANAGEMENT SCREEN
     // ============================================
-    function CategoriesScreen({ companies, allAnswersByCompany, lang }) {
+    function CategoriesScreen({ companies, allAnswersByCompany, allAdminAnswersByCompany, lang }) {
       // Local state: copy of CATEGORY_MAP for editing
       const [localMap, setLocalMap] = useState({ ...CATEGORY_MAP });
       const [savedMap, setSavedMap] = useState({ ...CATEGORY_MAP });
@@ -3061,7 +3459,10 @@
         ) : null,
 
         // v9: Analysis section
-        React.createElement(AnalysisSection, { companies, allAnswersByCompany, lang })
+        React.createElement(AnalysisSection, { companies, allAnswersByCompany, lang }),
+
+        // v10: Priority lists (3 tables)
+        React.createElement(PrioritySection, { companies, allAnswersByCompany, allAdminAnswersByCompany, lang })
       );
     }
 
@@ -3135,7 +3536,7 @@
                 })
               : view === 'categories'
                 ? React.createElement(CategoriesScreen, {
-                    companies, allAnswersByCompany, lang
+                    companies, allAnswersByCompany, allAdminAnswersByCompany, lang
                   })
                 : React.createElement(CompanyDetailScreen, {
                     companyId: selectedId,
