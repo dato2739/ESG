@@ -653,25 +653,62 @@
 
     // v10d: Get short human-readable label from qid — e.g. q_2_15_1 → "კ_2, შ_15.1"
     // Returns "(კ_X, შ_Y)" or "(cat_X, q_Y)" depending on lang
+    // v10f: Now uses SEQUENTIAL numbering within each section (parent/child collapsed)
+    // Example (Quality, 22 questions):
+    //   q_2_1     → შ_1
+    //   q_2_2     → შ_2
+    //   q_2_2_1   → შ_3  (sub-question is just next in sequence)
+    //   q_2_3     → შ_4
+    //   ...
+    //   q_2_15_2  → შ_22
+
+    // Build the sequential ordering map once, on demand
+    let __questionLabelMap = null;
+    function buildQuestionLabelMap() {
+      const map = {};
+      // Contractor sections 2-8
+      Object.keys(CONTRACTOR_QIDS_BY_SECTION).forEach(sec => {
+        const ids = CONTRACTOR_QIDS_BY_SECTION[sec];
+        // Sort by natural order: parse ID parts as numbers
+        const sorted = [...ids].sort((a, b) => {
+          const pa = a.split('_').slice(1).map(Number);
+          const pb = b.split('_').slice(1).map(Number);
+          for (let i = 0; i < Math.max(pa.length, pb.length); i++) {
+            const va = pa[i] !== undefined ? pa[i] : -1;
+            const vb = pb[i] !== undefined ? pb[i] : -1;
+            if (va !== vb) return va - vb;
+          }
+          return 0;
+        });
+        sorted.forEach((qid, idx) => {
+          map[qid] = { section: parseInt(sec), position: idx + 1 };
+        });
+      });
+      // Admin section 1
+      if (typeof ADMIN_QUESTION_IDS !== 'undefined') {
+        ADMIN_QUESTION_IDS.forEach((qid, idx) => {
+          map[qid] = { section: 1, position: idx + 1 };
+        });
+      }
+      return map;
+    }
+
     function getQuestionLabel(qid, lang) {
       if (!qid) return '';
-      const parts = qid.split('_'); // ['q', section, parent, child?]
-      if (parts.length < 3) return '';
-      const section = parts[1];  // section number as string
-      let questionNum;
-      if (parts.length === 3) {
-        // parent question e.g. q_2_15
-        questionNum = parts[2];
-      } else if (parts.length === 4) {
-        // child question e.g. q_2_15_1 → "15.1"
-        questionNum = parts[2] + '.' + parts[3];
-      } else {
-        questionNum = parts.slice(2).join('.');
+      if (!__questionLabelMap) __questionLabelMap = buildQuestionLabelMap();
+      const info = __questionLabelMap[qid];
+      if (!info) {
+        // Fallback for unknown IDs
+        const parts = qid.split('_');
+        const section = parts[1] || '?';
+        const rest = parts.slice(2).join('.');
+        if (lang === 'ka') return '(კ_' + section + ', შ_' + rest + ')';
+        return '(cat_' + section + ', q_' + rest + ')';
       }
       if (lang === 'ka') {
-        return '(კ_' + section + ', შ_' + questionNum + ')';
+        return '(კ_' + info.section + ', შ_' + info.position + ')';
       } else {
-        return '(cat_' + section + ', q_' + questionNum + ')';
+        return '(cat_' + info.section + ', q_' + info.position + ')';
       }
     }
 
