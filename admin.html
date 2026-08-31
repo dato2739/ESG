@@ -651,65 +651,21 @@
       return -1;
     }
 
-    // v10d: Get short human-readable label from qid — e.g. q_2_15_1 → "კ_2, შ_15.1"
-    // Returns "(კ_X, შ_Y)" or "(cat_X, q_Y)" depending on lang
-    // v10f: Now uses SEQUENTIAL numbering within each section (parent/child collapsed)
-    // Example (Quality, 22 questions):
-    //   q_2_1     → შ_1
-    //   q_2_2     → შ_2
-    //   q_2_2_1   → შ_3  (sub-question is just next in sequence)
-    //   q_2_3     → შ_4
-    //   ...
-    //   q_2_15_2  → შ_22
-
-    // Build the sequential ordering map once, on demand
-    let __questionLabelMap = null;
-    function buildQuestionLabelMap() {
-      const map = {};
-      // Contractor sections 2-8
-      Object.keys(CONTRACTOR_QIDS_BY_SECTION).forEach(sec => {
-        const ids = CONTRACTOR_QIDS_BY_SECTION[sec];
-        // Sort by natural order: parse ID parts as numbers
-        const sorted = [...ids].sort((a, b) => {
-          const pa = a.split('_').slice(1).map(Number);
-          const pb = b.split('_').slice(1).map(Number);
-          for (let i = 0; i < Math.max(pa.length, pb.length); i++) {
-            const va = pa[i] !== undefined ? pa[i] : -1;
-            const vb = pb[i] !== undefined ? pb[i] : -1;
-            if (va !== vb) return va - vb;
-          }
-          return 0;
-        });
-        sorted.forEach((qid, idx) => {
-          map[qid] = { section: parseInt(sec), position: idx + 1 };
-        });
-      });
-      // Admin section 1
-      if (typeof ADMIN_QUESTION_IDS !== 'undefined') {
-        ADMIN_QUESTION_IDS.forEach((qid, idx) => {
-          map[qid] = { section: 1, position: idx + 1 };
-        });
-      }
-      return map;
-    }
-
-    function getQuestionLabel(qid, lang) {
+    // v11: Get section name from qid — e.g. q_2_15_1 → "ხარისხი" / "Quality"
+    // Section 1 = admin (general/commercial), sections 2-8 = contractor
+    function getSectionName(qid, lang) {
       if (!qid) return '';
-      if (!__questionLabelMap) __questionLabelMap = buildQuestionLabelMap();
-      const info = __questionLabelMap[qid];
-      if (!info) {
-        // Fallback for unknown IDs
-        const parts = qid.split('_');
-        const section = parts[1] || '?';
-        const rest = parts.slice(2).join('.');
-        if (lang === 'ka') return '(კ_' + section + ', შ_' + rest + ')';
-        return '(cat_' + section + ', q_' + rest + ')';
+      const parts = qid.split('_');
+      if (parts.length < 2) return '';
+      const sec = parseInt(parts[1]);
+      if (sec === 1) {
+        return ADMIN_SECTION_NAME[lang] || 'General / Commercial';
       }
-      if (lang === 'ka') {
-        return '(კ_' + info.section + ', შ_' + info.position + ')';
-      } else {
-        return '(cat_' + info.section + ', q_' + info.position + ')';
+      const idx = sec - 2; // sections 2-8 → SECTION_NAMES[0-6]
+      if (idx >= 0 && idx < SECTION_NAMES[lang].length) {
+        return SECTION_NAMES[lang][idx];
       }
+      return '';
     }
 
     // Helper: escape HTML
@@ -2583,8 +2539,8 @@
         lines.push('');
         matchingAnswers.forEach((a, i) => {
           const qText = QUESTIONS[a.question_id] ? QUESTIONS[a.question_id][lang] : a.question_id;
-          const label = getQuestionLabel(a.question_id, lang);
-          lines.push(`  ${i + 1}. ${qText} ${label}`);
+          const secName = getSectionName(a.question_id, lang);
+          lines.push(`  ${i + 1}. [${secName}] ${qText}`);
         });
         lines.push('');
         lines.push('ნებისმიერ კითხვაზე ან განმარტებაზე მოხარული ვიქნებით დაგეხმაროთ. გთხოვთ, პასუხი მოგვწეროთ 5 სამუშაო დღეში.');
@@ -2610,8 +2566,8 @@
         lines.push('');
         matchingAnswers.forEach((a, i) => {
           const qText = QUESTIONS[a.question_id] ? QUESTIONS[a.question_id][lang] : a.question_id;
-          const label = getQuestionLabel(a.question_id, lang);
-          lines.push(`  ${i + 1}. ${qText} ${label}`);
+          const secName = getSectionName(a.question_id, lang);
+          lines.push(`  ${i + 1}. [${secName}] ${qText}`);
         });
         lines.push('');
         lines.push('We are happy to help with any questions or clarifications. Please respond within 5 working days.');
@@ -2665,9 +2621,9 @@
         lines.push('');
         matchingAnswers.forEach((a, i) => {
           const qText = QUESTIONS[a.question_id] ? QUESTIONS[a.question_id][lang] : a.question_id;
-          const label = getQuestionLabel(a.question_id, lang);
+          const secName = getSectionName(a.question_id, lang);
           const ansTxt = a.answer === 'yes' ? 'დიახ' : 'ნაწილობრივ';
-          lines.push(`  ${i + 1}. ${qText} ${label}`);
+          lines.push(`  ${i + 1}. [${secName}] ${qText}`);
           lines.push(`     თქვენი პასუხი: ${ansTxt}`);
           lines.push(`     დამადასტურებელი დოკუმენტი: ${docSuggestion(a.question_id, lang)}`);
           if (a.partial_text && a.partial_text.trim()) {
@@ -2698,9 +2654,9 @@
         lines.push('');
         matchingAnswers.forEach((a, i) => {
           const qText = QUESTIONS[a.question_id] ? QUESTIONS[a.question_id][lang] : a.question_id;
-          const label = getQuestionLabel(a.question_id, lang);
+          const secName = getSectionName(a.question_id, lang);
           const ansTxt = a.answer === 'yes' ? 'Yes' : 'Partial';
-          lines.push(`  ${i + 1}. ${qText} ${label}`);
+          lines.push(`  ${i + 1}. [${secName}] ${qText}`);
           lines.push(`     Your answer: ${ansTxt}`);
           lines.push(`     Supporting document: ${docSuggestion(a.question_id, lang)}`);
           if (a.partial_text && a.partial_text.trim()) {
@@ -2735,9 +2691,9 @@
         lines.push('');
         matchingAnswers.forEach((a, i) => {
           const qText = QUESTIONS[a.question_id] ? QUESTIONS[a.question_id][lang] : a.question_id;
-          const label = getQuestionLabel(a.question_id, lang);
+          const secName = getSectionName(a.question_id, lang);
           const ansTxt = a.answer === 'yes' ? 'დიახ' : a.answer === 'partial' ? 'ნაწილობრივ' : 'არა';
-          lines.push(`  ${i + 1}. ${qText} ${label}`);
+          lines.push(`  ${i + 1}. [${secName}] ${qText}`);
           lines.push(`     თქვენი პასუხი: ${ansTxt}`);
         });
         lines.push('');
@@ -2760,9 +2716,9 @@
         lines.push('');
         matchingAnswers.forEach((a, i) => {
           const qText = QUESTIONS[a.question_id] ? QUESTIONS[a.question_id][lang] : a.question_id;
-          const label = getQuestionLabel(a.question_id, lang);
+          const secName = getSectionName(a.question_id, lang);
           const ansTxt = a.answer === 'yes' ? 'Yes' : a.answer === 'partial' ? 'Partial' : 'No';
-          lines.push(`  ${i + 1}. ${qText} ${label}`);
+          lines.push(`  ${i + 1}. [${secName}] ${qText}`);
           lines.push(`     Your answer: ${ansTxt}`);
         });
         lines.push('');
