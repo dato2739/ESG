@@ -651,6 +651,30 @@
       return -1;
     }
 
+    // v10d: Get short human-readable label from qid — e.g. q_2_15_1 → "კ_2, შ_15.1"
+    // Returns "(კ_X, შ_Y)" or "(cat_X, q_Y)" depending on lang
+    function getQuestionLabel(qid, lang) {
+      if (!qid) return '';
+      const parts = qid.split('_'); // ['q', section, parent, child?]
+      if (parts.length < 3) return '';
+      const section = parts[1];  // section number as string
+      let questionNum;
+      if (parts.length === 3) {
+        // parent question e.g. q_2_15
+        questionNum = parts[2];
+      } else if (parts.length === 4) {
+        // child question e.g. q_2_15_1 → "15.1"
+        questionNum = parts[2] + '.' + parts[3];
+      } else {
+        questionNum = parts.slice(2).join('.');
+      }
+      if (lang === 'ka') {
+        return '(კ_' + section + ', შ_' + questionNum + ')';
+      } else {
+        return '(cat_' + section + ', q_' + questionNum + ')';
+      }
+    }
+
     // Helper: escape HTML
     function escapeHtml(s) {
       if (!s) return '';
@@ -2522,7 +2546,8 @@
         lines.push('');
         matchingAnswers.forEach((a, i) => {
           const qText = QUESTIONS[a.question_id] ? QUESTIONS[a.question_id][lang] : a.question_id;
-          lines.push(`  ${i + 1}. ${qText}`);
+          const label = getQuestionLabel(a.question_id, lang);
+          lines.push(`  ${i + 1}. ${qText} ${label}`);
         });
         lines.push('');
         lines.push('ნებისმიერ კითხვაზე ან განმარტებაზე მოხარული ვიქნებით დაგეხმაროთ. გთხოვთ, პასუხი მოგვწეროთ 5 სამუშაო დღეში.');
@@ -2548,7 +2573,8 @@
         lines.push('');
         matchingAnswers.forEach((a, i) => {
           const qText = QUESTIONS[a.question_id] ? QUESTIONS[a.question_id][lang] : a.question_id;
-          lines.push(`  ${i + 1}. ${qText}`);
+          const label = getQuestionLabel(a.question_id, lang);
+          lines.push(`  ${i + 1}. ${qText} ${label}`);
         });
         lines.push('');
         lines.push('We are happy to help with any questions or clarifications. Please respond within 5 working days.');
@@ -2602,8 +2628,9 @@
         lines.push('');
         matchingAnswers.forEach((a, i) => {
           const qText = QUESTIONS[a.question_id] ? QUESTIONS[a.question_id][lang] : a.question_id;
+          const label = getQuestionLabel(a.question_id, lang);
           const ansTxt = a.answer === 'yes' ? 'დიახ' : 'ნაწილობრივ';
-          lines.push(`  ${i + 1}. ${qText}`);
+          lines.push(`  ${i + 1}. ${qText} ${label}`);
           lines.push(`     თქვენი პასუხი: ${ansTxt}`);
           lines.push(`     დამადასტურებელი დოკუმენტი: ${docSuggestion(a.question_id, lang)}`);
           if (a.partial_text && a.partial_text.trim()) {
@@ -2634,8 +2661,9 @@
         lines.push('');
         matchingAnswers.forEach((a, i) => {
           const qText = QUESTIONS[a.question_id] ? QUESTIONS[a.question_id][lang] : a.question_id;
+          const label = getQuestionLabel(a.question_id, lang);
           const ansTxt = a.answer === 'yes' ? 'Yes' : 'Partial';
-          lines.push(`  ${i + 1}. ${qText}`);
+          lines.push(`  ${i + 1}. ${qText} ${label}`);
           lines.push(`     Your answer: ${ansTxt}`);
           lines.push(`     Supporting document: ${docSuggestion(a.question_id, lang)}`);
           if (a.partial_text && a.partial_text.trim()) {
@@ -2670,8 +2698,9 @@
         lines.push('');
         matchingAnswers.forEach((a, i) => {
           const qText = QUESTIONS[a.question_id] ? QUESTIONS[a.question_id][lang] : a.question_id;
+          const label = getQuestionLabel(a.question_id, lang);
           const ansTxt = a.answer === 'yes' ? 'დიახ' : a.answer === 'partial' ? 'ნაწილობრივ' : 'არა';
-          lines.push(`  ${i + 1}. ${qText}`);
+          lines.push(`  ${i + 1}. ${qText} ${label}`);
           lines.push(`     თქვენი პასუხი: ${ansTxt}`);
         });
         lines.push('');
@@ -2694,8 +2723,9 @@
         lines.push('');
         matchingAnswers.forEach((a, i) => {
           const qText = QUESTIONS[a.question_id] ? QUESTIONS[a.question_id][lang] : a.question_id;
+          const label = getQuestionLabel(a.question_id, lang);
           const ansTxt = a.answer === 'yes' ? 'Yes' : a.answer === 'partial' ? 'Partial' : 'No';
-          lines.push(`  ${i + 1}. ${qText}`);
+          lines.push(`  ${i + 1}. ${qText} ${label}`);
           lines.push(`     Your answer: ${ansTxt}`);
         });
         lines.push('');
