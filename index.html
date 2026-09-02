@@ -1550,10 +1550,21 @@
           setScreen('locked');
           return;
         }
-        // Update name/contact if user changed them
-        await updateCompany(id, { name, contact: contactNum });
-        setCompanyName(name);
-        setContact(contactNum);
+        // Update name/contact ONLY if user provided them and they differ from existing
+        // (protects against wiping name/contact on unlock re-entry when form fields are empty)
+        const updateFields = {};
+        if (name && name.trim() && name.trim() !== (company.name || '')) {
+          updateFields.name = name.trim();
+        }
+        if (contactNum && contactNum.trim() && contactNum.trim() !== (company.contact || '')) {
+          updateFields.contact = contactNum.trim();
+        }
+        if (Object.keys(updateFields).length > 0) {
+          await updateCompany(id, updateFields);
+        }
+        // Use existing values from DB as source of truth
+        setCompanyName(company.name || name || '');
+        setContact(company.contact || contactNum || '');
         // Load existing answers
         const { data: rows } = await loadAnswers(id);
         const map = {};
