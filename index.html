@@ -591,7 +591,25 @@
     }
     async function updateCompany(id, fields) {
       if (!supabase) return { error: 'no-supabase' };
-      return supabase.from('esg_companies').update(fields).eq('id', id);
+      // v12b: Defensive guard — never write empty/null name or contact
+      // (protects against accidentally wiping existing values in DB)
+      const safeFields = { ...fields };
+      if ('name' in safeFields) {
+        const v = safeFields.name;
+        if (v === null || v === undefined || (typeof v === 'string' && !v.trim())) {
+          delete safeFields.name;
+        }
+      }
+      if ('contact' in safeFields) {
+        const v = safeFields.contact;
+        if (v === null || v === undefined || (typeof v === 'string' && !v.trim())) {
+          delete safeFields.contact;
+        }
+      }
+      if (Object.keys(safeFields).length === 0) {
+        return { data: null, error: null }; // nothing to update
+      }
+      return supabase.from('esg_companies').update(safeFields).eq('id', id);
     }
     async function loadAnswers(companyId) {
       if (!supabase) return { data: [] };
