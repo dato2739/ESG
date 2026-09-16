@@ -1212,9 +1212,10 @@
       const [deleting, setDeleting] = useState(false);
       const [confirmUnlock, setConfirmUnlock] = useState(null); // { id, name }
       const [unlocking, setUnlocking] = useState(false);
+      const [scoreSort, setScoreSort] = useState(null); // null | 'asc' | 'desc'
 
       const filtered = useMemo(() => {
-        return companies.filter(c => {
+        const base = companies.filter(c => {
           if (filter === 'submitted' && !c.is_locked) return false;
           if (filter === 'in_progress' && c.is_locked) return false;
           if (search) {
@@ -1225,7 +1226,32 @@
           }
           return true;
         });
-      }, [companies, search, filter]);
+        if (scoreSort) {
+          // Precompute scores for sorting
+          const withScore = base.map(c => {
+            const answers = allAnswersByCompany[c.id] || [];
+            const adminAnswers = (allAdminAnswersByCompany || {})[c.id] || [];
+            const wStats = calcWeightedSectionStats(answers, adminAnswers);
+            return { c, score: wStats.overall.score, hasAnswers: answers.length > 0 };
+          });
+          withScore.sort((a, b) => {
+            // Companies with no answers go to the end
+            if (!a.hasAnswers && b.hasAnswers) return 1;
+            if (a.hasAnswers && !b.hasAnswers) return -1;
+            if (!a.hasAnswers && !b.hasAnswers) return 0;
+            return scoreSort === 'asc' ? a.score - b.score : b.score - a.score;
+          });
+          return withScore.map(x => x.c);
+        }
+        return base;
+      }, [companies, search, filter, scoreSort, allAnswersByCompany, allAdminAnswersByCompany]);
+
+      const cycleScoreSort = () => {
+        // null → desc → asc → null
+        if (scoreSort === null) setScoreSort('desc');
+        else if (scoreSort === 'desc') setScoreSort('asc');
+        else setScoreSort(null);
+      };
 
       const formatDate = (d) => {
         if (!d) return '—';
@@ -1292,7 +1318,18 @@
                   React.createElement('th', { className: 'text-left px-4 py-3 font-medium text-stone-600 text-xs uppercase tracking-wider' }, T[lang].thContact),
                   React.createElement('th', { className: 'text-left px-4 py-3 font-medium text-stone-600 text-xs uppercase tracking-wider' }, T[lang].thStatus),
                   React.createElement('th', { className: 'text-left px-4 py-3 font-medium text-stone-600 text-xs uppercase tracking-wider' }, T[lang].thDate),
-                  React.createElement('th', { className: 'text-left px-4 py-3 font-medium text-stone-600 text-xs uppercase tracking-wider' }, T[lang].thScore),
+                  React.createElement('th', { className: 'text-left px-4 py-3 font-medium text-stone-600 text-xs uppercase tracking-wider' },
+                    React.createElement('button', {
+                      onClick: cycleScoreSort,
+                      className: 'inline-flex items-center gap-1 hover:text-stone-900 transition',
+                      title: scoreSort === 'desc' ? (lang === 'ka' ? 'კლებადობით' : 'Descending') : scoreSort === 'asc' ? (lang === 'ka' ? 'ზრდადობით' : 'Ascending') : (lang === 'ka' ? 'დახარისხების გარეშე' : 'No sort')
+                    },
+                      React.createElement('span', null, T[lang].thScore),
+                      React.createElement('span', { className: 'text-[10px]' },
+                        scoreSort === 'desc' ? '▼' : scoreSort === 'asc' ? '▲' : '⇅'
+                      )
+                    )
+                  ),
                   React.createElement('th', { className: 'text-right px-4 py-3 font-medium text-stone-600 text-xs uppercase tracking-wider' }, T[lang].thActions)
                 )
               ),
