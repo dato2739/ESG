@@ -233,6 +233,19 @@
         maxScore: 'მაქს.',
         adminSectionTitle: 'ზოგადი / კომერციული (ადმინი)',
         adminSectionSubtitle: '7 კითხვას ავსებს ადმინი — შეაფასეთ ეს კომპანია',
+        // v12: Admin completion
+        adminCompletedByLabel: 'შემფასებელი (სახელი და გვარი)',
+        adminCompletedByPlaceholder: 'მაგ. თეონა ქველიძე',
+        adminCompleteBtn: '✓ დასრულება',
+        adminCompletedBadge: 'დასრულებული',
+        adminCompletedBy: 'შემფასებელი:',
+        adminCompletedAt: 'დასრულების თარიღი:',
+        adminCompletedLocked: 'შეფასება დაფიქსირდა. შესცვლა შესაძლებელია მხოლოდ განბლოკვის შემდეგ.',
+        adminCompleteConfirmTitle: 'შეფასების დასრულება',
+        adminCompleteConfirmMsg: 'ნამდვილად გსურთ შეფასების დასრულება? ამის შემდეგ ცვლილება მხოლოდ განბლოკვის შემდეგ იქნება შესაძლებელი.',
+        adminCompleteConfirmBtn: 'დიახ, დასრულება',
+        adminCompleteNoName: 'გთხოვთ ჯერ შეიყვანოთ თქვენი სახელი და გვარი',
+        statusCompleted: '✓ დასრულებული',
         contractorPdfBtn: '📄 კონტრაქტორის PDF',
         fullPdfBtn: '📊 სრული PDF (ადმინი)',
         contractorHistoryPdfBtn: '📄 კონტრ. წინა ვერსია',
@@ -454,6 +467,19 @@
         maxScore: 'max.',
         adminSectionTitle: 'General / Commercial (Admin)',
         adminSectionSubtitle: '7 questions filled by admin — rate this company',
+        // v12: Admin completion
+        adminCompletedByLabel: 'Evaluator (name and surname)',
+        adminCompletedByPlaceholder: 'e.g. Teona Kvelidze',
+        adminCompleteBtn: '✓ Complete',
+        adminCompletedBadge: 'Completed',
+        adminCompletedBy: 'Evaluator:',
+        adminCompletedAt: 'Completed on:',
+        adminCompletedLocked: 'Assessment is finalized. Changes are only possible after unlocking.',
+        adminCompleteConfirmTitle: 'Finalize assessment',
+        adminCompleteConfirmMsg: 'Are you sure you want to finalize the assessment? After this, changes will only be possible after unlocking.',
+        adminCompleteConfirmBtn: 'Yes, complete',
+        adminCompleteNoName: 'Please enter your name and surname first',
+        statusCompleted: '✓ Completed',
         contractorPdfBtn: '📄 Contractor PDF',
         fullPdfBtn: '📊 Full PDF (Admin)',
         contractorHistoryPdfBtn: '📄 Contr. previous version',
@@ -795,7 +821,13 @@
       // Step 5: Unlock the company
       const { error } = await supabase
         .from('esg_companies')
-        .update({ is_locked: false, submitted_at: null })
+        .update({
+          is_locked: false,
+          submitted_at: null,
+          admin_completed: false,
+          admin_completed_by: null,
+          admin_completed_at: null
+        })
         .eq('id', companyId);
       return { error };
     }
@@ -1364,9 +1396,11 @@
                       className: 'px-4 py-3 cursor-pointer',
                       onClick: () => onSelectCompany(c.id)
                     },
-                      c.is_locked
-                        ? React.createElement('span', { className: 'inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium bg-emerald-50 text-emerald-700 border border-emerald-200' }, T[lang].statusSubmitted)
-                        : React.createElement('span', { className: 'inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium bg-amber-50 text-amber-700 border border-amber-200' }, T[lang].statusInProgress)
+                      c.admin_completed
+                        ? React.createElement('span', { className: 'inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium bg-blue-50 text-blue-700 border border-blue-200' }, T[lang].statusCompleted)
+                        : c.is_locked
+                          ? React.createElement('span', { className: 'inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium bg-emerald-50 text-emerald-700 border border-emerald-200' }, T[lang].statusSubmitted)
+                          : React.createElement('span', { className: 'inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium bg-amber-50 text-amber-700 border border-amber-200' }, T[lang].statusInProgress)
                     ),
                     React.createElement('td', { 
                       className: 'px-4 py-3 text-stone-600 text-xs cursor-pointer',
@@ -1713,6 +1747,12 @@
       const [historyPdfLoading, setHistoryPdfLoading] = useState(false);
       const [adminAnswers, setAdminAnswers] = useState([]); // v8: admin general/commercial answers
       const [savingAdmin, setSavingAdmin] = useState({}); // { qid: true } while saving
+      // v12: Admin completion
+      const [evaluatorName, setEvaluatorName] = useState('');
+      const [adminCompleted, setAdminCompleted] = useState(false);
+      const [adminCompletedAt, setAdminCompletedAt] = useState(null);
+      const [confirmComplete, setConfirmComplete] = useState(false);
+      const [completing, setCompleting] = useState(false);
 
       useEffect(() => {
         (async () => {
@@ -1721,6 +1761,12 @@
           const { data: a } = await supabase.from('esg_answers').select('*').eq('company_id', companyId);
           setCompany(c);
           setAnswers(a || []);
+          // v12: Load completion status
+          if (c) {
+            setAdminCompleted(!!c.admin_completed);
+            setEvaluatorName(c.admin_completed_by || '');
+            setAdminCompletedAt(c.admin_completed_at || null);
+          }
           // Load weights (v8)
           await loadWeights();
           // Load admin answers (create defaults if needed)
@@ -1761,7 +1807,9 @@
       });
 
       // v8: Handler for changing admin answer
+      // v12: Handler for changing admin answer (blocked when completed)
       const handleAdminAnswerChange = async (qid, newAnswer) => {
+        if (adminCompleted) return; // Locked until unlock
         setSavingAdmin(prev => ({ ...prev, [qid]: true }));
         // Optimistic update
         setAdminAnswers(prev => {
@@ -1782,6 +1830,32 @@
         if (error) {
           console.error('Admin answer save error:', error);
         }
+      };
+
+      // v12: Complete assessment
+      const handleCompleteAssessment = async () => {
+        if (!evaluatorName.trim()) {
+          alert(T[lang].adminCompleteNoName);
+          return;
+        }
+        setCompleting(true);
+        const now = new Date().toISOString();
+        const { error } = await supabase
+          .from('esg_companies')
+          .update({
+            admin_completed: true,
+            admin_completed_by: evaluatorName.trim(),
+            admin_completed_at: now
+          })
+          .eq('id', companyId);
+        setCompleting(false);
+        if (error) {
+          alert('Error: ' + (error.message || error.code || ''));
+          return;
+        }
+        setAdminCompleted(true);
+        setAdminCompletedAt(now);
+        setConfirmComplete(false);
       };
 
       const downloadContractorPdf = async () => {
@@ -2091,18 +2165,18 @@
                   React.createElement('div', { className: 'flex gap-1 flex-shrink-0' },
                     React.createElement('button', {
                       onClick: () => handleAdminAnswerChange(qid, 'yes'),
-                      disabled: isSaving,
-                      className: btnBase + ' ' + (currentAnswer === 'yes' ? btnActive.yes : btnInactive)
+                      disabled: isSaving || adminCompleted,
+                      className: btnBase + ' ' + (currentAnswer === 'yes' ? btnActive.yes : btnInactive) + (adminCompleted ? ' opacity-60 cursor-not-allowed' : '')
                     }, T[lang].answerYes),
                     React.createElement('button', {
                       onClick: () => handleAdminAnswerChange(qid, 'partial'),
-                      disabled: isSaving,
-                      className: btnBase + ' ' + (currentAnswer === 'partial' ? btnActive.partial : btnInactive)
+                      disabled: isSaving || adminCompleted,
+                      className: btnBase + ' ' + (currentAnswer === 'partial' ? btnActive.partial : btnInactive) + (adminCompleted ? ' opacity-60 cursor-not-allowed' : '')
                     }, T[lang].answerPartial),
                     React.createElement('button', {
                       onClick: () => handleAdminAnswerChange(qid, 'no'),
-                      disabled: isSaving,
-                      className: btnBase + ' ' + (currentAnswer === 'no' ? btnActive.no : btnInactive)
+                      disabled: isSaving || adminCompleted,
+                      className: btnBase + ' ' + (currentAnswer === 'no' ? btnActive.no : btnInactive) + (adminCompleted ? ' opacity-60 cursor-not-allowed' : '')
                     }, T[lang].answerNo)
                   ),
                   React.createElement('span', {
@@ -2110,6 +2184,58 @@
                   }, earned.toFixed(1) + ' / ' + wPct.toFixed(1))
                 );
               })
+            ),
+            // v12: Admin completion block
+            React.createElement('div', {
+              className: 'mt-4 pt-4 border-t border-stone-200'
+            },
+              adminCompleted ? (
+                // Locked state — show badge + info
+                React.createElement('div', {
+                  className: 'bg-emerald-50 border border-emerald-200 rounded-lg p-4'
+                },
+                  React.createElement('div', { className: 'flex items-center gap-2 mb-2' },
+                    React.createElement('span', {
+                      className: 'inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-semibold text-emerald-700 bg-emerald-100 border border-emerald-300 rounded-full'
+                    }, T[lang].adminCompletedBadge)
+                  ),
+                  React.createElement('div', { className: 'text-[12px] text-stone-700 space-y-1' },
+                    React.createElement('div', null,
+                      React.createElement('span', { className: 'text-stone-500' }, T[lang].adminCompletedBy + ' '),
+                      React.createElement('span', { className: 'font-semibold' }, evaluatorName)
+                    ),
+                    adminCompletedAt ? React.createElement('div', null,
+                      React.createElement('span', { className: 'text-stone-500' }, T[lang].adminCompletedAt + ' '),
+                      React.createElement('span', { className: 'font-semibold' },
+                        new Date(adminCompletedAt).toLocaleDateString(lang === 'ka' ? 'ka-GE' : 'en-US', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })
+                      )
+                    ) : null
+                  ),
+                  React.createElement('p', { className: 'text-[11px] text-stone-500 mt-3 italic' }, T[lang].adminCompletedLocked)
+                )
+              ) : (
+                // Active state — name input + button
+                React.createElement('div', { className: 'space-y-3' },
+                  React.createElement('div', null,
+                    React.createElement('label', {
+                      className: 'block text-[11px] font-semibold text-stone-600 uppercase tracking-wider mb-1.5'
+                    }, T[lang].adminCompletedByLabel),
+                    React.createElement('input', {
+                      type: 'text',
+                      value: evaluatorName,
+                      onChange: e => setEvaluatorName(e.target.value),
+                      placeholder: T[lang].adminCompletedByPlaceholder,
+                      className: 'w-full h-10 px-3 text-sm border border-stone-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500'
+                    })
+                  ),
+                  React.createElement('button', {
+                    onClick: () => setConfirmComplete(true),
+                    disabled: !evaluatorName.trim(),
+                    className: 'w-full h-10 px-4 text-sm font-medium text-white rounded-lg shadow-sm hover:shadow disabled:opacity-50 disabled:cursor-not-allowed',
+                    style: { background: !evaluatorName.trim() ? '#a8a29e' : 'linear-gradient(135deg, #059669, #10b981)' }
+                  }, T[lang].adminCompleteBtn)
+                )
+              )
             )
           ),
 
@@ -2221,6 +2347,44 @@
                 className: 'h-10 px-5 text-sm font-medium text-white rounded-lg transition shadow-sm hover:shadow',
                 style: { background: emailCopied ? '#059669' : 'linear-gradient(135deg, #0E5BA8, #1976D2)' }
               }, emailCopied ? T[lang].emailCopied : ('📋 ' + T[lang].emailCopy))
+            )
+          )
+        ) : null,
+
+        // v12: Completion confirmation modal
+        confirmComplete ? React.createElement('div', {
+          className: 'fixed inset-0 bg-black/50 flex items-center justify-center px-4 z-50 fade-in',
+          onClick: () => !completing && setConfirmComplete(false)
+        },
+          React.createElement('div', {
+            className: 'bg-white rounded-xl max-w-md w-full p-6 shadow-2xl',
+            onClick: e => e.stopPropagation()
+          },
+            React.createElement('div', { className: 'flex items-start gap-4 mb-5' },
+              React.createElement('div', {
+                className: 'w-12 h-12 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-2xl flex-shrink-0'
+              }, '✓'),
+              React.createElement('div', null,
+                React.createElement('h3', { className: 'text-base font-semibold text-stone-900 mb-1' }, T[lang].adminCompleteConfirmTitle),
+                React.createElement('p', { className: 'text-sm text-stone-600' }, T[lang].adminCompleteConfirmMsg)
+              )
+            ),
+            React.createElement('div', { className: 'bg-stone-50 border border-stone-200 rounded-lg p-3 mb-4' },
+              React.createElement('div', { className: 'text-[11px] text-stone-500 uppercase tracking-wider mb-1' }, T[lang].adminCompletedByLabel),
+              React.createElement('div', { className: 'text-sm font-semibold text-stone-900' }, evaluatorName)
+            ),
+            React.createElement('div', { className: 'flex gap-2 justify-end' },
+              React.createElement('button', {
+                onClick: () => setConfirmComplete(false),
+                disabled: completing,
+                className: 'h-10 px-4 text-sm text-stone-700 border border-stone-200 hover:bg-stone-50 rounded-lg transition disabled:opacity-50'
+              }, T[lang].cancel),
+              React.createElement('button', {
+                onClick: handleCompleteAssessment,
+                disabled: completing,
+                className: 'h-10 px-4 text-sm font-medium text-white rounded-lg transition disabled:opacity-50',
+                style: { background: 'linear-gradient(135deg, #059669, #10b981)' }
+              }, completing ? '...' : T[lang].adminCompleteConfirmBtn)
             )
           )
         ) : null
