@@ -31,7 +31,7 @@
   <div id="root"></div>
 
   <script type="module">
-    import React, { useState, useEffect, useMemo } from 'react';
+    import React, { useState, useEffect, useMemo, useRef } from 'react';
     import { createRoot } from 'react-dom/client';
     import { createClient } from '@supabase/supabase-js';
 
@@ -4130,6 +4130,446 @@
     // ============================================
     // ROOT APP
     // ============================================
+    // ============================================
+    // v14: AI Analytics Chat Panel (Ctrl+Shift+A)
+    // Rule-based analytics assistant — no external API
+    // ============================================
+    const SECTION_NAMES_KA = {
+      1: 'ზოგადი/კომერციული', 2: 'ხარისხი', 3: 'ადამიანის უფლებები',
+      4: 'შრომა', 5: 'გარემო', 6: 'ანტი-კორუფცია',
+      7: 'ჯანდაცვა და უსაფრთხოება', 8: 'კლიმატის ცვლილება'
+    };
+    const SECTION_NAMES_EN = {
+      1: 'General/Commercial', 2: 'Quality', 3: 'Human Rights',
+      4: 'Labour', 5: 'Environment', 6: 'Anti-Corruption',
+      7: 'Health & Safety', 8: 'Climate Change'
+    };
+
+    function qidSection(qid) {
+      try { return parseInt(qid.split('_')[1]); } catch { return 0; }
+    }
+
+    // ============================================
+    // Query handlers — the "brain" of the chat
+    // ============================================
+    function AiChatPanel({ companies, allAnswersByCompany, allAdminAnswersByCompany, lang, onClose }) {
+      const [messages, setMessages] = useState([
+        { role: 'assistant', content: lang === 'ka'
+          ? 'გამარჯობა! მე ვარ შენი ESG ანალიტიკური ასისტენტი. შემიძლია გიპასუხო კითხვებზე ყველა კონტრაქტორის მონაცემის შესახებ. აირჩიე ქვემოთ მოცემული ქვერი ან დასვი კითხვა.'
+          : 'Hello! I am your ESG analytics assistant. I can answer questions about all contractor data. Pick a query below or ask a question.' }
+      ]);
+      const [input, setInput] = useState('');
+      const [thinking, setThinking] = useState(false);
+      const messagesEndRef = useRef(null);
+
+      useEffect(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+      }, [messages]);
+
+      const SECTION_NAMES = lang === 'ka' ? SECTION_NAMES_KA : SECTION_NAMES_EN;
+
+      // Build analytics data snapshot
+      const analytics = useMemo(() => {
+        const companyData = companies.filter(c => c.is_locked).map(c => {
+          const answers = allAnswersByCompany[c.id] || [];
+          const adminAnswers = (allAdminAnswersByCompany || {})[c.id] || [];
+          const wStats = calcWeightedSectionStats(answers, adminAnswers);
+          const cp = calcCategoryPositives(answers);
+          const y = answers.filter(a => a.answer === 'yes').length;
+          const p = answers.filter(a => a.answer === 'partial').length;
+          const n = answers.filter(a => a.answer === 'no').length;
+          const posScore = y + p * 0.5;
+          const posPct = answers.length > 0 ? (posScore / answers.length * 100) : 0;
+          return { company: c, answers, adminAnswers, wStats, cp, y, p, n, posScore, posPct, totalAnswers: answers.length };
+        });
+        return companyData;
+      }, [companies, allAnswersByCompany, allAdminAnswersByCompany]);
+
+      // ============================================
+      // Query functions (each returns formatted response string)
+      // ============================================
+      const Q = {
+        top10: () => {
+          const sorted = [...analytics].sort((a, b) => b.wStats.overall.score - a.wStats.overall.score).slice(0, 10);
+          let out = lang === 'ka' ? '🏆 **ტოპ 10 კომპანია (ESG ქულით)**\n\n' : '🏆 **Top 10 companies (by ESG score)**\n\n';
+          sorted.forEach((d, i) => {
+            out += `${i + 1}. **${d.company.name}** — ${d.wStats.overall.score.toFixed(1)}% (${d.y}✓/${d.p}◐/${d.n}✗)\n`;
+          });
+          return out;
+        },
+        bottom10: () => {
+          const sorted = [...analytics].sort((a, b) => a.wStats.overall.score - b.wStats.overall.score).slice(0, 10);
+          let out = lang === 'ka' ? '📉 **ქვედა 10 კომპანია (ESG ქულით)**\n\n' : '📉 **Bottom 10 companies (by ESG score)**\n\n';
+          sorted.forEach((d, i) => {
+            out += `${i + 1}. **${d.company.name}** — ${d.wStats.overall.score.toFixed(1)}% (${d.y}✓/${d.p}◐/${d.n}✗)\n`;
+          });
+          return out;
+        },
+        overconfident: () => {
+          const flagged = analytics.filter(d => d.totalAnswers > 20 && d.y / d.totalAnswers > 0.6 && d.p === 0);
+          let out = lang === 'ka' ? '⚠️ **ზედმეტად თავდაჯერებული (ბინარული პასუხები)**\n\n' : '⚠️ **Overconfident (binary answers)**\n\n';
+          if (flagged.length === 0) return out + (lang === 'ka' ? 'არ გამოვლინდა.' : 'None found.');
+          out += lang === 'ka' ? 'კომპანიები ბევრი „დიახ“-ით და 0 „ნაწილობრივით“ — სავარაუდოდ არ იყენებენ შუა პასუხის ვარიანტს:\n\n' : 'Companies with many "Yes" and 0 "Partial" — likely not using the middle option:\n\n';
+          flagged.forEach(d => {
+            out += `• **${d.company.name}** — ${d.y}✓ / ${d.p}◐ / ${d.n}✗ (${d.wStats.overall.score.toFixed(1)}%)\n`;
+          });
+          return out;
+        },
+        overcautious: () => {
+          const flagged = analytics.filter(d => d.totalAnswers > 20 && d.p / d.totalAnswers > 0.5);
+          let out = lang === 'ka' ? '⚠️ **ზედმეტად მოკრძალებული (ზედმეტი „ნაწილობრივ“)**\n\n' : '⚠️ **Overcautious (too many "Partial")**\n\n';
+          if (flagged.length === 0) return out + (lang === 'ka' ? 'არ გამოვლინდა.' : 'None found.');
+          flagged.forEach(d => {
+            out += `• **${d.company.name}** — ${d.y}✓ / ${d.p}◐ / ${d.n}✗ (${d.wStats.overall.score.toFixed(1)}%)\n`;
+          });
+          return out;
+        },
+        incomplete: () => {
+          const total = Object.keys(QUESTIONS).filter(q => !q.startsWith('q_1_')).length;
+          const flagged = analytics.filter(d => d.totalAnswers > 0 && d.totalAnswers < total);
+          let out = lang === 'ka' ? `📝 **არასრული შევსება** (სრული = ${total} კითხვა)\n\n` : `📝 **Incomplete submissions** (full = ${total} questions)\n\n`;
+          if (flagged.length === 0) return out + (lang === 'ka' ? 'ყველა კომპანიამ სრულად შეავსო.' : 'All companies submitted complete answers.');
+          flagged.forEach(d => {
+            out += `• **${d.company.name}** — ${d.totalAnswers} / ${total}\n`;
+          });
+          return out;
+        },
+        sectionWeakness: () => {
+          const secTotal = { 2: { y: 0, p: 0, n: 0, t: 0 }, 3: { y: 0, p: 0, n: 0, t: 0 }, 4: { y: 0, p: 0, n: 0, t: 0 }, 5: { y: 0, p: 0, n: 0, t: 0 }, 6: { y: 0, p: 0, n: 0, t: 0 }, 7: { y: 0, p: 0, n: 0, t: 0 }, 8: { y: 0, p: 0, n: 0, t: 0 } };
+          analytics.forEach(d => {
+            d.answers.forEach(a => {
+              const s = qidSection(a.question_id);
+              if (!secTotal[s]) return;
+              secTotal[s].t += 1;
+              if (a.answer === 'yes') secTotal[s].y += 1;
+              else if (a.answer === 'partial') secTotal[s].p += 1;
+              else if (a.answer === 'no') secTotal[s].n += 1;
+            });
+          });
+          let out = lang === 'ka' ? '📊 **სექციების სისუსტეები (ყველა კომპანიაზე)**\n\n' : '📊 **Section-level weakness (across all companies)**\n\n';
+          const sorted = Object.entries(secTotal).sort((a, b) => {
+            const pa = (a[1].y + a[1].p * 0.5) / Math.max(a[1].t, 1);
+            const pb = (b[1].y + b[1].p * 0.5) / Math.max(b[1].t, 1);
+            return pa - pb;
+          });
+          sorted.forEach(([s, d]) => {
+            const pct = d.t > 0 ? ((d.y + d.p * 0.5) / d.t * 100).toFixed(1) : '—';
+            const icon = parseFloat(pct) < 50 ? '🔴' : parseFloat(pct) < 65 ? '🟡' : '🟢';
+            out += `${icon} **${SECTION_NAMES[s]}** — ${pct}% (${d.y}✓/${d.p}◐/${d.n}✗)\n`;
+          });
+          return out;
+        },
+        hsRisk: () => {
+          const flagged = analytics.map(d => {
+            const hsAns = d.answers.filter(a => qidSection(a.question_id) === 7);
+            const noCount = hsAns.filter(a => a.answer === 'no').length;
+            return { d, noCount, hsTotal: hsAns.length };
+          }).filter(x => x.noCount >= 2).sort((a, b) => b.noCount - a.noCount);
+          let out = lang === 'ka' ? '🚨 **ჯანდაცვა და უსაფრთხოება — „არა“ პასუხები**\n\n' : '🚨 **Health & Safety — "No" answers**\n\n';
+          if (flagged.length === 0) return out + (lang === 'ka' ? 'არ გამოვლინდა.' : 'None found.');
+          out += lang === 'ka' ? 'ენერგოსექტორში H&S-ზე „არა“ კრიტიკულია:\n\n' : 'In energy sector, "No" on H&S is critical:\n\n';
+          flagged.forEach(x => {
+            out += `• **${x.d.company.name}** — ${x.noCount} / ${x.hsTotal} ${lang === 'ka' ? '„არა“' : '"No"'} (ESG ${x.d.wStats.overall.score.toFixed(1)}%)\n`;
+          });
+          return out;
+        },
+        duplicatePatterns: () => {
+          const patterns = {};
+          analytics.forEach(d => {
+            const key = `${d.y}-${d.p}-${d.n}`;
+            if (!patterns[key]) patterns[key] = [];
+            patterns[key].push(d.company.name);
+          });
+          const dups = Object.entries(patterns).filter(([k, v]) => v.length > 1 && k !== '0-0-0');
+          let out = lang === 'ka' ? '👥 **იდენტური პასუხის პატერნები (შესაძლო დუბლიკატები)**\n\n' : '👥 **Identical answer patterns (potential duplicates)**\n\n';
+          if (dups.length === 0) return out + (lang === 'ka' ? 'არ გამოვლინდა.' : 'None found.');
+          out += lang === 'ka' ? 'კომპანიები ზუსტად იგივე Y/P/N პასუხების რაოდენობით — ხშირად იგივე ავტორი ავსებდა:\n\n' : 'Companies with exact same Y/P/N counts — often same author:\n\n';
+          dups.forEach(([k, v]) => {
+            out += `• პატერნი ${k.replace(/-/g, '/')}: ${v.join(', ')}\n`;
+          });
+          return out;
+        },
+        isoConsistency: () => {
+          let out = lang === 'ka' ? '🔍 **ISO vs ხარისხის სახელმძღვანელო — ლოგიკური შემოწმება**\n\n' : '🔍 **ISO vs Quality Manual — consistency check**\n\n';
+          const bad = [];
+          const good = [];
+          analytics.forEach(d => {
+            const iso = d.answers.find(a => a.question_id === 'q_2_1')?.answer;
+            const manual = d.answers.find(a => a.question_id === 'q_2_2')?.answer;
+            if (iso === 'no' && manual === 'yes') bad.push(d.company.name);
+            if (iso === 'yes') good.push(d.company.name);
+          });
+          out += (lang === 'ka' ? '✅ **ISO სერტიფიცირებული:** ' : '✅ **ISO certified:** ') + good.length + '\n';
+          good.forEach(n => out += `  • ${n}\n`);
+          out += '\n';
+          out += (lang === 'ka' ? '⚠️ **ISO = არა, მაგრამ ხარისხის სახელმძღვანელო = დიახ:** ' : '⚠️ **ISO = No, but Quality Manual = Yes:** ') + bad.length + '\n';
+          bad.forEach(n => out += `  • ${n}\n`);
+          return out;
+        },
+        riskZones: () => {
+          const groups = { A: [], B: [], C: [], D: [] };
+          analytics.forEach(d => {
+            const score = d.wStats.overall.score;
+            const binaryRisk = d.totalAnswers > 20 && d.y / d.totalAnswers > 0.6 && d.p === 0;
+            const cautionRisk = d.totalAnswers > 20 && d.p / d.totalAnswers > 0.5;
+            const incomplete = d.totalAnswers < Object.keys(QUESTIONS).filter(q => !q.startsWith('q_1_')).length * 0.9;
+            if (score < 50 || cautionRisk || incomplete) groups.D.push({ d, flags: [score < 50 ? 'low score' : null, cautionRisk ? 'overcautious' : null, incomplete ? 'incomplete' : null].filter(Boolean) });
+            else if (binaryRisk || score > 80) groups.C.push({ d, flags: [binaryRisk ? 'binary pattern' : null, score > 80 ? 'very high score' : null].filter(Boolean) });
+            else if (score >= 60 && score < 75) groups.B.push({ d, flags: [] });
+            else groups.A.push({ d, flags: [] });
+          });
+          let out = lang === 'ka' ? '🎯 **რისკ-ჯგუფები**\n\n' : '🎯 **Risk zones**\n\n';
+          out += `🟢 **${lang === 'ka' ? 'ჯგუფი A — უსაფრთხო' : 'Group A — Safe'}:** ${groups.A.length}\n`;
+          groups.A.forEach(g => out += `  • ${g.d.company.name} (${g.d.wStats.overall.score.toFixed(1)}%)\n`);
+          out += `\n🟡 **${lang === 'ka' ? 'ჯგუფი B — საშუალო რისკი' : 'Group B — Medium risk'}:** ${groups.B.length}\n`;
+          groups.B.forEach(g => out += `  • ${g.d.company.name} (${g.d.wStats.overall.score.toFixed(1)}%)\n`);
+          out += `\n🟠 **${lang === 'ka' ? 'ჯგუფი C — მაღალი რისკი' : 'Group C — High risk'}:** ${groups.C.length}\n`;
+          groups.C.forEach(g => out += `  • ${g.d.company.name} (${g.d.wStats.overall.score.toFixed(1)}%) — ${g.flags.join(', ')}\n`);
+          out += `\n🔴 **${lang === 'ka' ? 'ჯგუფი D — კრიტიკული' : 'Group D — Critical'}:** ${groups.D.length}\n`;
+          groups.D.forEach(g => out += `  • ${g.d.company.name} (${g.d.wStats.overall.score.toFixed(1)}%) — ${g.flags.join(', ')}\n`);
+          return out;
+        },
+        summary: () => {
+          const n = analytics.length;
+          if (n === 0) return lang === 'ka' ? 'არ არის კომპანიები ბაზაში.' : 'No companies in database.';
+          const avg = analytics.reduce((s, d) => s + d.wStats.overall.score, 0) / n;
+          const totalY = analytics.reduce((s, d) => s + d.y, 0);
+          const totalP = analytics.reduce((s, d) => s + d.p, 0);
+          const totalN = analytics.reduce((s, d) => s + d.n, 0);
+          const completed = analytics.filter(d => d.company.admin_completed).length;
+          let out = lang === 'ka' ? '📈 **ზოგადი სურათი**\n\n' : '📈 **Overview**\n\n';
+          out += (lang === 'ka' ? `• შევსებული კომპანიები: **${n}**\n` : `• Submitted companies: **${n}**\n`);
+          out += (lang === 'ka' ? `• ადმინის მიერ დასრულებული: **${completed}**\n` : `• Admin-completed: **${completed}**\n`);
+          out += (lang === 'ka' ? `• საშუალო ESG ქულა: **${avg.toFixed(1)}%**\n` : `• Average ESG score: **${avg.toFixed(1)}%**\n`);
+          out += (lang === 'ka' ? `• სულ „დიახ“: ${totalY}\n` : `• Total Yes: ${totalY}\n`);
+          out += (lang === 'ka' ? `• სულ „ნაწილობრივ“: ${totalP}\n` : `• Total Partial: ${totalP}\n`);
+          out += (lang === 'ka' ? `• სულ „არა“: ${totalN}\n` : `• Total No: ${totalN}\n`);
+          return out;
+        },
+        company: (name) => {
+          const d = analytics.find(x => x.company.name && x.company.name.toLowerCase().includes(name.toLowerCase()));
+          if (!d) return lang === 'ka' ? `კომპანია „${name}" ვერ ვიპოვე.` : `Company "${name}" not found.`;
+          let out = `🏢 **${d.company.name}** (ID: ${d.company.id})\n\n`;
+          out += (lang === 'ka' ? `• ESG ქულა: **${d.wStats.overall.score.toFixed(1)}%**\n` : `• ESG score: **${d.wStats.overall.score.toFixed(1)}%**\n`);
+          out += (lang === 'ka' ? `• პასუხები: ${d.y}✓ / ${d.p}◐ / ${d.n}✗ (სულ ${d.totalAnswers})\n` : `• Answers: ${d.y}✓ / ${d.p}◐ / ${d.n}✗ (total ${d.totalAnswers})\n`);
+          out += (lang === 'ka' ? `• კონტაქტი: ${d.company.contact || '—'}\n` : `• Contact: ${d.company.contact || '—'}\n`);
+          out += (lang === 'ka' ? `• სტატუსი: ${d.company.admin_completed ? '✓ დასრულებული' : d.company.is_locked ? 'შევსებული' : 'პროცესში'}\n\n` : `• Status: ${d.company.admin_completed ? '✓ Completed' : d.company.is_locked ? 'Submitted' : 'In progress'}\n\n`);
+          out += (lang === 'ka' ? '**კატეგორიებით დადებითი:**\n' : '**Positive by category:**\n');
+          out += `🟢 Cat 1: ${d.cp[1].positive}  |  🟡 Cat 2: ${d.cp[2].positive}  |  🔴 Cat 3: ${d.cp[3].positive}\n\n`;
+          out += (lang === 'ka' ? '**სექციებით:**\n' : '**By section:**\n');
+          [2, 3, 4, 5, 6, 7, 8].forEach(s => {
+            const sAns = d.answers.filter(a => qidSection(a.question_id) === s);
+            if (sAns.length === 0) return;
+            const y = sAns.filter(a => a.answer === 'yes').length;
+            const p = sAns.filter(a => a.answer === 'partial').length;
+            const n = sAns.filter(a => a.answer === 'no').length;
+            const pct = ((y + p * 0.5) / sAns.length * 100).toFixed(0);
+            out += `• ${SECTION_NAMES[s]}: ${y}✓/${p}◐/${n}✗ — ${pct}%\n`;
+          });
+          return out;
+        },
+        docRequest: () => {
+          const key = { 'q_2_1': lang === 'ka' ? 'ISO სერტიფიკატი' : 'ISO certificate', 'q_2_2': lang === 'ka' ? 'ხარისხის სახელმძღვანელო' : 'Quality manual', 'q_3_1': lang === 'ka' ? 'ადამიანის უფლებების პოლიტიკა' : 'HR policy', 'q_5_1': lang === 'ka' ? 'გარემოს პოლიტიკა' : 'Environment policy', 'q_6_1': lang === 'ka' ? 'ანტი-კორუფციული პოლიტიკა' : 'Anti-corruption policy', 'q_7_1': lang === 'ka' ? 'H&S პოლიტიკა' : 'H&S policy' };
+          let out = lang === 'ka' ? '📑 **ვისგან რა დოკუმენტი უნდა მოითხოვო**\n\n' : '📑 **Who to request what document from**\n\n';
+          Object.entries(key).forEach(([qid, docName]) => {
+            const yesCompanies = analytics.filter(d => d.answers.find(a => a.question_id === qid && a.answer === 'yes'));
+            if (yesCompanies.length === 0) return;
+            out += `**${docName}** (${yesCompanies.length}):\n`;
+            yesCompanies.slice(0, 15).forEach(d => out += `  • ${d.company.name}\n`);
+            if (yesCompanies.length > 15) out += `  ... ${lang === 'ka' ? 'და კიდევ' : 'and'} ${yesCompanies.length - 15}\n`;
+            out += '\n';
+          });
+          return out;
+        },
+        help: () => {
+          return lang === 'ka'
+            ? '💡 **ხელმისაწვდომი ქვერი (დააწკაპე ქვემოთ):**\n\n• 📈 ზოგადი სურათი\n• 🏆 ტოპ 10\n• 📉 ქვედა 10\n• 🎯 რისკ-ჯგუფები\n• ⚠️ ზედმეტად თავდაჯერებული\n• ⚠️ ზედმეტად მოკრძალებული\n• 📝 არასრული შევსება\n• 📊 სექციების სისუსტეები\n• 🚨 H&S რისკი\n• 👥 დუბლიკატი პატერნები\n• 🔍 ISO ლოგიკური შემოწმება\n• 📑 დოკუმენტის მოთხოვნა — ვისგან\n\n**ასევე** შეგიძლია შეიყვანო კომპანიის სახელი (მაგ. „შპს ჯერო") რომ კონკრეტული კომპანიის დეტალები ნახო.'
+            : '💡 **Available queries (click below):**\n\n• 📈 Overview\n• 🏆 Top 10\n• 📉 Bottom 10\n• 🎯 Risk zones\n• ⚠️ Overconfident\n• ⚠️ Overcautious\n• 📝 Incomplete\n• 📊 Section weakness\n• 🚨 H&S risk\n• 👥 Duplicate patterns\n• 🔍 ISO consistency\n• 📑 Document requests\n\n**Also** you can type a company name (e.g. "Burjiani") to see its details.';
+        }
+      };
+
+      // ============================================
+      // Query intent matching (simple keyword routing)
+      // ============================================
+      function routeQuery(text) {
+        const t = text.toLowerCase().trim();
+        // Georgian + English keyword matching
+        if (/ტოპ|top/.test(t) && /10|ათი/.test(t)) return Q.top10();
+        if (/ქვედა|ბოლო|bottom|worst|lowest/.test(t) && /10|ათი/.test(t)) return Q.bottom10();
+        if (/თავდაჯერ|overconfident|binary|ბინარ/.test(t)) return Q.overconfident();
+        if (/მოკრძალ|ზედმეტი.*ნაწილობრივ|cautious|partial.*many/.test(t)) return Q.overcautious();
+        if (/არასრული|incomplete|missing/.test(t)) return Q.incomplete();
+        if (/სექცი|section|weakness|სისუსტე/.test(t)) return Q.sectionWeakness();
+        if (/h&s|hs|ჯანდაცვ|უსაფრთხო|health|safety/.test(t)) return Q.hsRisk();
+        if (/დუბლიკატ|duplicate|იდენტურ|identical|იგივე/.test(t)) return Q.duplicatePatterns();
+        if (/iso|ლოგიკ|consist|შეუთავსებ/.test(t)) return Q.isoConsistency();
+        if (/რისკ.?ჯგუფ|risk.?zone|groups|ჯგუფ/.test(t)) return Q.riskZones();
+        if (/დოკუმენტ|docum|request|მოითხოვ|მოთხოვნ/.test(t)) return Q.docRequest();
+        if (/ზოგადი|overview|summary|საშუალო|total|average/.test(t)) return Q.summary();
+        if (/დახმარ|help|რა შეგი|what can/.test(t)) return Q.help();
+        // Default — try company name search
+        if (text.trim().length >= 3) {
+          const d = analytics.find(x => x.company.name && x.company.name.toLowerCase().includes(text.trim().toLowerCase()));
+          if (d) return Q.company(text.trim());
+        }
+        return lang === 'ka'
+          ? '🤔 ვერ გავიგე. სცადე:\n\n• „ტოპ 10"\n• „რისკ ჯგუფები"\n• „ზედმეტად თავდაჯერებული"\n• „H&S რისკი"\n• „დუბლიკატები"\n• „დოკუმენტის მოთხოვნა"\n• კომპანიის სახელი (მაგ. „შპს ჯერო")\n• „დახმარება" — სრული სია'
+          : '🤔 Not understood. Try:\n\n• "top 10"\n• "risk zones"\n• "overconfident"\n• "H&S risk"\n• "duplicates"\n• "document request"\n• company name (e.g. "Burjiani")\n• "help" — full list';
+      }
+
+      const quickActions = lang === 'ka' ? [
+        { label: '📈 ზოგადი', q: 'ზოგადი' },
+        { label: '🏆 ტოპ 10', q: 'ტოპ 10' },
+        { label: '📉 ქვედა 10', q: 'ქვედა 10' },
+        { label: '🎯 რისკ-ჯგუფები', q: 'რისკ ჯგუფები' },
+        { label: '⚠️ თავდაჯერებული', q: 'თავდაჯერებული' },
+        { label: '⚠️ მოკრძალებული', q: 'მოკრძალებული' },
+        { label: '📝 არასრული', q: 'არასრული' },
+        { label: '📊 სექციები', q: 'სექციები' },
+        { label: '🚨 H&S', q: 'H&S' },
+        { label: '👥 დუბლიკატები', q: 'დუბლიკატები' },
+        { label: '🔍 ISO', q: 'ISO' },
+        { label: '📑 დოკუმენტები', q: 'დოკუმენტები' }
+      ] : [
+        { label: '📈 Overview', q: 'overview' },
+        { label: '🏆 Top 10', q: 'top 10' },
+        { label: '📉 Bottom 10', q: 'bottom 10' },
+        { label: '🎯 Risk zones', q: 'risk zones' },
+        { label: '⚠️ Overconfident', q: 'overconfident' },
+        { label: '⚠️ Overcautious', q: 'overcautious' },
+        { label: '📝 Incomplete', q: 'incomplete' },
+        { label: '📊 Sections', q: 'sections' },
+        { label: '🚨 H&S', q: 'H&S' },
+        { label: '👥 Duplicates', q: 'duplicates' },
+        { label: '🔍 ISO', q: 'ISO' },
+        { label: '📑 Documents', q: 'documents' }
+      ];
+
+      const send = (text) => {
+        if (!text.trim()) return;
+        setInput('');
+        setMessages(prev => [...prev, { role: 'user', content: text }]);
+        setThinking(true);
+        setTimeout(() => {
+          const response = routeQuery(text);
+          setMessages(prev => [...prev, { role: 'assistant', content: response }]);
+          setThinking(false);
+        }, 300);
+      };
+
+      const clear = () => {
+        setMessages([{ role: 'assistant', content: lang === 'ka'
+          ? 'ჩატი გასუფთავებულია. რა გაინტერესებს?'
+          : 'Chat cleared. What interests you?' }]);
+      };
+
+      // Format message content (simple markdown-like)
+      const formatContent = (text) => {
+        return text.split('\n').map((line, i) => {
+          const parts = line.split(/(\*\*[^*]+\*\*)/g).map((p, j) => {
+            if (p.startsWith('**') && p.endsWith('**')) {
+              return React.createElement('strong', { key: j }, p.slice(2, -2));
+            }
+            return p;
+          });
+          return React.createElement('div', { key: i, style: { minHeight: line === '' ? '0.5em' : 'auto' } }, parts);
+        });
+      };
+
+      return React.createElement('div', {
+        className: 'fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 fade-in',
+        onClick: onClose
+      },
+        React.createElement('div', {
+          className: 'bg-white rounded-xl shadow-2xl flex flex-col',
+          style: { width: '100%', maxWidth: '900px', height: '85vh', maxHeight: '85vh' },
+          onClick: (e) => e.stopPropagation()
+        },
+          // Header
+          React.createElement('div', {
+            className: 'flex items-center justify-between px-5 py-3 border-b border-stone-200',
+            style: { background: 'linear-gradient(135deg, #0E5BA8, #1976D2)' }
+          },
+            React.createElement('div', { className: 'flex items-center gap-3' },
+              React.createElement('div', {
+                className: 'w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center text-lg'
+              }, '🤖'),
+              React.createElement('div', null,
+                React.createElement('div', { className: 'text-white font-semibold text-sm' },
+                  lang === 'ka' ? 'ESG ანალიტიკური ასისტენტი' : 'ESG Analytics Assistant'),
+                React.createElement('div', { className: 'text-white/70 text-[11px]' },
+                  (lang === 'ka' ? 'რეალური მონაცემები · ' : 'Live data · ') + analytics.length + (lang === 'ka' ? ' კომპანია' : ' companies'))
+              )
+            ),
+            React.createElement('div', { className: 'flex items-center gap-2' },
+              React.createElement('button', {
+                onClick: clear,
+                className: 'text-white/80 hover:text-white text-xs px-2 py-1 rounded hover:bg-white/10'
+              }, lang === 'ka' ? '🗑 გაწმენდა' : '🗑 Clear'),
+              React.createElement('button', {
+                onClick: onClose,
+                className: 'text-white/80 hover:text-white text-xl w-8 h-8 rounded hover:bg-white/10 flex items-center justify-center'
+              }, '✕')
+            )
+          ),
+
+          // Messages
+          React.createElement('div', {
+            className: 'flex-1 overflow-y-auto px-5 py-4 space-y-3',
+            style: { background: '#f8f8f6' }
+          },
+            messages.map((m, i) => React.createElement('div', {
+              key: i,
+              className: 'flex ' + (m.role === 'user' ? 'justify-end' : 'justify-start')
+            },
+              React.createElement('div', {
+                className: 'max-w-[85%] rounded-xl px-4 py-2.5 text-sm ' + (m.role === 'user'
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-white border border-stone-200 text-stone-800 shadow-sm'),
+                style: { whiteSpace: 'pre-wrap', lineHeight: '1.6' }
+              }, formatContent(m.content))
+            )),
+            thinking ? React.createElement('div', { className: 'flex justify-start' },
+              React.createElement('div', { className: 'bg-white border border-stone-200 rounded-xl px-4 py-2 text-sm text-stone-400' },
+                lang === 'ka' ? 'ვფიქრობ...' : 'Thinking...')
+            ) : null,
+            React.createElement('div', { ref: messagesEndRef })
+          ),
+
+          // Quick actions
+          React.createElement('div', {
+            className: 'px-4 py-2 border-t border-stone-200 bg-white flex flex-wrap gap-1.5'
+          },
+            quickActions.map((a, i) => React.createElement('button', {
+              key: i,
+              onClick: () => send(a.q),
+              disabled: thinking,
+              className: 'text-[11px] px-2.5 py-1 bg-stone-100 hover:bg-blue-100 text-stone-700 hover:text-blue-700 rounded-md border border-stone-200 transition disabled:opacity-50'
+            }, a.label))
+          ),
+
+          // Input
+          React.createElement('div', { className: 'px-4 py-3 border-t border-stone-200 bg-white flex gap-2' },
+            React.createElement('input', {
+              type: 'text',
+              value: input,
+              onChange: (e) => setInput(e.target.value),
+              onKeyDown: (e) => { if (e.key === 'Enter') send(input); },
+              placeholder: lang === 'ka' ? 'დასვი კითხვა ან ჩაწერე კომპანიის სახელი...' : 'Ask a question or type a company name...',
+              className: 'flex-1 h-10 px-3 text-sm border border-stone-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500',
+              disabled: thinking
+            }),
+            React.createElement('button', {
+              onClick: () => send(input),
+              disabled: thinking || !input.trim(),
+              className: 'px-4 h-10 text-sm font-medium text-white rounded-lg transition disabled:opacity-50',
+              style: { background: 'linear-gradient(135deg, #0E5BA8, #1976D2)' }
+            }, lang === 'ka' ? 'გაგზავნა' : 'Send')
+          )
+        )
+      );
+    }
+
     function App() {
       const [authed, setAuthed] = useState(sessionStorage.getItem('esg_admin_auth') === '1');
       const [view, setView] = useState('list'); // 'list' or 'detail'
@@ -4139,11 +4579,28 @@
       const [allAdminAnswersByCompany, setAllAdminAnswersByCompany] = useState({});
       const [loading, setLoading] = useState(false);
       const [lang, setLang] = useState(() => localStorage.getItem('esg_admin_lang') || 'ka');
+      // v14: AI chat panel
+      const [aiChatOpen, setAiChatOpen] = useState(false);
 
       useEffect(() => {
         localStorage.setItem('esg_admin_lang', lang);
         document.documentElement.lang = lang;
       }, [lang]);
+
+      // v14: Keyboard shortcut Ctrl+Shift+A to open AI chat
+      useEffect(() => {
+        const handler = (e) => {
+          if (e.ctrlKey && e.shiftKey && (e.key === 'A' || e.key === 'a')) {
+            e.preventDefault();
+            if (authed) setAiChatOpen(prev => !prev);
+          }
+          if (e.key === 'Escape' && aiChatOpen) {
+            setAiChatOpen(false);
+          }
+        };
+        window.addEventListener('keydown', handler);
+        return () => window.removeEventListener('keydown', handler);
+      }, [authed, aiChatOpen]);
 
       const refresh = async () => {
         setLoading(true);
@@ -4212,7 +4669,15 @@
                         onBack: () => setView('list'),
                         lang
                       })
-        )
+        ),
+        // v14: AI Chat panel (Ctrl+Shift+A)
+        aiChatOpen ? React.createElement(AiChatPanel, {
+          companies,
+          allAnswersByCompany,
+          allAdminAnswersByCompany,
+          lang,
+          onClose: () => setAiChatOpen(false)
+        }) : null
       );
     }
 
